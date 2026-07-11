@@ -30,6 +30,9 @@ kernelsu-objs += infra/gki1_trampolines.o
 ccflags-y += -DKSU_GKI1_LKM_IMPORTS
 asflags-y += -DKSU_GKI1_LKM_IMPORTS
 endif
+ifeq ($(CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER),y)
+ccflags-y += -DCONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER=1
+endif
 endif
 
 ifneq ($(CONFIG_KSU_DISABLE_MANAGER),y)
