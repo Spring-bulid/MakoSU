@@ -5,6 +5,8 @@
 #include <linux/uaccess.h>
 #include <linux/version.h>
 #include <linux/thread_info.h>
+#include <linux/sched/task.h>
+#include <linux/sched/signal.h>
 #include "uapi/supercall.h"
 #include "supercall/internal.h"
 #include "arch.h" // IWYU pragma: keep
@@ -23,6 +25,7 @@
 #include "sulog/fd.h"
 #include "supercall/supercall.h"
 #include "feature/uts_spoof.h"
+#include "infra/gki1_imports.h"
 
 #ifdef CONFIG_KPM
 #include "kpm/kpm.h"

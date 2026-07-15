@@ -59,6 +59,7 @@ class MainActivityViewModel(
             "key_color",
             "color_style",
             "color_spec",
+            "miuix_monet",
             "page_scale",
             "enable_blur",
             "enable_floating_bottom_bar",

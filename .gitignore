@@ -1,9 +1,15 @@
 .idea
-CLAUDE.md
-AGENTS.md
 .DS_Store
 /target
 .cargo/config.toml
 __pycache__
 /dist
+/out/
 /repack-config.json
+/\.android-sdk/
+/\.downloads/
+/manager/*.jks
+/manager/makosu-signing.properties
+/manager/makosu-release-cert.der
+.cache/
+.wsl/

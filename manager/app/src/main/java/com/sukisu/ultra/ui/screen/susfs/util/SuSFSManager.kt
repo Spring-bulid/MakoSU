@@ -3,14 +3,13 @@ package com.sukisu.ultra.ui.screen.susfs.util
 import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 object SuSFSManager {
-    fun getCurrentModuleConfig(): ModuleConfig = SuSFSRepository.getCurrentModuleConfig()
+    suspend fun getCurrentModuleConfig(): ModuleConfig = SuSFSRepository.getCurrentModuleConfig()
 
-    fun getKernelSpoofRelease(): String = SuSFSRepository.getKernelSpoofRelease()
-    fun getKernelSpoofVersion(): String = SuSFSRepository.getKernelSpoofVersion()
+    suspend fun getKernelSpoofRelease(): String = SuSFSRepository.getKernelSpoofRelease()
+    suspend fun getKernelSpoofVersion(): String = SuSFSRepository.getKernelSpoofVersion()
 
     suspend fun isAutoStartEnabled(): Boolean = SuSFSRepository.isAutoStartEnabled()
     suspend fun setAutoStartEnabled(enabled: Boolean) = SuSFSRepository.setAutoStartEnabled(enabled)
@@ -69,20 +68,21 @@ object SuSFSManager {
     suspend fun updateKstat(context: Context, path: String): Boolean = SuSFSPathManager.updateKstat(context, path)
     suspend fun updateKstatFullClone(context: Context, path: String): Boolean = SuSFSPathManager.updateKstatFullClone(context, path)
 
-    fun createBackup(context: Context, backupFilePath: String): Boolean = runBlocking { SuSFSBackupManager.createBackup(context, backupFilePath) }
+    suspend fun createBackup(context: Context, backupFilePath: String): Boolean =
+        SuSFSBackupManager.createBackup(context, backupFilePath)
     suspend fun restoreFromBackup(context: Context, backupFilePath: String): Boolean = SuSFSBackupManager.restoreFromBackup(context, backupFilePath)
     suspend fun validateBackupFile(backupFilePath: String): BackupData? = SuSFSBackupManager.validateBackupFile(backupFilePath)
     fun getDefaultBackupFileName(): String = SuSFSBackupManager.getDefaultBackupFileName()
 
-    suspend fun hasConfigurationForAutoStart(context: Context): Boolean {
+    suspend fun hasConfigurationForAutoStart(): Boolean {
         val config = getCurrentModuleConfig()
-        return config.hasAutoStartConfig() || SuSFSCommands.getEnabledFeatures(context).any { it.isEnabled }
+        return config.hasAutoStartConfig()
     }
 
     suspend fun configureAutoStart(context: Context, enabled: Boolean): Boolean = withContext(Dispatchers.IO) {
         try {
             if (enabled) {
-                if (!hasConfigurationForAutoStart(context)) {
+                if (!hasConfigurationForAutoStart()) {
                     Log.e("SuSFSManager", "No configuration available for auto start")
                     return@withContext false
                 }
@@ -109,18 +109,14 @@ object SuSFSManager {
     }
 
     suspend fun resetToDefault(context: Context): Boolean {
-        val success = setUname(context, SuSFSConfig.DEFAULT_UNAME, SuSFSConfig.DEFAULT_BUILD_TIME)
-        if (success) {
-            saveEnableHideBl(false)
-            saveEnableCleanupResidue(false)
-            saveEnableAvcLogSpoofing(false)
-            saveHideSusMountsForAllProcs(false)
-            saveEnableLogState(false)
-            saveExecuteInPostFsData(false)
-            if (isAutoStartEnabled()) {
-                configureAutoStart(context, false)
-            }
-        }
-        return success
+        val unameReset = setUname(context, SuSFSConfig.DEFAULT_UNAME, SuSFSConfig.DEFAULT_BUILD_TIME)
+        val runtimeReset = listOf(
+            "enable-log 0",
+            "enable-avc-log-spoofing 0",
+            "hide-sus-mnts-for-non-su-procs 0"
+        ).map { command -> SuSFSCommands.executeSusfsCommandWithOutput(command).isSuccess }.all { it }
+        val configReset = SuSFSConfig.reset()
+        val moduleRemoved = configReset && SuSFSCommands.removeMagiskModule()
+        return unameReset && runtimeReset && configReset && moduleRemoved
     }
 }

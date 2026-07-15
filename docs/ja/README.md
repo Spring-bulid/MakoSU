@@ -1,153 +1,116 @@
-# SukiSU Ultra
-<img align='right' src='SukiSU-mini.svg' width='220px' alt="sukisu logo">
+# MakoSU
 
+<img align="right" src="../MakoSU-mini.png" width="220px" alt="MakoSU logo">
 
-[English](../README.md) | [简体中文](../zh/README.md) | **日本語** | [Türkçe](../tr/README.md)
+[English](../README.md) | [简体中文](../zh/README.md) | [繁體中文](../zh-TW/README.md) | **日本語** | [한국어](../ko/README.md) | [Русский](../ru/README.md) | [Türkçe](../tr/README.md)
 
-[KernelSU](https://github.com/tiann/KernelSU) をベースとした Android デバイスの root ソリューション
+MakoSU は [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra) の downstream プロジェクトです。このリポジトリでは Manager、リリース用 KMI モジュール、SuSFS の userspace 機能、関連ビルドスクリプトを保守しています。
 
-**試験中なビルドです！自己責任で使用してください！**<br>
-このソリューションは [KernelSU](https://github.com/tiann/KernelSU) に基づいていますが、試験中なビルドです。
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-orange.svg?logo=gnu)](../../LICENSE)
+[![Manager](https://img.shields.io/badge/Manager-Android%208.0%2B-3DDC84.svg?logo=android)](#互換性)
+[![KMI](https://img.shields.io/badge/KMI-5.10--6.12-2f81f7.svg)](#同梱-kmi)
 
-> これは非公式なフォークです。すべての権利は [@tiann](https://github.com/tiann) に帰属します。
->
-> ただし、将来的には KSU とは別に管理されるブランチとなる予定です。
+> [!WARNING]
+> MakoSU はブートイメージを変更し、またはカーネルモジュールを読み込みます。互換性のないカーネル、LKM、署名、パーティションを使用すると起動不能になる可能性があります。必ず元のイメージと復旧手段を準備してください。
 
-## 追加する方法
+## 主な機能
 
-メインブランチを使用 (非 GKI のデバイスのビルドは非対応) (susfs を手動で統合が必要)
+- カーネルベースの `su`、権限管理、App Profile。
+- LKM インストール、ブートイメージのパッチ、KMI 自動判定。
+- Manager パッケージ名：`com.makosu.manager`。
+- KPM、モジュール管理、カーネルフラッシュ機能。
+- Material / Miuix UI とテーマ切り替え。
+- SuSFS のパス、マップ、Kstat、uname、ログ、自動起動設定。
+- Release 署名がない場合はビルドを失敗させ、Debug 署名へ自動フォールバックしません。
+- `arm64-v8a`、`armeabi-v7a`、`x86_64` の userspace コンポーネント。
 
+## SuSFS
+
+MakoSU の SuSFS userspace 実装には、次の保護が含まれます。
+
+- プロセス間ロックによる設定更新の競合防止。
+- 一時ファイル、`fsync`、アトミック置換による設定破損対策。
+- 途中で切れたデータ、重複キー、上限超過、余分なデータの拒否。
+- Manager は 1 回の root コマンドで設定全体を取得し、画面の待ち時間を削減。
+- 自動起動モジュールはステージング後に切り替え、失敗時は旧状態へロールバック。
+- ストレージ待機には上限があり、無限ループや固定 45 秒待機を行いません。
+- バックアップ復元とモジュール更新に失敗した場合、旧設定の復元を試みます。
+- Shell 引数を統一的にエスケープし、保存形式で扱えない区切り文字を拒否します。
+
+利用可能な SuSFS 機能はカーネル側の設定に依存します。Manager だけで未統合のカーネルに SuSFS を追加することはできません。
+
+## 互換性
+
+現在の正式サポートは GKI 2.0、カーネル `5.10` 以上です。
+
+- Manager の最低 Android バージョン：Android 8.0 / API 26。
+- 自動判定にはカーネル文字列内の有効な Android KMI マーカーが必要です。
+- Android 11 / 5.4（GKI 1.0）は現在の正式リリースに含まれません。
+- 5.4 向けの実験コードは、すべての 5.4 カーネルで動作することを意味しません。
+
+## 同梱 KMI
+
+| Android | カーネル | KMI |
+| --- | --- | --- |
+| Android 12 | 5.10 | `android12-5.10` |
+| Android 13 | 5.10 | `android13-5.10` |
+| Android 13 | 5.15 | `android13-5.15` |
+| Android 14 | 5.15 | `android14-5.15` |
+| Android 14 | 6.1 | `android14-6.1` |
+| Android 15 | 6.6 | `android15-6.6` |
+| Android 16 | 6.12 | `android16-6.12` |
+
+メジャーバージョンだけを見て LKM を強制読み込みしないでください。ベンダー ABI、シンボル、設定、KMI が一致する必要があります。
+
+## インストール
+
+1. 署名済み Release APK と対応するリリース ZIP を取得します。
+2. SHA-256 と ZIP 内の `SHA256SUMS.txt` を確認します。
+3. 元のブートイメージをバックアップします。
+4. Manager の自動 KMI 判定を使用し、完全に一致する場合のみ手動選択します。
+5. Fastboot または Recovery から復旧できる状態を維持します。
+
+別の証明書で署名された Manager や、出所不明の `kernelsu.ko` と混在させないでください。
+
+## Manager 署名契約
+
+| 項目 | 値 |
+| --- | --- |
+| パッケージ | `com.makosu.manager` |
+| 証明書 DER サイズ | `0x0549` |
+| 証明書 SHA-256 | `7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943` |
+
+この契約を変更した場合は、すべての KMI を再ビルドし、APK v2 証明書を再確認する必要があります。
+
+## ソースからのビルド
+
+必要環境：Git、Rust stable、JDK 17、Android SDK、Build Tools 37、NDK `29.0.14206865`、KMI 用 Docker。
+
+```bash
+bash scripts/build-makosu-kmi.sh
 ```
-curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s main
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\build-makosu-rust.ps1
+Set-Location .\manager
+.\gradlew.bat testDebugUnitTest assembleDebug
+.\gradlew.bat assembleRelease
 ```
 
-非 GKI のデバイスに対応するブランチを使用 (susfs を手動で統合が必要)
+Release 署名は `manager/makosu-signing.properties` または CI Secret から設定します。鍵とパスワードをコミットしないでください。
 
-```
-curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s builtin
-```
+## 商標とライセンス
 
-## 統合された susfs の使い方
+README では `docs/MakoSU-mini.png` を使用し、元画像は `docs/MakoSU.png` に保存しています。
 
-1. susfs-main または他の susfs-\* ブランチを直接で使用、susfs の統合は不要 (非 GKI デバイスのビルドに対応)
+『千恋＊万花』に関するキャラクター、名称、画像の権利は YUZUSOFT および各権利者に帰属します。MakoSU は非公式プロジェクトであり、YUZUSOFT との提携、認可、協賛関係はありません。ソースコードのライセンスは、これらの素材の利用権を付与しません。
 
-```
-curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
-```
+カーネルコードは各ファイルの GPL-2.0-only 表示に従い、その他のコードはルートの [`LICENSE`](../../LICENSE) と各ファイルのライセンス表示に従います。
 
-## フックの方式
+## 謝辞
 
-- この方式は (https://github.com/rsuntk/KernelSU) のフック方式を参照してください。
+[KernelSU](https://github.com/tiann/KernelSU)、[SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra)、[ReSukiSU](https://github.com/ReSukiSU/ReSukiSU)、[MKSU](https://github.com/5ec1cff/KernelSU)、[RKSU](https://github.com/rsuntk/KernelsU)、[susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu)、[KernelPatch](https://github.com/bmax121/KernelPatch)、[Magisk](https://github.com/topjohnwu/Magisk) の開発者に感謝します。
 
-1. **KPROBES でフック:**
+## 免責事項
 
-   - 読み込み可能なカーネルモジュールの場合 (LKM)
-   - GKI カーネルのデフォルトとなるフック方式
-   - `CONFIG_KPROBES=y` が必要です
-
-2. **手動でフック:**
-   - 標準の KernelSU フック: https://kernelsu.org/guide/how-to-integrate-for-non-gki.html#manually-modify-the-kernel-source
-   - backslashxx syscall フック: https://github.com/backslashxx/KernelSU/issues/5
-   - 非 GKI カーネル用のデフォルトフック方式
-   - `CONFIG_KSU_MANUAL_HOOK=y` が必要です
-
-## KPM に対応
-
-- KernelPatch に基づいて重複した KSU の機能を削除、KPM の対応を維持させています。
-- KPM 機能の整合性を確保するために、APatch の互換機能を更に向上させる予定です。
-
-オープンソースアドレス: https://github.com/ShirkNeko/SukiSU_KernelPatch_patch
-
-KPM テンプレートのアドレス: https://github.com/udochina/KPM-Build-Anywhere
-
-> [!Note]
->
-> 1. `CONFIG_KPM=y` が必要です。
-> 2. 非 GKI デバイスには `CONFIG_KALLSYMS=y` と `CONFIG_KALLSYMS_ALL=y` も必要です。
-> 3. いくつかのカーネル `4.19` およびそれ以降のソースコードでは、 `4.19` からバックポートされた `set_memory.h` ヘッダーファイルも必要です。
-
-## ROOT を保持した状態でのシステムアップデートの方法
-
-- 始めに OTA 後すぐに再起動せずにマネージャーのカーネルのフラッシュ、パッチのインターフェースを開いて`GKI/非 GKI のインストール`を見つけます。フラッシュする AnyKernel3 の zip ファイルを選択し、フラッシュする実行中のスロットと逆のスロットを選択後に再起動をして GKI モードの更新が保持できます (この方法はすべての非 GKI のデバイスが対応している訳ではないので、自分でお試しください。これは非 GKI のデバイスで TWRP を使用する最も安全な方法です)。
-- または LKM モードを使用して未使用のスロットにインストールします (OTA 後)。
-
-## 互換性の状態
-
-- KernelSU (v1.0.0 より前) は Android GKI 2.0 のデバイス (カーネル 5.10 以降) を公式に対応しています。
-
-- 古いカーネル (4.4 以降) も互換性がありますが、カーネルを手動で再ビルドする必要があります。
-
-- KernelSU は追加のリバースポートを通じて 3.x カーネル (3.4-3.18) で対応可能です。
-
-- 現在 `arm64-v8a`, `armeabi-v7a (bare)` および一部の `X86_64` に対応しています。
-
-## その他のリンク
-
-**マネージャーの翻訳を行う場合** https://crowdin.com/project/SukiSU-Ultra
-
-- [その他パッチ済み GKI](https://github.com/ShirkNeko/GKI_KernelSU_SUSFS) ZRAM パッチ、KPM、susfs が含まれています...
-- [パッチの少ない GKI](https://github.com/MiRinFork/GKI_SukiSU_SUSFS/releases) susfs のみ
-- [OnePlus](https://github.com/ShirkNeko/Action_OnePlus_MKSU_SUSFS)
-
-## 使い方
-
-### Universal GKI
-
-**すべて**参照してください https://kernelsu.org/ja_JP/guide/installation.html
-
-> [!Note]
->
-> 1. Xiaomi、Redmi、Samsung などの GKI 2.0 を搭載したデバイス向け (Meizu、OnePlus、Zenith、Oppo などカーネルが変更されているメーカーを除く)
-> 2. GKI のビルドは[その他のリンク](#その他のリンク)から入手できます。デバイスのカーネルバージョンを確認してください。ダウンロード後に TWRP またはカーネルフラッシュツールを使用して AnyKernel3 の接頭辞を持つ zip ファイルをフラッシュしてください。Pixel のユーザーは、パッチの少ない GKI を使用する必要があります。
-> 3. 接頭辞のない .zip アーカイブは圧縮されていません。.gz の接頭辞は Tenguet モデルで使用される圧縮になります。
-
-### OnePlus
-
-1. `その他のリンク`の項目に記載されているリンクを開き、デバイス情報を使用してカスタマイズされたカーネルをビルドし、AnyKernel3 の接頭辞を持つ .zip ファイルをフラッシュします。
-
-> [!Note]
->
-> - 5.10、5.15、6.1、6.6 などのカーネルバージョンの最初の 2 文字のみを入力する必要があります。
-> - SoC のコードネームは自分で検索してください。通常は、数字がなく英語表記のみです。
-> - ブランチと構成ファイルは、OnePlus オープンソースカーネルリポジトリから見つけることができます。
-
-## 機能
-
-1. カーネルベースな `su` および root アクセスの管理。
-2. [OverlayFS](https://en.wikipedia.org/wiki/OverlayFS) モジュールシステムではなく、 5ec1cff 氏の [Magic Mount](https://github.com/5ec1cff/KernelSU) に基づいています。
-3. [アプリプロファイル](https://kernelsu.org/guide/app-profile.html): root 権限をケージ内にロックします。
-4. 非 GKI / GKI 1.0 の対応を復活
-5. その他のカスタマイズ
-6. KPM カーネルモジュールに対応
-
-## トラブルシューティング
-
-1. KernelSU Manager のアンインストールが停止してしまう → com.sony.playmemories.mobile のアプリをアンインストールしてください。
-
-## ライセンス
-
-- 「kernel」のディレクトリ内のファイルは [GPL-2.0-only](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) のライセンスに基づいています。
-- アニメキャラクター画像とスタンプを含むこれらのファイルの `ic_launcher(?!.*alt.*).*` は[怡子曰曰](https://space.bilibili.com/10545509)によって著作権保護されており、画像の Brand Intellectual Property は[明风 OuO](https://space.bilibili.com/274939213)によって所有され、ベクター化は @MiRinChan によって行われています。 これらのファイルを使用する前に、[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt)を遵守することに加えて、アートコンテンツを使用するために前の 2 人の作者から許可を得る必要があります。
-- 上記のファイルまたはディレクトリを除き、その他のすべての部分は[GPL-3.0 以降](https://www.gnu.org/licenses/gpl-3.0.html)です。
-
-## スポンサーシップの一覧
-
-- [Ktouls](https://github.com/Ktouls) 応援してくれてありがとう
-- [zaoqi123](https://github.com/zaoqi123) ミルクティーを買ってあげるのも良い考えですね
-- [wswzgdg](https://github.com/wswzgdg) このプロジェクトにご支援いただき、ありがとうございます
-- [yspbwx2010](https://github.com/yspbwx2010) ありがとうございます
-- [DARKWWEE](https://github.com/DARKWWEE) ラオスから 100 USDT の支援に感謝します
-- [Saksham Singla](https://github.com/TypeFlu) ウェブサイトの提供とメンテナンス
-- [OukaroMF](https://github.com/OukaroMF) ウェブサイトのドメインと寄付
-
-## 貢献者
-
-- [KernelSU](https://github.com/tiann/KernelSU): オリジナルのプロジェクト
-- [MKSU](https://github.com/5ec1cff/KernelSU): 使用しているプロジェクト
-- [RKSU](https://github.com/rsuntk/KernelsU): このプロジェクトのカーネルを使用した非 GKI デバイスのサポートの再導入
-- [susfs](https://gitlab.com/simonpunk/susfs4ksu): susfs ファイルシステムの使用
-- [KernelSU](https://git.zx2c4.com/kernel-assisted-superuser/about/): KernelSU の概念化
-- [Magisk](https://github.com/topjohnwu/Magisk): パワフルな root ユーティリティ
-- [genuine](https://github.com/brevent/genuine/): APK v2 署名認証
-- [Diamorphine](https://github.com/m0nad/Diamorphine): いくつかの root キットユーティリティ
-- [KernelPatch](https://github.com/bmax121/KernelPatch): KernelPatch はカーネルモジュールの APatch 実装の重要な部分での活用
+本プロジェクトは現状のまま提供され、すべての端末やベンダーカーネルでの動作を保証しません。アンロック、フラッシュ、Root、データ損失、保証、端末故障のリスクは利用者が負担します。

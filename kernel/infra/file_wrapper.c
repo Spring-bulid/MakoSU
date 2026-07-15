@@ -19,6 +19,7 @@
 #include "selinux/selinux.h"
 
 #include "infra/file_wrapper.h"
+#include "infra/gki1_imports.h"
 
 struct ksu_file_wrapper {
     struct file *orig;
@@ -26,6 +27,19 @@ struct ksu_file_wrapper {
 };
 
 static struct ksu_file_wrapper *ksu_create_file_wrapper(struct file *fp);
+
+static struct inode_security_struct *ksu_selinux_inode(const struct inode *inode)
+{
+#ifdef KSU_GKI1_LKM_IMPORTS
+    struct lsm_blob_sizes *blob_sizes = ksu_gki1_import_selinux_blob_sizes;
+
+    if (unlikely(!inode->i_security))
+        return NULL;
+    return inode->i_security + blob_sizes->lbs_inode;
+#else
+    return selinux_inode(inode);
+#endif
+}
 
 static int ksu_wrapper_open(struct inode *ino, struct file *fp)
 {
@@ -437,8 +451,13 @@ static struct vfsmount *anon_inode_mnt __read_mostly;
 static struct inode *ksu_anon_inode_make_secure_inode(const char *name, const struct inode *context_inode)
 {
     struct inode *inode;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
     const struct qstr qname = QSTR_INIT(name, strlen(name));
     int error;
+#else
+    (void)name;
+    (void)context_inode;
+#endif
 
     if (unlikely(!anon_inode_mnt)) {
         return ERR_PTR(-ENODEV);
@@ -448,11 +467,13 @@ static struct inode *ksu_anon_inode_make_secure_inode(const char *name, const st
     if (IS_ERR(inode))
         return inode;
     inode->i_flags &= ~S_PRIVATE;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
     error = security_inode_init_security_anon(inode, &qname, context_inode);
     if (error) {
         iput(inode);
         return ERR_PTR(error);
     }
+#endif
     return inode;
 }
 
@@ -523,7 +544,7 @@ int ksu_install_file_wrapper(int fd)
     struct inode *wrapper_inode = file_inode(wrapper_file);
     // libc's stdio relies on the fstat() result of the fd to determine its buffer type.
     wrapper_inode->i_mode = file_inode(orig_file)->i_mode;
-    struct inode_security_struct *wrapper_sec = selinux_inode(wrapper_inode);
+    struct inode_security_struct *wrapper_sec = ksu_selinux_inode(wrapper_inode);
     // Use ksu_file_sid to bypass SELinux check.
     // When we call `su` from terminal app, this is useful.
     if (wrapper_sec) {

@@ -4,6 +4,7 @@
 #include <linux/version.h>
 
 #include "infra/symbol_resolver.h"
+#include "infra/gki1_imports.h"
 
 // https://github.com/torvalds/linux/commit/89245600941e4e0f87d77f60ee269b5e61ef4e49
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
@@ -56,6 +57,10 @@ struct ksu_lookup_symbol_ctx {
 
 unsigned long __nocfi find_kernel_symbol_exact(const char *symbol_name)
 {
+#ifdef KSU_GKI1_LKM_IMPORTS
+    /* The import bootstrap owns the only direct kallsyms dependency on 5.4. */
+    return 0;
+#else
     unsigned long addr = 0;
 #if HAVE_ON_EACH_MATCH_SYMBOL
     if (likely(kallsyms_on_each_match_symbol_fn)) {
@@ -74,6 +79,7 @@ unsigned long __nocfi find_kernel_symbol_exact(const char *symbol_name)
         return 0;
     }
     return addr;
+#endif
 }
 
 static inline bool ksu_symbol_has_suffix(const char *name, size_t name_len, const char *suffix, size_t suffix_len)
@@ -172,8 +178,11 @@ void *ksu_resolve_symbol_for_functable_hook(const char *symbol_name)
 #endif
 }
 
-void __init ksu_init_symbol_resolver()
+bool __init ksu_init_symbol_resolver(void)
 {
+#ifdef KSU_GKI1_LKM_IMPORTS
+    return ksu_gki1_imports_init();
+#else
 #if !ALWAYS_HAVE_ON_EACH_SYMBOL
     kallsyms_on_each_symbol_fn = find_kernel_symbol_exact("kallsyms_on_each_symbol");
     if (!kallsyms_on_each_symbol_fn) {
@@ -185,5 +194,7 @@ void __init ksu_init_symbol_resolver()
     if (!kallsyms_on_each_match_symbol_fn) {
         pr_warn("kallsyms_on_each_match_symbol not found!\n");
     }
+#endif
+    return true;
 #endif
 }

@@ -21,6 +21,7 @@
 #include "hook/setuid_hook.h"
 #include "hook/syscall_hook.h"
 #include "hook/syscall_event_bridge.h"
+#include "infra/gki1_imports.h"
 
 #ifdef CONFIG_KRETPROBES
 
@@ -138,7 +139,12 @@ void __init ksu_syscall_hook_manager_init(void)
     ksu_register_syscall_hook(__NR_faccessat, ksu_hook_faccessat);
 
 #ifdef CONFIG_HAVE_SYSCALL_TRACEPOINTS
+#ifdef KSU_GKI1_LKM_IMPORTS
+    ret = tracepoint_probe_register((struct tracepoint *)ksu_gki1_import___tracepoint_sys_enter,
+                                    (void *)ksu_sys_enter_handler, NULL);
+#else
     ret = register_trace_sys_enter(ksu_sys_enter_handler, NULL);
+#endif
 #ifndef CONFIG_KRETPROBES
     ksu_mark_running_process_locked();
 #endif
@@ -157,8 +163,14 @@ void __exit ksu_syscall_hook_manager_exit(void)
 {
     pr_info("hook_manager: ksu_hook_manager_exit called\n");
 #ifdef CONFIG_HAVE_SYSCALL_TRACEPOINTS
+#ifdef KSU_GKI1_LKM_IMPORTS
+    tracepoint_probe_unregister((struct tracepoint *)ksu_gki1_import___tracepoint_sys_enter,
+                                (void *)ksu_sys_enter_handler, NULL);
+    synchronize_srcu((struct srcu_struct *)ksu_gki1_import_tracepoint_srcu);
+#else
     unregister_trace_sys_enter(ksu_sys_enter_handler, NULL);
     tracepoint_synchronize_unregister();
+#endif
     pr_info("hook_manager: sys_enter tracepoint unregistered\n");
 #endif
 

@@ -63,6 +63,7 @@ data class BackupData(
 data class ModuleConfig(
     val unameValue: String,
     val buildTimeValue: String,
+    val autoStartEnabled: Boolean,
     val executeInPostFsData: Boolean,
     val susPaths: Set<String>,
     val susLoopPaths: Set<String>,
@@ -82,6 +83,11 @@ data class ModuleConfig(
                 susLoopPaths.isNotEmpty() ||
                 susMaps.isNotEmpty() ||
                 kstatConfigs.isNotEmpty() ||
-                addKstatPaths.isNotEmpty()
+                addKstatPaths.isNotEmpty() ||
+                enableLog ||
+                hideSusMountsForAllProcs ||
+                enableHideBl ||
+                enableCleanupResidue ||
+                enableAvcLogSpoofing
     }
 }

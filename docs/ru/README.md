@@ -1,100 +1,95 @@
-# SukiSU Ultra
-<img align='right' src='SukiSU-mini.svg' width='220px' alt="логотип sukisu">
+# MakoSU
 
+<img align="right" src="../MakoSU-mini.png" width="220px" alt="MakoSU logo">
 
-[English](../README.md) | [简体中文](./zh/README.md) | [日本語](./ja/README.md) | [Türkçe](./tr/README.md) | **Русский**
+[English](../README.md) | [简体中文](../zh/README.md) | [繁體中文](../zh-TW/README.md) | [日本語](../ja/README.md) | [한국어](../ko/README.md) | **Русский** | [Türkçe](../tr/README.md)
 
-Решение для получения root-прав на уровне ядра для устройств Android. Форк [`tiann/KernelSU`](https://github.com/tiann/KernelSU) с добавлением интересных изменений.
+MakoSU — downstream-проект [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra). В этом репозитории поддерживаются Manager, KMI-модули для выпусков, userspace-часть SuSFS и связанные скрипты сборки.
 
-[![Latest release](https://img.shields.io/github/v/release/SukiSU-Ultra/SukiSU-Ultra?label=Release&logo=github)](https://github.com/tiann/KernelSU/releases/latest)
-[![Channel](https://img.shields.io/badge/Follow-Telegram-blue.svg?logo=telegram)](https://t.me/Sukiksu)
-[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-orange.svg?logo=gnu)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
-[![GitHub License](https://img.shields.io/github/license/tiann/KernelSU?logo=gnu)](/LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-orange.svg?logo=gnu)](../../LICENSE)
+[![Manager](https://img.shields.io/badge/Manager-Android%208.0%2B-3DDC84.svg?logo=android)](#совместимость)
+[![KMI](https://img.shields.io/badge/KMI-5.10--6.12-2f81f7.svg)](#встроенные-kmi)
 
-## Особенности
+> [!WARNING]
+> MakoSU изменяет загрузочный образ или загружает модуль ядра. Несовместимое ядро, LKM, подпись или раздел могут сделать устройство незагружаемым. Сохраните оригинальный образ и подготовьте рабочее восстановление через Fastboot или Recovery.
 
-1. Управление доступом `su` и root на уровне ядра.
-2. [App Profile](https://kernelsu.org/guide/app-profile.html): закройте root-права для конкретных приложений.
-3. Поддержка non-GKI и GKI 1.0.
-4. Поддержка KPM.
-5. Изменения в теме менеджера и встроенный susfs.
+## Возможности
 
-## Статус совместимости
+- Ядерный `su`, управление разрешениями и App Profile.
+- Установка LKM, патч загрузочного образа и автоматическое определение KMI.
+- Имя пакета Manager: `com.makosu.manager`.
+- KPM, управление модулями, прошивка ядра и сервисные инструменты.
+- Интерфейсы Material и Miuix с переключением темы.
+- Настройка SuSFS: пути, карты, Kstat, uname, журналирование и автозапуск.
+- Release-сборка завершается ошибкой без параметров подписи и не переходит на Debug-ключ.
+- Userspace-компоненты для `arm64-v8a`, `armeabi-v7a` и `x86_64`.
 
-- KernelSU (до v1.0.0) официально поддерживает устройства Android GKI 2.0 (ядро 5.10+).
+## SuSFS
 
-- Более старые ядра (4.4+) также совместимы, но ядро придется собирать вручную.
+- Межпроцессная блокировка предотвращает потерю параллельных изменений конфигурации.
+- Временный файл, `fsync` и атомарная замена уменьшают риск повреждения настроек.
+- Парсер отклоняет обрезанные данные, повторяющиеся ключи, слишком большие поля и лишние байты.
+- Manager получает всю конфигурацию одной root-командой, уменьшая задержки интерфейса.
+- Модуль автозапуска сначала полностью создаётся во временном каталоге и откатывается при ошибке.
+- Ожидание хранилища ограничено по времени; бесконечные циклы и фиксированная задержка 45 секунд удалены.
+- При ошибке восстановления резервной копии или обновления модуля выполняется попытка вернуть прежнее состояние.
+- Аргументы Shell экранируются, а небезопасные для формата разделители отклоняются.
 
-- С дополнительными бэкпортами KernelSU может поддерживать ядра серии 3.x (3.4–3.18).
+Доступные функции SuSFS зависят от интеграции в ядро устройства.
 
-- На данный момент поддерживаются только архитектуры `arm64-v8a`, `armeabi-v7a (bare)` и некоторые `X86_64`.
+## Совместимость
 
-## Установка
+Официальный диапазон текущего выпуска: GKI 2.0 и ядро `5.10` или новее. Минимальная версия Android для Manager — Android 8.0 / API 26.
 
-См. [`guide/installation.md`](guide/installation.md)
+Android 11 / 5.4 (GKI 1.0) не входит в официальный выпуск и набор встроенных KMI. Экспериментальный код 5.4 не означает универсальную совместимость со всеми ядрами 5.4.
 
-## Интеграция
+## Встроенные KMI
 
-См. [`guide/how-to-integrate.md`](guide/how-to-integrate.md)
+| Android | Ядро | KMI |
+| --- | --- | --- |
+| Android 12 | 5.10 | `android12-5.10` |
+| Android 13 | 5.10 | `android13-5.10` |
+| Android 13 | 5.15 | `android13-5.15` |
+| Android 14 | 5.15 | `android14-5.15` |
+| Android 14 | 6.1 | `android14-6.1` |
+| Android 15 | 6.6 | `android15-6.6` |
+| Android 16 | 6.12 | `android16-6.12` |
 
-## Перевод
+Не загружайте LKM только по основной версии ядра. ABI производителя, символы, конфигурация ядра и метка KMI также должны совпадать.
 
-Если вы хотите предложить перевод для менеджера, пожалуйста, воспользуйтесь [Crowdin](https://crowdin.com/project/SukiSU-Ultra).
+## Контракт идентичности Manager
 
-## Поддержка KPM
+| Поле | Значение |
+| --- | --- |
+| Пакет | `com.makosu.manager` |
+| Размер DER-сертификата | `0x0549` |
+| SHA-256 сертификата | `7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943` |
 
-- На базе KernelPatch: мы удалили функции, дублирующие возможности KSU, оставив только поддержку KPM.
-- В разработке: расширение совместимости с APatch путем интеграции дополнительных функций для обеспечения работы в различных реализациях.
+При изменении любого поля необходимо пересобрать все KMI и повторно проверить v2-сертификат APK.
 
-**Open-source репозиторий**: [https://github.com/ShirkNeko/SukiSU_KernelPatch_patch](https://github.com/ShirkNeko/SukiSU_KernelPatch_patch)
+## Сборка
 
-**Шаблон KPM**: [https://github.com/udochina/KPM-Build-Anywhere](https://github.com/udochina/KPM-Build-Anywhere)
+```bash
+bash scripts/build-makosu-kmi.sh
+```
 
-> [!Note]
->
-> 1. Требуется `CONFIG_KPM=y`
-> 2. Для non-GKI устройств требуются `CONFIG_KALLSYMS=y` и `CONFIG_KALLSYMS_ALL=y`
-> 3. Для ядер ниже `4.19` требуется бэкпорт `set_memory.h` из версии `4.19`.
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\build-makosu-rust.ps1
+Set-Location .\manager
+.\gradlew.bat testDebugUnitTest assembleDebug
+.\gradlew.bat assembleRelease
+```
 
-## Устранение неполадок
+Параметры Release-подписи задаются в `manager/makosu-signing.properties` или CI Secret. Никогда не добавляйте ключи и пароли в репозиторий.
 
-1. Если устройство зависает при удалении менеджера (sukisu) 
-   Удалите com.sony.playmemories.mobile
+## Изображения, лицензия и отказ от ответственности
 
-## Спонсоры
+README использует `docs/MakoSU-mini.png`; исходное изображение сохранено как `docs/MakoSU.png`.
 
-- [ShirkNeko](https://afdian.com/a/shirkneko) (поддерживает SukiSU)
-- [weishu](https://github.com/sponsors/tiann) (автор KernelSU)
+Права на персонажей, названия и изображения, связанные с *Senren Banka*, принадлежат YUZUSOFT и соответствующим правообладателям. MakoSU является неофициальным проектом и не связан, не одобрен и не спонсируется YUZUSOFT. Лицензия исходного кода не предоставляет право использовать эти изображения.
 
-## Список спонсоров ShirkNeko
-
-- [Ktouls](https://github.com/Ktouls) Большое спасибо за поддержку.
-- [zaoqi123](https://github.com/zaoqi123) Спасибо за чай с молоком.
-- [wswzgdg](https://github.com/wswzgdg) Огромное спасибо за поддержку проекта.
-- [yspbwx2010](https://github.com/yspbwx2010) Большое спасибо.
-- [DARKWWEE](https://github.com/DARKWWEE) 100 USDT
-- [Saksham Singla](https://github.com/TypeFlu) Предоставление и поддержка сайта.
-- [OukaroMF](https://github.com/OukaroMF) Пожертвование доменного имени для сайта.
-
-## Лицензия
-
-- Файлы в директории «kernel» находятся под лицензией [GPL-2.0-only](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
-- Изображения файлов `ic_launcher(?!.*alt.*).*` со стикерами аниме-персонажей защищены авторским правом [怡子曰曰](https://space.bilibili.com/10545509), права на интеллектуальную собственность бренда на изображениях принадлежат [明风 OuO](https://space.bilibili.com/274939213), векторизация выполнена @MiRinChan. Перед использованием этих файлов, помимо соблюдения [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt), вам также необходимо получить разрешение от двух авторов на использование этого художественного контента.
-- За исключением вышеуказанных файлов и директорий, все остальные части находятся под лицензией [GPL-3.0 or later](https://www.gnu.org/licenses/gpl-3.0.html)
+Код ядра следует файловым объявлениям GPL-2.0-only, остальной код — корневому [`LICENSE`](../../LICENSE) и файловым лицензиям. Риски разблокировки, прошивки, Root, потери данных и повреждения устройства несёт пользователь.
 
 ## Благодарности
 
-- [KernelSU](https://github.com/tiann/KernelSU): база (основа).
-- [MKSU](https://github.com/5ec1cff/KernelSU): Magic Mount.
-- [RKSU](https://github.com/rsuntk/KernelsU): поддержка non-GKI.
-- [susfs](https://gitlab.com/simonpunk/susfs4ksu): дополнение для скрытия root в ядре и модуль пространства пользователя для KernelSU.
-- [KernelPatch](https://github.com/bmax121/KernelPatch): ключевая часть реализации модулей ядра в APatch.
-
-<details>
-<summary>Благодарности команды KernelSU</summary>
-
-- [Kernel-Assisted Superuser](https://git.zx2c4.com/kernel-assisted-superuser/about/): Идея KernelSU.
-- [Magisk](https://github.com/topjohnwu/Magisk): Мощный инструмент для получения root-прав.
-- [genuine](https://github.com/brevent/genuine/): Проверка подписи APK v2.
-- [Diamorphine](https://github.com/m0nad/Diamorphine): Некоторые техники руткитов.
-</details>
+[KernelSU](https://github.com/tiann/KernelSU), [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra), [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU), [MKSU](https://github.com/5ec1cff/KernelSU), [RKSU](https://github.com/rsuntk/KernelsU), [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu), [KernelPatch](https://github.com/bmax121/KernelPatch) и [Magisk](https://github.com/topjohnwu/Magisk).

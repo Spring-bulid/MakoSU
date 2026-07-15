@@ -1,4 +1,28 @@
 #include "selinux_hide.h"
+#include <linux/init.h>
+#include <linux/version.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0)
+void __init ksu_selinux_hide_init(void)
+{
+}
+
+void __exit ksu_selinux_hide_exit(void)
+{
+}
+
+void ksu_selinux_hide_drop_backup_if_unused(void)
+{
+}
+
+void ksu_selinux_hide_handle_second_stage(void)
+{
+}
+
+void ksu_selinux_hide_handle_post_fs_data(void)
+{
+}
+#else
 #include "infra/symbol_resolver.h"
 #include "linux/jump_label.h"
 #include "selinux/sepolicy.h"
@@ -1132,4 +1156,5 @@ allow:
     avd->allowed = 0xffffffff;
     goto out;
 }
+#endif
 #endif

@@ -1,4 +1,13 @@
-use std::{env, process::Command};
+use std::{env, fs, process::Command};
+
+fn verify_embedded_scripts() {
+    let installer = fs::read("src/installer.sh").expect("Failed to read embedded installer.sh");
+    assert!(
+        !installer.contains(&b'\r'),
+        "src/installer.sh must use LF line endings for Android sh"
+    );
+    println!("cargo:rerun-if-changed=src/installer.sh");
+}
 
 fn get_git_version() -> Result<(u32, String), std::io::Error> {
     let output = Command::new("git")
@@ -51,6 +60,7 @@ fn configure_bindgen() {
 }
 
 fn main() {
+    verify_embedded_scripts();
     let (code, name) = match get_git_version() {
         Ok((code, name)) => (code, name),
         Err(_) => {
@@ -59,9 +69,10 @@ fn main() {
             (0, "0.0.0".to_string())
         }
     };
-    if env::var("KSU_PACKAGE_NAME").is_err() {
-        println!("cargo:rustc-env=KSU_PACKAGE_NAME=com.sukisu.ultra");
-    }
+    println!("cargo:rerun-if-env-changed=KSU_PACKAGE_NAME");
+    let package_name =
+        env::var("KSU_PACKAGE_NAME").unwrap_or_else(|_| "com.makosu.manager".to_string());
+    println!("cargo:rustc-env=KSU_PACKAGE_NAME={package_name}");
     println!("cargo:rustc-env=VERSION_CODE={code}");
     println!("cargo:rustc-env=VERSION_NAME={name}");
 

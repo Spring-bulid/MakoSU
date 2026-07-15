@@ -20,6 +20,7 @@ import com.sukisu.ultra.R
 import com.sukisu.ultra.data.repository.SettingsRepositoryImpl
 import com.sukisu.ultra.ui.component.dialog.ConfirmResult
 import com.sukisu.ultra.ui.component.dialog.rememberConfirmDialog
+import com.sukisu.ultra.ui.kernelFlash.AnyKernel3Contract
 import com.sukisu.ultra.ui.screen.flash.FlashIt
 import com.sukisu.ultra.ui.util.getFileName
 import com.sukisu.ultra.ui.webui.WebUIActivity
@@ -348,24 +349,20 @@ private fun detectZipType(context: Context, uri: Uri): ZipType {
 
 private fun detectFromZipStream(zipStream: ZipInputStream, isApk: Boolean): ZipType {
     var hasModuleProp = false
-    var hasToolsFolder = false
-    var hasAnykernelSh = false
+    val archiveLayout = AnyKernel3Contract.inspectArchive()
 
     var entry = zipStream.nextEntry
     while (entry != null) {
         val entryName = entry.name.lowercase()
-        when {
-            entryName == "module.prop" || entryName.endsWith("/module.prop") -> hasModuleProp = true
-            entryName.startsWith("tools/") || entryName == "tools" -> hasToolsFolder = true
-            entryName == "anykernel.sh" || entryName.endsWith("/anykernel.sh") -> hasAnykernelSh = true
-        }
+        archiveLayout.record(entry.name)
+        if (entryName == "module.prop" || entryName.endsWith("/module.prop")) hasModuleProp = true
         zipStream.closeEntry()
         entry = zipStream.nextEntry
     }
 
     return when {
         hasModuleProp -> ZipType.MODULE
-        hasToolsFolder && hasAnykernelSh -> ZipType.KERNEL
+        archiveLayout.isSupported -> ZipType.KERNEL
         isApk -> ZipType.MODULE
         else -> ZipType.UNKNOWN
     }

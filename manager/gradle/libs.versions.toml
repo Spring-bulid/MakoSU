@@ -21,6 +21,7 @@ hiddenapibypass = "6.1"
 appiconloader = "1.5.0"
 documentfile = "1.1.0"
 gson = "2.13.2"
+junit4 = "4.13.2"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -84,4 +85,5 @@ material-kolor = { group = "com.materialkolor", name = "material-kolor", version
 appiconloader = { module = "me.zhanghai.android.appiconloader:appiconloader", version.ref = "appiconloader" }
 
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+junit4 = { module = "junit:junit", version.ref = "junit4" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }

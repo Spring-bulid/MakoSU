@@ -50,6 +50,11 @@ struct Asset;
 #[folder = "bin/x86_64"]
 struct Asset;
 
+#[cfg(not(target_os = "android"))]
+#[derive(RustEmbed)]
+#[folder = "bin/aarch64"]
+struct Asset;
+
 #[allow(unused)]
 pub fn get_asset_data(name: &str) -> Result<std::borrow::Cow<'static, [u8]>> {
     let asset = Asset::get(name).ok_or_else(|| anyhow::anyhow!("asset not found: {name}"))?;

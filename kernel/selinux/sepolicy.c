@@ -564,6 +564,7 @@ static bool add_filename_trans(struct policydb *db, const char *s, const char *t
         return false;
     }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0)
     struct filename_trans_key key;
     key.ttype = tgt->value;
     key.tclass = cls->value;
@@ -571,7 +572,11 @@ static bool add_filename_trans(struct policydb *db, const char *s, const char *t
 
     struct filename_trans_datum *last = NULL;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
     struct filename_trans_datum *trans = policydb_filenametr_search(db, &key);
+#else
+    struct filename_trans_datum *trans = hashtab_search(&db->filename_trans, &key);
+#endif
     while (trans) {
         if (ebitmap_get_bit(&trans->stypes, src->value - 1)) {
             // Duplicate, overwrite existing data and return
@@ -591,11 +596,57 @@ static bool add_filename_trans(struct policydb *db, const char *s, const char *t
         new_key->name = kstrdup(key.name, GFP_KERNEL);
         trans->next = last;
         trans->otype = def->value;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
         hashtab_insert(&db->filename_trans, new_key, trans, filenametr_key_params);
+#else
+        hashtab_insert(&db->filename_trans, new_key, trans);
+#endif
     }
 
     db->compat_filename_trans_count++;
     return ebitmap_set_bit(&trans->stypes, src->value - 1, 1) == 0;
+#else
+    struct filename_trans key;
+    struct filename_trans_datum *trans;
+
+    key.stype = src->value;
+    key.ttype = tgt->value;
+    key.tclass = cls->value;
+    key.name = (char *)o;
+
+    trans = hashtab_search(db->filename_trans, &key);
+    if (!trans) {
+        struct filename_trans *new_key;
+
+        trans = kcalloc(1, sizeof(*trans), GFP_KERNEL);
+        new_key = kmalloc(sizeof(*new_key), GFP_KERNEL);
+        if (!trans || !new_key) {
+            kfree(trans);
+            kfree(new_key);
+            return false;
+        }
+
+        *new_key = key;
+        new_key->name = kstrdup(key.name, GFP_KERNEL);
+        if (!new_key->name) {
+            kfree(trans);
+            kfree(new_key);
+            return false;
+        }
+
+        trans->otype = def->value;
+        if (hashtab_insert(db->filename_trans, new_key, trans)) {
+            kfree(new_key->name);
+            kfree(new_key);
+            kfree(trans);
+            return false;
+        }
+    } else {
+        trans->otype = def->value;
+    }
+
+    return ebitmap_set_bit(&db->filename_trans_ttypes, src->value - 1, 1) == 0;
+#endif
 }
 
 static bool add_genfscon(struct policydb *db, const char *fs_name, const char *path, const char *context)
@@ -867,6 +918,7 @@ bool ksu_genfscon(struct policydb *db, const char *fs_name, const char *path, co
 
 // ======== sepolicy ========
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 void ksu_destroy_sepolicy(struct selinux_policy *pol)
 {
     policydb_destroy(&pol->policydb);
@@ -946,3 +998,4 @@ out_free_data:
 
     return ERR_PTR(ret);
 }
+#endif

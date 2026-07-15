@@ -22,7 +22,6 @@ import com.sukisu.ultra.ui.util.loadKpmModule
 import com.sukisu.ultra.ui.util.unloadKpmModule
 import com.sukisu.ultra.ui.viewmodel.KpmViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -48,7 +47,7 @@ fun KpmScreen(
     val failedToCheckModuleFile = stringResource(R.string.snackbar_failed_to_check_module_file)
 
     val showToast: suspend (String) -> Unit = { msg ->
-        scope.launch(Dispatchers.Main) {
+        withContext(Dispatchers.Main.immediate) {
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
         }
     }
@@ -65,36 +64,28 @@ fun KpmScreen(
             val encodedFileName = URLEncoder.encode(fileName, "UTF-8")
             val tempFile = File(context.cacheDir, encodedFileName)
 
-            context.contentResolver.openInputStream(uri)?.use { input ->
+            val copied = context.contentResolver.openInputStream(uri)?.use { input ->
                 tempFile.outputStream().use { output ->
                     input.copyTo(output)
                 }
-            }
+            } ?: 0L
 
-            if (!isValidKpmFile(tempFile, context.contentResolver.getType(uri))) {
-                withContext(Dispatchers.Main) {
-                    showToast(invalidFileTypeMessage)
-                }
+            if (copied <= 0L || !isValidKpmFile(tempFile, context.contentResolver.getType(uri))) {
+                showToast(invalidFileTypeMessage)
                 tempFile.delete()
                 return@launch
             }
 
-            val moduleName = withContext(Dispatchers.IO) {
-                extractModuleName(tempFile)
-            }
+            val moduleName = extractModuleName(tempFile)
             withContext(Dispatchers.Main) {
                 viewModel.showInstallDialog(moduleName ?: tempFile.nameWithoutExtension)
+                viewModel.setTempFileForInstall(tempFile)
             }
-
-            viewModel.setTempFileForInstall(tempFile)
         }
     }
 
     LaunchedEffect(Unit) {
-        while (true) {
-            viewModel.fetchModuleList()
-            delay(5000)
-        }
+        viewModel.fetchModuleList()
     }
 
     val actions = KpmActions(
@@ -111,7 +102,7 @@ fun KpmScreen(
             )
         },
         onConfirmInstall = { _, isEmbed ->
-            scope.launch {
+            scope.launch(Dispatchers.IO) {
                 val tempFile = viewModel.getTempFile()
                 tempFile?.let {
                     handleModuleInstall(
@@ -140,14 +131,16 @@ fun KpmScreen(
                 )
 
                 if (confirmResult == ConfirmResult.Confirmed) {
-                    handleModuleUninstall(
-                        moduleId = moduleId,
-                        showToast = showToast,
-                        kpmUninstallSuccess = kpmUninstallSuccess,
-                        kpmUninstallFailed = kpmUninstallFailed,
-                        failedToCheckModuleFile = failedToCheckModuleFile,
-                        viewModel = viewModel
-                    )
+                    withContext(Dispatchers.IO) {
+                        handleModuleUninstall(
+                            moduleId = moduleId,
+                            showToast = showToast,
+                            kpmUninstallSuccess = kpmUninstallSuccess,
+                            kpmUninstallFailed = kpmUninstallFailed,
+                            failedToCheckModuleFile = failedToCheckModuleFile,
+                            viewModel = viewModel
+                        )
+                    }
                 }
             }
         },
@@ -157,7 +150,7 @@ fun KpmScreen(
         onHideInputDialog = viewModel::hideInputDialog,
         onInputArgsChange = viewModel::updateInputArgs,
         onExecuteControl = {
-            scope.launch {
+            scope.launch(Dispatchers.IO) {
                 val result = viewModel.executeControl()
                 val message = when (result) {
                     0 -> context.getString(R.string.kpm_control_success)
@@ -211,7 +204,6 @@ private suspend fun handleModuleInstall(
         if (!loadResult) {
             showToast(kpmInstallFailed)
         } else {
-            delay(500) // Wait for module to be fully loaded
             viewModel.fetchModuleList()
             showToast(kpmInstallSuccess)
         }

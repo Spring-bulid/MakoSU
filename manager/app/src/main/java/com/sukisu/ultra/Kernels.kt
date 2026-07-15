@@ -13,13 +13,10 @@ data class KernelVersion(val major: Int, val patchLevel: Int, val subLevel: Int)
     }
 
     fun isGKI(): Boolean {
-
-        // kernel 6.x
         if (major > 5) {
             return true
         }
 
-        // kernel 5.10.x
         if (major == 5) {
             return patchLevel >= 10
         }
@@ -41,4 +38,8 @@ fun getKernelVersion(): KernelVersion {
     Os.uname().release.let {
         return parseKernelVersion(it)
     }
+}
+
+fun defaultBootPartitionForSdk(sdkInt: Int): String {
+    return if (sdkInt >= 33) "init_boot" else "boot"
 }

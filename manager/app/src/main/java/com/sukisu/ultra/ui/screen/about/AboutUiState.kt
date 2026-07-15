@@ -7,6 +7,7 @@ data class AboutUiState(
     val title: String,
     val appName: String,
     val versionName: String,
+    val copyright: String,
     val links: List<LinkInfo>,
 )
 

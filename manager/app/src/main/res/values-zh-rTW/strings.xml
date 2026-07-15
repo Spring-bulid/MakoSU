@@ -72,7 +72,7 @@
     <string name="home_click_to_learn_kernelsu">知曉安裝、使用 KernelSU 本體與其模組功能的方法</string>
     <string name="home_support_title">協助發展</string>
     <string name="home_support_content">KernelSU 一向以免費與開放原始碼自居，矢志不渝。若想協助我們，可以用小額捐款表達你對專案發展的大力支持。</string>
-    <string name="about_source_code"><![CDATA[前往 %1$s 檢閱原始碼<br/>前往 %2$s 加入頻道]]></string>
+    <string name="about_source_code"><![CDATA[前往 %1$s 檢閱原始碼<br/>前往 %2$s 加入頻道<br/><br/>圖標圖像版權：%3$s<br/>品牌智慧財產權：%4$s<br/>授權說明：%5$s]]></string>
     <string name="profile_default">預設</string>
     <string name="profile_template">模版</string>
     <string name="profile_custom">自定義</string>
@@ -353,7 +353,7 @@
     <string name="kpm_args">參數</string>
     <string name="kpm_control">執行</string>
     <string name="close_notice">關閉</string>
-    <string name="kernel_module_notice">以下內核模塊功能由 KernelPatch 開發，並經過修改後加入了 SukiSU Ultra 的內核模塊功能</string>
+    <string name="kernel_module_notice">以下內核模塊功能由 KernelPatch 開發，並經過修改後加入 MakoSU</string>
     <string name="kpm_control_success">成功</string>
     <string name="kpm_control_failed">失敗</string>
     <string name="not_supported">不支持</string>
@@ -552,6 +552,6 @@
     <string name="sus_maps_warning">重要提示：對於具備完善注入檢測機制的應用，此功能可能無法有效繞過檢測。</string>
     <string name="sus_maps_debug_info">首先通過 ps -enf 查找目標應用的 PID 和 UID，然後檢查 /proc/&lt;pid&gt;/maps 中的相關路徑，並與 /proc/1/mountinfo 中的設備號進行比對以確保一致性。只有當設備號一致時，隱藏映射才能正常工作。</string>
     <string name="icon_switch_title">備選圖標</string>
-    <string name="icon_switch_summary">更換為 KernelSU 圖標</string>
+    <string name="icon_switch_summary">切換 MakoSU 啟動器圖標變體</string>
     <string name="refresh">刷新</string>
 </resources>

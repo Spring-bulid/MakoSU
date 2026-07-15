@@ -264,7 +264,7 @@ fun SuSFSMiuix() {
         showDialog = uiState.showConfirmReset,
         onDismiss = { viewModel.toggleConfirmReset(false) },
         onConfirm = {
-            viewModel.resetAll()
+            viewModel.resetAll(context)
         },
         titleRes = R.string.susfs_reset_confirm_title,
         messageRes = R.string.susfs_reset_confirm_title,

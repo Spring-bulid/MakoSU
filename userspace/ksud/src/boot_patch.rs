@@ -14,9 +14,9 @@ use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::ensure;
 use memmap2::{Mmap, MmapOptions};
-use regex_lite::Regex;
 
 use crate::assets;
+use crate::kmi::parse_kmi_from_bytes;
 
 #[cfg(target_os = "android")]
 mod android {
@@ -38,7 +38,7 @@ mod android {
 
     pub(super) fn ensure_gki_kernel() -> Result<()> {
         let version = get_kernel_version()?;
-        let is_gki = version.0 == 5 && version.1 >= 10 || version.2 > 5;
+        let is_gki = crate::kmi::is_gki_version(version.0, version.1);
         ensure!(is_gki, "only support GKI kernel");
         Ok(())
     }
@@ -66,20 +66,10 @@ mod android {
         }
     }
 
-    fn parse_kmi(version: &str) -> Result<String> {
-        let re = Regex::new(r"(.* )?(\d+\.\d+)(\S+)?(android\d+)(.*)")?;
-        let cap = re
-            .captures(version)
-            .ok_or_else(|| anyhow::anyhow!("Failed to get KMI from boot/modules"))?;
-        let android_version = cap.get(4).map_or("", |m| m.as_str());
-        let kernel_version = cap.get(2).map_or("", |m| m.as_str());
-        Ok(format!("{android_version}-{kernel_version}"))
-    }
-
     fn parse_kmi_from_uname() -> Result<String> {
         let uname = rustix::system::uname();
         let version = uname.release().to_string_lossy();
-        parse_kmi(&version)
+        crate::kmi::parse_kmi_version(&version)
     }
 
     fn parse_kmi_from_modules() -> Result<String> {
@@ -93,7 +83,7 @@ mod android {
         let output = Command::new("modinfo").arg(modfile).output()?;
         for line in output.stdout.lines().map_while(Result::ok) {
             if line.starts_with("vermagic") {
-                return parse_kmi(&line);
+                return crate::kmi::parse_kmi_version(&line);
             }
         }
         bail!("Parse KMI from modules failed")
@@ -224,7 +214,7 @@ mod android {
         partition: &Option<String>,
     ) -> String {
         let slot_suffix = get_slot_suffix(false);
-        let skip_init_boot = kmi.starts_with("android12-");
+        let skip_init_boot = kmi.starts_with("android11-") || kmi.starts_with("android12-");
         let init_boot_exist =
             Path::new(&format!("/dev/block/by-name/init_boot{slot_suffix}")).exists();
 
@@ -328,45 +318,9 @@ fn map_file(file: &Path) -> Result<Mmap> {
     Ok(mmap)
 }
 
-fn parse_kmi(buffer: &[u8]) -> Result<String> {
-    let re = Regex::new(r"(\d+\.\d+)(?:\S+)?(android\d+)").context("Failed to compile regex")?;
-    buffer
-        .windows(4)
-        .enumerate()
-        .filter(|(_, x)| {
-            x[1] == b'.'
-                && x[2].is_ascii_digit()
-                && match x[0] {
-                    b'5' => x[3].is_ascii_digit(),
-                    b'6'..=b'9' => true,
-                    _ => false,
-                }
-        })
-        .find_map(|(i, _)| {
-            let a = &buffer[i..buffer.len().min(i + 100)];
-            if let Some(e) = a.iter().position(|c| *c == 0)
-                && let Ok(s) = std::str::from_utf8(&a[..e])
-                && let Some(caps) = re.captures(s)
-                && let (Some(kernel_version), Some(android_version)) = (caps.get(1), caps.get(2))
-            {
-                Some(format!(
-                    "{}-{}",
-                    android_version.as_str(),
-                    kernel_version.as_str()
-                ))
-            } else {
-                None
-            }
-        })
-        .ok_or_else(|| {
-            println!("- Failed to get KMI version");
-            anyhow!("Try to choose LKM manually")
-        })
-}
-
 fn parse_kmi_from_kernel(kernel: &Path) -> Result<String> {
     let data = std::fs::read(kernel).context("Failed to read kernel file")?;
-    parse_kmi(&data)
+    parse_kmi_from_bytes(&data)
 }
 
 fn parse_kmi_from_boot(image: &Path) -> Result<String> {
@@ -375,7 +329,7 @@ fn parse_kmi_from_boot(image: &Path) -> Result<String> {
     if let Some(kernel) = boot.get_blocks().get_kernel() {
         let mut output = Vec::<u8>::new();
         kernel.dump(&mut output, false)?;
-        parse_kmi(&output)
+        parse_kmi_from_bytes(&output)
     } else {
         bail!("no kernel found in boot image")
     }

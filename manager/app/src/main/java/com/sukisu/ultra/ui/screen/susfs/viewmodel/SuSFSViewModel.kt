@@ -31,17 +31,13 @@ class SuSFSViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val canEnableAutoStart = withContext(Dispatchers.IO) {
-                SuSFSManager.hasConfigurationForAutoStart(context)
-            }
-
             repo.loadInitialConfig(context).onSuccess { config ->
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         unameValue = config.unameValue,
                         buildTimeValue = config.buildTimeValue,
-                        autoStartEnabled = SuSFSManager.isAutoStartEnabled(),
+                        autoStartEnabled = config.autoStartEnabled,
                         executeInPostFsData = config.executeInPostFsData,
                         susPaths = config.susPaths,
                         susLoopPaths = config.susLoopPaths,
@@ -52,7 +48,7 @@ class SuSFSViewModel(
                         enableHideBl = config.enableHideBl,
                         enableCleanupResidue = config.enableCleanupResidue,
                         enableAvcLogSpoofing = config.enableAvcLogSpoofing,
-                        canEnableAutoStart = canEnableAutoStart
+                        canEnableAutoStart = config.hasAutoStartConfig()
                     )
                 }
                 loadSlotInfo(context)
@@ -224,11 +220,18 @@ class SuSFSViewModel(
         }
     }
 
-    fun resetAll() {
+    fun resetAll(context: Context) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            _uiState.update { it.copy(isLoading = false, showConfirmReset = false) }
-            reloadConfig()
+            val success = SuSFSManager.resetToDefault(context)
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    showConfirmReset = !success,
+                    error = if (success) null else IllegalStateException("Failed to reset SuSFS settings")
+                )
+            }
+            if (success) reloadConfig()
         }
     }
 
@@ -299,24 +302,32 @@ class SuSFSViewModel(
 
     fun reloadConfig() {
         viewModelScope.launch {
-            val config = SuSFSManager.getCurrentModuleConfig()
-            _uiState.update {
-                it.copy(
-                    unameValue = config.unameValue,
-                    buildTimeValue = config.buildTimeValue,
-                    autoStartEnabled = SuSFSManager.isAutoStartEnabled(),
-                    executeInPostFsData = config.executeInPostFsData,
-                    susPaths = config.susPaths,
-                    susLoopPaths = config.susLoopPaths,
-                    susMaps = config.susMaps,
-                    kstatConfigs = config.kstatConfigs,
-                    addKstatPaths = config.addKstatPaths,
-                    hideSusMountsForAllProcs = config.hideSusMountsForAllProcs,
-                    enableHideBl = config.enableHideBl,
-                    enableCleanupResidue = config.enableCleanupResidue,
-                    enableAvcLogSpoofing = config.enableAvcLogSpoofing
-                )
-            }
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            runCatching { SuSFSManager.getCurrentModuleConfig() }
+                .onSuccess { config ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            unameValue = config.unameValue,
+                            buildTimeValue = config.buildTimeValue,
+                            autoStartEnabled = config.autoStartEnabled,
+                            executeInPostFsData = config.executeInPostFsData,
+                            susPaths = config.susPaths,
+                            susLoopPaths = config.susLoopPaths,
+                            susMaps = config.susMaps,
+                            kstatConfigs = config.kstatConfigs,
+                            addKstatPaths = config.addKstatPaths,
+                            hideSusMountsForAllProcs = config.hideSusMountsForAllProcs,
+                            enableHideBl = config.enableHideBl,
+                            enableCleanupResidue = config.enableCleanupResidue,
+                            enableAvcLogSpoofing = config.enableAvcLogSpoofing,
+                            canEnableAutoStart = config.hasAutoStartConfig()
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(isLoading = false, error = error) }
+                }
         }
     }
 }

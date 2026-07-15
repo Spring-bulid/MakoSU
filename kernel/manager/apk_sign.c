@@ -74,6 +74,12 @@ static int ksu_sha256(const unsigned char *data, unsigned int datalen, unsigned 
 static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset, unsigned expected_size,
                         const char *expected_sha256)
 {
+    unsigned char digest[SHA256_DIGEST_SIZE];
+    char hash_str[SHA256_DIGEST_SIZE * 2 + 1];
+    char *cert;
+    bool matched = false;
+    int ret;
+
     kernel_read(fp, size4, 0x4, pos); // signer-sequence length
     kernel_read(fp, size4, 0x4, pos); // signer length
     kernel_read(fp, size4, 0x4, pos); // signed data length
@@ -89,32 +95,36 @@ static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset, u
     kernel_read(fp, size4, 0x4, pos); // certificate length
     *offset += 0x4 * 2;
 
-    if (*size4 == expected_size) {
-        *offset += *size4;
-
-#define CERT_MAX_LENGTH 1024
-        char cert[CERT_MAX_LENGTH];
-        if (*size4 > CERT_MAX_LENGTH) {
-            pr_info("cert length overlimit\n");
-            return false;
-        }
-        kernel_read(fp, cert, *size4, pos);
-        unsigned char digest[SHA256_DIGEST_SIZE];
-        if (IS_ERR(ksu_sha256(cert, *size4, digest))) {
-            pr_info("sha256 error\n");
-            return false;
-        }
-
-        char hash_str[SHA256_DIGEST_SIZE * 2 + 1];
-        hash_str[SHA256_DIGEST_SIZE * 2] = '\0';
-
-        bin2hex(hash_str, digest, SHA256_DIGEST_SIZE);
-        pr_info("sha256: %s, expected: %s\n", hash_str, expected_sha256);
-        if (strcmp(expected_sha256, hash_str) == 0) {
-            return true;
-        }
+    if (*size4 != expected_size) {
+        return false;
     }
-    return false;
+
+    *offset += *size4;
+    cert = kmalloc(*size4, GFP_KERNEL);
+    if (!cert) {
+        pr_info("failed to allocate certificate buffer\n");
+        return false;
+    }
+
+    if (kernel_read(fp, cert, *size4, pos) != *size4) {
+        pr_info("failed to read certificate\n");
+        goto out;
+    }
+
+    ret = ksu_sha256(cert, *size4, digest);
+    if (ret) {
+        pr_info("sha256 error: %d\n", ret);
+        goto out;
+    }
+
+    hash_str[SHA256_DIGEST_SIZE * 2] = '\0';
+    bin2hex(hash_str, digest, SHA256_DIGEST_SIZE);
+    pr_info("sha256: %s, expected: %s\n", hash_str, expected_sha256);
+    matched = strcmp(expected_sha256, hash_str) == 0;
+
+out:
+    kfree(cert);
+    return matched;
 }
 
 struct zip_entry_header {
@@ -342,6 +352,9 @@ int get_pkg_from_apk_path(char *pkg, const char *path)
     return 0;
 }
 
+
+static const char __used ksu_expected_hash[] = EXPECTED_HASH;
+
 bool is_manager_apk(char *path)
 {
 #ifdef KSU_MANAGER_PACKAGE
@@ -356,7 +369,7 @@ bool is_manager_apk(char *path)
         return false;
     }
 #endif
-    if (check_v2_signature(path, EXPECTED_SIZE, EXPECTED_HASH)) {
+    if (check_v2_signature(path, EXPECTED_SIZE, ksu_expected_hash)) {
         return true;
     }
 #ifdef EXPECTED_SIZE2

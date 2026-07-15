@@ -1,4 +1,5 @@
 #!/system/bin/sh
+# Keep this file LF-only: it is embedded verbatim and executed by Android sh.
 ############################################
 # KernelSU installer script
 # mostly from module_installer.sh
@@ -403,7 +404,7 @@ install_module() {
     set_permissions
   else
     print_title "$MODNAME" "by $MODAUTH"
-    print_title "Powered by KernelSU"
+    print_title "Powered by MakoSU"
 
     unzip -o "$ZIPFILE" customize.sh -d $MODPATH >&2
 

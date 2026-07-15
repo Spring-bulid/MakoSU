@@ -74,7 +74,7 @@ object SuSFSCommands {
     }
 
     suspend fun updateMagiskModule(): Boolean {
-        return removeMagiskModule() && createMagiskModule()
+        return createMagiskModule()
     }
 
     private fun runCmdWithResult(cmd: String): CommandResult {

@@ -20,8 +20,8 @@ val managerVersionCode = rootProject.extra["managerVersionCode"] as Int
 val managerVersionName = rootProject.extra["managerVersionName"] as String
 
 val isPrBuild = project.findProperty("IS_PR_BUILD")?.toString()?.toBoolean() ?: false
-val defaultManagerPackageName = if (isPrBuild) "com.sukisu.ultra.pr" else "com.sukisu.ultra"
-val defaultManagerName = if (isPrBuild) "SukiSU PR" else "SukiSU"
+val defaultManagerPackageName = if (isPrBuild) "com.makosu.manager.pr" else "com.makosu.manager"
+val defaultManagerName = if (isPrBuild) "MakoSU PR" else "MakoSU"
 val managerPackageName = project.findProperty("KSU_PACKAGE_NAME")?.toString() ?: defaultManagerPackageName
 val managerName = project.findProperty("KSU_NAME")?.toString() ?: defaultManagerName
 
@@ -30,6 +30,23 @@ apksign {
     storePasswordProperty = "KEYSTORE_PASSWORD"
     keyAliasProperty = "KEY_ALIAS"
     keyPasswordProperty = "KEY_PASSWORD"
+}
+
+val releaseSigningProperties = listOf(
+    "KEYSTORE_FILE",
+    "KEYSTORE_PASSWORD",
+    "KEY_ALIAS",
+    "KEY_PASSWORD",
+)
+
+gradle.taskGraph.whenReady {
+    if (allTasks.any { it.name == "validateSigningRelease" }) {
+        val missing = releaseSigningProperties.filter { project.findProperty(it)?.toString().isNullOrBlank() }
+        check(missing.isEmpty()) {
+            "Release signing configuration is missing: ${missing.joinToString()}. " +
+                "Set local values in manager/makosu-signing.properties or pass -P properties."
+        }
+    }
 }
 
 val baseCFlags = listOf(
@@ -167,6 +184,8 @@ base {
 }
 
 dependencies {
+    testImplementation(libs.junit4)
+
     implementation(libs.androidx.activity.compose)
 
     implementation(platform(libs.androidx.compose.bom))

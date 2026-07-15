@@ -2,7 +2,7 @@
 #include <linux/compat.h>
 #include <linux/cred.h>
 #include <linux/gfp.h>
-#include <linux/minmax.h>
+#include <linux/kernel.h>
 #include <linux/overflow.h>
 #include <linux/sched/signal.h>
 #include <linux/slab.h>
@@ -18,6 +18,8 @@
 #include "infra/event_queue.h"
 #include "klog.h" // IWYU pragma: keep
 #include "sulog/event.h"
+#include "util.h"
+#include "infra/gki1_imports.h"
 
 #define KSU_SULOG_MAX_QUEUED 256U
 #define KSU_SULOG_MAX_PAYLOAD_LEN 2048U
@@ -93,9 +95,17 @@ static void ksu_sulog_fill_task_info(struct ksu_sulog_event *event, __u16 event_
     event->version = KSU_SULOG_EVENT_VERSION;
     event->event_type = event_type;
     event->retval = retval;
+#ifdef KSU_GKI1_LKM_IMPORTS
+    struct pid_namespace *initial_pid_ns = ksu_gki1_import_init_pid_ns;
+
+    event->pid = task_pid_nr_ns(current, initial_pid_ns);
+    event->tgid = task_tgid_nr_ns(current, initial_pid_ns);
+    event->ppid = task_ppid_nr_ns(current, initial_pid_ns);
+#else
     event->pid = task_pid_nr(current);
     event->tgid = task_tgid_nr(current);
     event->ppid = task_ppid_nr(current);
+#endif
     event->uid = current_uid().val;
     event->euid = current_euid().val;
     get_task_comm(event->comm, current);
@@ -126,7 +136,8 @@ static __u32 ksu_sulog_copy_filename(const char __user *filename_user, char *dst
     if (!filename_user)
         return ksu_sulog_copy_empty_string(dst);
 
-    ret = strncpy_from_user_nofault(dst, (const void __user *)untagged_addr((unsigned long)filename_user), dst_len);
+    ret = ksu_strncpy_from_user_nofault(dst, (const void __user *)untagged_addr((unsigned long)filename_user),
+                                        dst_len);
     if (ret <= 0)
         return ksu_sulog_copy_empty_string(dst);
 
@@ -166,7 +177,8 @@ static __u32 ksu_sulog_flatten_argv(const char __user *const __user *argv_user, 
             return ksu_sulog_copy_empty_string(dst);
 
         copied =
-            strncpy_from_user_nofault(arg, (const void __user *)untagged_addr((unsigned long)arg_user), sizeof(arg));
+            ksu_strncpy_from_user_nofault(arg, (const void __user *)untagged_addr((unsigned long)arg_user),
+                                          sizeof(arg));
         if (copied <= 0)
             return ksu_sulog_copy_empty_string(dst);
 

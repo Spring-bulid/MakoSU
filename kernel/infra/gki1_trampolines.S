@@ -1,0 +1,72 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+#ifdef KSU_GKI1_LKM_IMPORTS
+
+    .macro KSU_GKI1_TRAMPOLINE symbol
+    .globl \symbol
+    .type \symbol, %function
+    .align 2
+\symbol:
+    adrp x16, ksu_gki1_import_\symbol
+    ldr x16, [x16, :lo12:ksu_gki1_import_\symbol]
+    br x16
+    .size \symbol, .-\symbol
+    .endm
+
+KSU_GKI1_TRAMPOLINE static_key_enable
+KSU_GKI1_TRAMPOLINE static_key_count
+KSU_GKI1_TRAMPOLINE change_pid
+KSU_GKI1_TRAMPOLINE avtab_destroy
+KSU_GKI1_TRAMPOLINE avtab_alloc
+KSU_GKI1_TRAMPOLINE avtab_insert_nonunique
+KSU_GKI1_TRAMPOLINE avtab_search_node_next
+KSU_GKI1_TRAMPOLINE avtab_search_node
+KSU_GKI1_TRAMPOLINE ebitmap_get_bit
+KSU_GKI1_TRAMPOLINE ebitmap_set_bit
+KSU_GKI1_TRAMPOLINE hashtab_insert
+KSU_GKI1_TRAMPOLINE hashtab_search
+KSU_GKI1_TRAMPOLINE selinux_status_update_policyload
+KSU_GKI1_TRAMPOLINE selnl_notify_policyload
+KSU_GKI1_TRAMPOLINE avc_ss_reset
+KSU_GKI1_TRAMPOLINE security_release_secctx
+KSU_GKI1_TRAMPOLINE security_secid_to_secctx
+KSU_GKI1_TRAMPOLINE security_secctx_to_secid
+KSU_GKI1_TRAMPOLINE unregister_kprobe
+KSU_GKI1_TRAMPOLINE register_kprobe
+KSU_GKI1_TRAMPOLINE ext4_unregister_sysfs
+KSU_GKI1_TRAMPOLINE put_seccomp_filter
+KSU_GKI1_TRAMPOLINE abort_creds
+KSU_GKI1_TRAMPOLINE commit_creds
+KSU_GKI1_TRAMPOLINE free_uid
+KSU_GKI1_TRAMPOLINE alloc_uid
+KSU_GKI1_TRAMPOLINE set_groups
+KSU_GKI1_TRAMPOLINE groups_sort
+KSU_GKI1_TRAMPOLINE groups_alloc
+KSU_GKI1_TRAMPOLINE groups_free
+KSU_GKI1_TRAMPOLINE task_work_add
+KSU_GKI1_TRAMPOLINE fsnotify_destroy_mark
+KSU_GKI1_TRAMPOLINE fsnotify_add_mark
+KSU_GKI1_TRAMPOLINE fsnotify_put_mark
+KSU_GKI1_TRAMPOLINE fsnotify_init_mark
+KSU_GKI1_TRAMPOLINE fsnotify_put_group
+KSU_GKI1_TRAMPOLINE fsnotify_alloc_group
+KSU_GKI1_TRAMPOLINE kallsyms_lookup
+KSU_GKI1_TRAMPOLINE kallsyms_lookup_name
+KSU_GKI1_TRAMPOLINE kallsyms_lookup_size_offset
+KSU_GKI1_TRAMPOLINE ksys_unshare
+KSU_GKI1_TRAMPOLINE __arm64_sys_setns
+KSU_GKI1_TRAMPOLINE set_fs_pwd
+KSU_GKI1_TRAMPOLINE ns_get_path
+KSU_GKI1_TRAMPOLINE find_pid_ns
+KSU_GKI1_TRAMPOLINE alloc_anon_inode
+KSU_GKI1_TRAMPOLINE alloc_file_pseudo
+KSU_GKI1_TRAMPOLINE __flush_dcache_area
+KSU_GKI1_TRAMPOLINE __set_fixmap
+KSU_GKI1_TRAMPOLINE stop_machine
+KSU_GKI1_TRAMPOLINE find_task_by_vpid
+KSU_GKI1_TRAMPOLINE get_task_cred
+KSU_GKI1_TRAMPOLINE unregister_kretprobe
+KSU_GKI1_TRAMPOLINE register_kretprobe
+KSU_GKI1_TRAMPOLINE static_key_disable
+KSU_GKI1_TRAMPOLINE prepare_creds
+
+#endif

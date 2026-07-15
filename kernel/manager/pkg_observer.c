@@ -35,8 +35,21 @@ static int ksu_handle_inode_event(struct fsnotify_mark *mark, u32 mask, struct i
     return 0;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
+static int ksu_handle_event(struct fsnotify_group *group, struct inode *inode, u32 mask, const void *data,
+                            int data_type, const struct qstr *file_name, u32 cookie,
+                            struct fsnotify_iter_info *iter_info)
+{
+    return ksu_handle_inode_event(NULL, mask, inode, NULL, file_name, cookie);
+}
+#endif
+
 static const struct fsnotify_ops ksu_ops = {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
+    .handle_event = ksu_handle_event,
+#else
     .handle_inode_event = ksu_handle_inode_event,
+#endif
 };
 
 static int add_mark_on_inode(struct inode *inode, u32 mask, struct fsnotify_mark **out)
@@ -112,6 +125,8 @@ int ksu_observer_init(void)
         return PTR_ERR(g);
 
     ret = watch_one_dir(&g_watch);
+    if (ret)
+        pr_warn("observer is unavailable: %d\n", ret);
     pr_info("observer init done\n");
     return 0;
 }

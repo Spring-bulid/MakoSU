@@ -95,7 +95,11 @@ static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
         tw->outp = (int __user *)arg4;
         tw->cb.func = ksu_install_fd_tw_func;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
+        if (task_work_add(current, &tw->cb, true)) {
+#else
         if (task_work_add(current, &tw->cb, TWA_RESUME)) {
+#endif
             kfree(tw);
             pr_warn("install fd add task_work failed\n");
         }

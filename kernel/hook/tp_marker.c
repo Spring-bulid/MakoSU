@@ -9,6 +9,7 @@
 #include "policy/allowlist.h"
 #include "klog.h" // IWYU pragma: keep
 #include "selinux/selinux.h"
+#include "infra/gki1_imports.h"
 
 // Tracepoint registration count management
 // == 1: just us

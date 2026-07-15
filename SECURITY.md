@@ -1,7 +1,5 @@
-# Reporting Security Issues
+# Security Policy
 
-The KernelSU team and community take security bugs in KernelSU seriously. We appreciate your efforts to responsibly disclose your findings, and will make every effort to acknowledge your contributions.
+Report security vulnerabilities through GitHub Security Advisories. Do not include exploit details, private keys, device identifiers, or vulnerable binaries in public issues.
 
-To report a security issue, please use the GitHub Security Advisory ["Report a Vulnerability"](https://github.com/tiann/KernelSU/security/advisories/new) tab, or you can mailto [weishu](mailto:twsxtd@gmail.com) directly.
-
-The KernelSU team will send a response indicating the next steps in handling your report. After the initial reply to your report, the security team will keep you informed of the progress towards a fix and full announcement, and may ask for additional information or guidance.
+The report should include the affected MakoSU version, Android/kernel environment, a minimal reproduction, impact assessment, and any mitigation already tested. Signing keys and release credentials must never be attached to a report or committed to the repository.

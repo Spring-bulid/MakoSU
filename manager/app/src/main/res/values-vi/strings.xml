@@ -348,7 +348,7 @@
     <string name="kpm_args">Thông số</string>
     <string name="kpm_control">Tuỳ chỉnh</string>
     <string name="close_notice">Đóng</string>
-    <string name="kernel_module_notice">Các chức năng Kernel Module sau đây được KernelPatch phát triển và sửa đổi để tương thích với các chức năng Kernel Module của SukiSU Ultra</string>
+    <string name="kernel_module_notice">Các chức năng Kernel Module sau đây được KernelPatch phát triển và điều chỉnh cho MakoSU</string>
     <string name="kpm_control_success">Thành công</string>
     <string name="kpm_control_failed">Thất bại</string>
     <string name="not_supported">Không được hỗ trợ</string>
@@ -487,7 +487,7 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'k
     <string name="sus_maps_warning">Quan trọng: Đối với các ứng dụng có cơ chế phát hiện tấn công mạnh mẽ, tính năng này có thể không hiệu quả trong việc bỏ qua khả năng phát hiện</string>
     <string name="sus_maps_debug_info">Trước tiên, hãy tìm PID và UID của ứng dụng đích bằng lệnh ps -enf. Sau đó kiểm tra các đường dẫn liên quan trong /proc/&lt;pid&gt;/maps và so sánh chúng với số thiết bị trong /proc/1/mountinfo để đảm bảo tính nhất quán. Chỉ khi số thiết bị khớp nhau thì chức năng ẩn map mới hoạt động bình thường</string>
     <string name="icon_switch_title">Thay thế icon</string>
-    <string name="icon_switch_summary">Thay đổi icon SukiSU thành icon của KernelSU</string>
+    <string name="icon_switch_summary">Chuyển đổi biến thể biểu tượng khởi chạy MakoSU</string>
     <string name="refresh">Làm mới</string>
     <string name="home_kernel_full_version">Phiên bản Kernel</string>
 </resources>

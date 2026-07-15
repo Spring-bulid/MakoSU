@@ -69,7 +69,7 @@
     <string name="home_click_to_learn_kernelsu">了解如何安装 KernelSU 以及如何开发模块</string>
     <string name="home_support_title">支持开发</string>
     <string name="home_support_content">KernelSU 将保持免费开源，向开发者捐赠以表示支持</string>
-    <string name="about_source_code"><![CDATA[在 %1$s 查看源码<br/>加入我们的 %2$s 频道<br/><br/>有动漫人物图片表情包的图像版权为%3$s所有，图像中的知识产权由%4$s 所有。在使用这些文件之前，除了必须遵守 %5$s 以外，还需要遵守向前两者索要使用这些艺术内容的授权。]]></string>
+    <string name="about_source_code"><![CDATA[在 %1$s 查看源码<br/>加入我们的 %2$s 频道<br/><br/>图标图像版权：%3$s<br/>品牌知识产权：%4$s<br/>授权说明：%5$s]]></string>
     <string name="profile_default">默认</string>
     <string name="profile_template">模版</string>
     <string name="profile_custom">自定义</string>
@@ -364,7 +364,7 @@
     <string name="kpm_args">参数</string>
     <string name="kpm_control">执行</string>
     <string name="close_notice">关闭</string>
-    <string name="kernel_module_notice">以下内核模块功能由 KernelPatch 开发，并经过修改后加入了 SukiSU Ultra 的内核模块功能</string>
+    <string name="kernel_module_notice">以下内核模块功能由 KernelPatch 开发，并经过修改后加入 MakoSU</string>
     <string name="kpm_control_success">成功</string>
     <string name="kpm_control_failed">失败</string>
     <string name="not_supported">不支持</string>
@@ -563,9 +563,10 @@
     <string name="sus_maps_warning">重要提示：对于具备完善注入检测机制的应用，此功能可能无法有效绕过检测。</string>
     <string name="sus_maps_debug_info">首先通过 ps -enf 查找目标应用的 PID 和 UID，然后检查 /proc/&lt;pid&gt;/maps 中的相关路径，并与 /proc/1/mountinfo 中的设备号进行比对以确保一致性。只有当设备号一致时，隐藏映射才能正常工作。</string>
     <string name="icon_switch_title">备选图标</string>
-    <string name="icon_switch_summary">更换为 KernelSU 图标</string>
+    <string name="icon_switch_summary">切换 MakoSU 启动器图标变体</string>
     <string name="refresh">刷新</string>
     <string name="home_kernel_full_version">内核完整版本</string>
     <string name="settings_show_fullstatus">显示完整状态</string>
     <string name="settings_show_fullstatus_summary">在首页信息卡中显示设备的完整状态</string>
+    <string name="about_icon_copyright">图标版权：千恋万花 · 柚子社</string>
 </resources>

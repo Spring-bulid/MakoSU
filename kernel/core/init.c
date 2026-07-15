@@ -127,13 +127,16 @@ int __init kernelsu_init(void)
         pr_alert("shell is allowed at init!");
     }
 
+    if (!ksu_init_symbol_resolver()) {
+        pr_err("symbol resolver initialization failed\n");
+        return -ENOENT;
+    }
+
     ksu_cred = prepare_creds();
     if (!ksu_cred) {
         pr_err("prepare cred failed!\n");
         return -ENOSYS;
     }
-
-    ksu_init_symbol_resolver();
 
     if (spoof_release || spoof_version) {
         ksu_spoof_version(spoof_release, spoof_version);

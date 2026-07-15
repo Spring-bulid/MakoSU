@@ -41,14 +41,21 @@ static const struct ksu_feature_handler kernel_umount_handler = {
     .set_handler = kernel_umount_feature_set,
 };
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 extern int path_umount(struct path *path, int flags);
+#endif
 
 static void ksu_umount_mnt(const char *mnt, struct path *path, int flags)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0)
+    pr_info("kernel_umount is unavailable on Android 11 GKI: %s\n", mnt);
+    path_put(path);
+#else
     int err = path_umount(path, flags);
     if (err) {
         pr_info("umount %s failed: %d\n", mnt, err);
     }
+#endif
 }
 
 static void try_umount(const char *mnt, int flags)

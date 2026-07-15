@@ -20,9 +20,12 @@
 #include "ksu.h"
 #include "infra/su_mount_ns.h"
 #include "util.h"
+#include "infra/gki1_imports.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 extern int path_mount(const char *dev_name, struct path *path, const char *type_page, unsigned long flags,
                       void *data_page);
+#endif
 
 #if defined(__aarch64__)
 extern long __arm64_sys_setns(const struct pt_regs *regs);
@@ -139,6 +142,15 @@ out:
 // individual mode , need CAP_SYS_ADMIN to perform unshare and remount
 static void ksu_mnt_ns_individual(void)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0)
+    /*
+     * Android 11's GKI keeps the path-based propagation helper private.  Do
+     * not unshare without making the new root private: doing so would let a
+     * root profile change mount propagation for every process.
+     */
+    pr_warn("individual mount namespace is unavailable on Android 11 GKI\n");
+    return;
+#else
     long ret = ksys_unshare(CLONE_NEWNS);
     if (ret) {
         pr_warn("call ksys_unshare failed: %ld\n", ret);
@@ -154,6 +166,7 @@ static void ksu_mnt_ns_individual(void)
     if (pm_ret < 0) {
         pr_err("failed to make root private, err: %d\n", pm_ret);
     }
+#endif
 }
 
 void setup_mount_ns(int32_t ns_mode)

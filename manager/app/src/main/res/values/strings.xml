@@ -87,7 +87,7 @@
     <string name="home_click_to_learn_kernelsu">Learn how to install KernelSU and use modules.</string>
     <string name="home_support_title">Support Us</string>
     <string name="home_support_content">KernelSU is, and always will be, free, and open source. However, you can show us that you care by making a donation.</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel<br/><br/>The images of the files with anime character sticker are copyrighted by %3$s, the Brand Intellectual Property in the images is owned by %4$s. Before using these files, in addition to complying with %5$s, you also need to comply with the authorization of the two authors to use these artistic contents]]></string>
+    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel<br/><br/>Icon artwork copyright: %3$s<br/>Brand intellectual property: %4$s<br/>Artwork license notice: %5$s]]></string>
     <string name="profile" translatable="false">App Profile</string>
     <string name="profile_default">Default</string>
     <string name="profile_template">Template</string>
@@ -391,7 +391,7 @@
     <string name="kpm_args">Parameters</string>
     <string name="kpm_control">Execute</string>
     <string name="close_notice">Close</string>
-    <string name="kernel_module_notice">The following kernel module functions were developed by KernelPatch and modified to include the kernel module functions of SukiSU Ultra</string>
+    <string name="kernel_module_notice">The following kernel module functions were developed by KernelPatch and modified for MakoSU</string>
     <string name="kpm_control_success">Success</string>
     <string name="kpm_control_failed">Failed</string>
     <string name="not_supported">Unsupported</string>
@@ -591,9 +591,10 @@
     <string name="sus_maps_warning">Important Notice: For applications with well-implemented injection detection mechanisms, this feature may not effectively bypass detection.</string>
     <string name="sus_maps_debug_info">First, find the target application\'s PID and UID using ps -enf, then check the relevant paths in /proc/&lt;pid&gt;/maps and compare the device numbers with those in /proc/1/mountinfo to ensure consistency. Only when the device numbers match can the map hiding function work properly.</string>
     <string name="icon_switch_title">Alternate icon</string>
-    <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon</string>
+    <string name="icon_switch_summary">Switch the launcher icon variant for MakoSU</string>
     <string name="refresh">Refresh</string>
     <string name="home_kernel_full_version">Kernel full version</string>
     <string name="settings_show_fullstatus">Show FullStatus</string>
     <string name="settings_show_fullstatus_summary">Display device FullStatus in home page info card</string>
+    <string name="about_icon_copyright">Icon artwork copyright: Senren Banka · YUZUSOFT</string>
 </resources>

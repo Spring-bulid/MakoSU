@@ -5,6 +5,7 @@ import com.sukisu.ultra.ui.util.getKsuDaemonPath
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 object SuSFSConfig {
     // Config keys (must match Rust susfs_config.rs)
@@ -34,31 +35,68 @@ object SuSFSConfig {
     const val CGROUP_BASE_PATH = "/sys/fs/cgroup"
 
     private suspend fun configGet(key: String): String = withContext(Dispatchers.IO) {
-        val shell = Shell.getShell()
-        runCmd(shell, "${getKsuDaemonPath()} susfs config get $key").trim()
+        val result = Shell.getShell().newJob()
+            .add("${getKsuDaemonPath()} susfs config get $key")
+            .exec()
+        check(result.isSuccess) {
+            result.err.joinToString("\n").ifBlank { "Failed to read SuSFS config key: $key" }
+        }
+        result.out.joinToString("\n").trim()
     }
 
     suspend fun get(key: String): String = configGet(key)
 
-    suspend fun configSet(key: String, value: String): Boolean = withContext(Dispatchers.IO) {
-        val shell = Shell.getShell()
-        shell.newJob().add("${getKsuDaemonPath()} susfs config set $key ${shellQuote(value)}").exec().isSuccess
+    suspend fun dump(): Map<String, String> = withContext(Dispatchers.IO) {
+        val result = Shell.getShell().newJob()
+            .add("${getKsuDaemonPath()} susfs config dump")
+            .exec()
+        check(result.isSuccess) {
+            result.err.joinToString("\n").ifBlank { "Failed to read SuSFS configuration" }
+        }
+
+        val json = JSONObject(result.out.joinToString("\n"))
+        buildMap {
+            json.keys().forEach { key -> put(key, json.getString(key)) }
+        }
     }
 
-    suspend fun set(key: String, value: String): Boolean = configSet(key, value)
-
-    suspend fun configSetMulti(key: String, values: Set<String>, separator: String): Boolean = withContext(Dispatchers.IO) {
-        val shell = Shell.getShell()
-        val raw = values.joinToString(separator)
-        shell.newJob().add("${getKsuDaemonPath()} susfs config set $key ${shellQuote(raw)}").exec().isSuccess
+    suspend fun replace(values: Map<String, String>): Boolean = withContext(Dispatchers.IO) {
+        val json = JSONObject(values).toString()
+        Shell.getShell().newJob()
+            .add("${getKsuDaemonPath()} susfs config replace ${shellQuote(json)}")
+            .exec()
+            .isSuccess
     }
 
-    suspend fun setMulti(key: String, values: Set<String>, separator: String): Boolean =
+    suspend fun reset(): Boolean = withContext(Dispatchers.IO) {
+        Shell.getShell().newJob()
+            .add("${getKsuDaemonPath()} susfs config reset")
+            .exec()
+            .isSuccess
+    }
+
+    suspend fun configSet(key: String, value: String) = withContext(Dispatchers.IO) {
+        val result = Shell.getShell().newJob()
+            .add("${getKsuDaemonPath()} susfs config set $key ${shellQuote(value)}")
+            .exec()
+        check(result.isSuccess) {
+            result.err.joinToString("\n").ifBlank { "Failed to save SuSFS config key: $key" }
+        }
+    }
+
+    suspend fun set(key: String, value: String) = configSet(key, value)
+
+    suspend fun configSetMulti(key: String, values: Set<String>, separator: String) = withContext(Dispatchers.IO) {
+        require(values.none { it.contains(separator) }) { "SuSFS value contains reserved separator: $separator" }
+        val raw = values.sorted().joinToString(separator)
+        configSet(key, raw)
+    }
+
+    suspend fun setMulti(key: String, values: Set<String>, separator: String) =
         configSetMulti(key, values, separator)
 
     private suspend fun configGetMulti(key: String, separator: String = ";"): Set<String> = withContext(Dispatchers.IO) {
-        val shell = Shell.getShell()
-        val raw = runCmd(shell, "${getKsuDaemonPath()} susfs config get $key")
+        val raw = configGet(key)
         if (raw.isBlank()) emptySet() else raw.split(separator).filter { it.isNotBlank() }.toSet()
     }
 
@@ -66,9 +104,9 @@ object SuSFSConfig {
 
     fun shellQuote(value: String): String = "'${value.replace("'", "'\\''")}'"
 
+    fun isValidMultiValue(value: String, separator: String = ";"): Boolean =
+        value.isNotBlank() && !value.contains(separator)
+
     fun isDefaultSpoofValue(value: String): Boolean = value.isBlank() || value == DEFAULT_UNAME
 
-    private fun runCmd(shell: Shell, cmd: String): String {
-        return shell.newJob().add(cmd).to(mutableListOf<String>(), null).exec().out.joinToString("\n")
-    }
 }

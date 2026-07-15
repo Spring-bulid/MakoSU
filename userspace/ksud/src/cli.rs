@@ -740,6 +740,13 @@ pub enum SusfsConfigCmd {
     Reset,
     /// List all config key=value pairs (one per line)
     List,
+    /// Dump the complete effective config as JSON
+    Dump,
+    /// Atomically replace the config from a JSON string map
+    Replace {
+        /// JSON object containing string keys and values
+        json: String,
+    },
 }
 
 pub fn run() -> Result<()> {
@@ -1221,7 +1228,16 @@ pub fn run() -> Result<()> {
                             Ok(())
                         }
                         SusfsConfigCmd::List => {
+                            println!("{}", susfs_config::export_lines()?);
+                            Ok(())
+                        }
+                        SusfsConfigCmd::Dump => {
                             println!("{}", susfs_config::export_json()?);
+                            Ok(())
+                        }
+                        SusfsConfigCmd::Replace { json } => {
+                            susfs_config::replace_from_json(&json)?;
+                            println!("ok");
                             Ok(())
                         }
                     }

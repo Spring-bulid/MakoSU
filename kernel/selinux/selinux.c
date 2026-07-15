@@ -5,6 +5,7 @@
 #include "linux/version.h"
 #include "klog.h" // IWYU pragma: keep
 #include "ksu.h"
+#include "infra/gki1_imports.h"
 
 /*
  * Cached SID values for frequently checked contexts.
@@ -23,6 +24,17 @@ static u32 cached_zygote_sid __read_mostly = 0;
 static u32 cached_init_sid __read_mostly = 0;
 u32 ksu_file_sid __read_mostly = 0;
 
+static struct task_security_struct *ksu_selinux_cred(const struct cred *cred)
+{
+#ifdef KSU_GKI1_LKM_IMPORTS
+    struct lsm_blob_sizes *blob_sizes = ksu_gki1_import_selinux_blob_sizes;
+
+    return cred->security + blob_sizes->lbs_cred;
+#else
+    return selinux_cred(cred);
+#endif
+}
+
 static int transive_to_domain(const char *domain, struct cred *cred, bool clear_exec_sid)
 {
     u32 sid;
@@ -32,7 +44,7 @@ static int transive_to_domain(const char *domain, struct cred *cred, bool clear_
 #else
     struct cred_security_struct *tsec;
 #endif
-    tsec = selinux_cred(cred);
+    tsec = ksu_selinux_cred(cred);
     if (!tsec) {
         pr_err("tsec == NULL!\n");
         return -1;
@@ -161,9 +173,9 @@ static bool is_sid_match(const struct cred *cred, u32 cached_sid, const char *fa
         return false;
     }
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 18, 0)
-    const struct task_security_struct *tsec = selinux_cred(cred);
+    const struct task_security_struct *tsec = ksu_selinux_cred(cred);
 #else
-    const struct cred_security_struct *tsec = selinux_cred(cred);
+    const struct cred_security_struct *tsec = (const struct cred_security_struct *)ksu_selinux_cred(cred);
 #endif
     if (!tsec) {
         return false;

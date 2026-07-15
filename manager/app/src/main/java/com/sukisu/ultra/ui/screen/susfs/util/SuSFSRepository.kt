@@ -7,25 +7,31 @@ import com.sukisu.ultra.R
 import com.sukisu.ultra.ui.util.getSuSFSStatus
 import com.sukisu.ultra.ui.util.spoofKernelUname
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 object SuSFSRepository {
-    fun getCurrentModuleConfig(): ModuleConfig = runBlocking(Dispatchers.IO) {
-        ModuleConfig(
-            unameValue = getUnameValue(),
-            buildTimeValue = getBuildTimeValue(),
-            executeInPostFsData = getExecuteInPostFsData(),
-            susPaths = getSusPaths(),
-            susLoopPaths = getSusLoopPaths(),
-            susMaps = getSusMaps(),
-            enableLog = getEnableLogState(),
-            kstatConfigs = getKstatConfigs(),
-            addKstatPaths = getAddKstatPaths(),
-            hideSusMountsForAllProcs = getHideSusMountsForAllProcs(),
-            enableHideBl = getEnableHideBl(),
-            enableCleanupResidue = getEnableCleanupResidue(),
-            enableAvcLogSpoofing = getEnableAvcLogSpoofing()
+    suspend fun getCurrentModuleConfig(): ModuleConfig {
+        val config = SuSFSConfig.dump()
+        fun value(key: String): String = config[key].orEmpty()
+        fun enabled(key: String): Boolean = value(key) == "true"
+        fun values(key: String, separator: String = ";"): Set<String> =
+            value(key).split(separator).filterTo(linkedSetOf()) { it.isNotBlank() }
+
+        return ModuleConfig(
+            unameValue = value(SuSFSConfig.KEY_UNAME_VALUE).ifBlank { SuSFSConfig.DEFAULT_UNAME },
+            buildTimeValue = value(SuSFSConfig.KEY_BUILD_TIME_VALUE).ifBlank { SuSFSConfig.DEFAULT_BUILD_TIME },
+            autoStartEnabled = enabled(SuSFSConfig.KEY_AUTO_START_ENABLED),
+            executeInPostFsData = enabled(SuSFSConfig.KEY_EXECUTE_IN_POST_FS_DATA),
+            susPaths = values(SuSFSConfig.KEY_SUS_PATHS),
+            susLoopPaths = values(SuSFSConfig.KEY_SUS_LOOP_PATHS),
+            susMaps = values(SuSFSConfig.KEY_SUS_MAPS),
+            enableLog = enabled(SuSFSConfig.KEY_ENABLE_LOG),
+            kstatConfigs = values(SuSFSConfig.KEY_KSTAT_CONFIGS, ";;"),
+            addKstatPaths = values(SuSFSConfig.KEY_ADD_KSTAT_PATHS),
+            hideSusMountsForAllProcs = enabled(SuSFSConfig.KEY_HIDE_SUS_MOUNTS_FOR_ALL_PROCS),
+            enableHideBl = enabled(SuSFSConfig.KEY_ENABLE_HIDE_BL),
+            enableCleanupResidue = enabled(SuSFSConfig.KEY_ENABLE_CLEANUP_RESIDUE),
+            enableAvcLogSpoofing = enabled(SuSFSConfig.KEY_ENABLE_AVC_LOG_SPOOFING)
         )
     }
 
@@ -39,11 +45,11 @@ object SuSFSRepository {
         return v.ifBlank { SuSFSConfig.DEFAULT_BUILD_TIME }
     }
 
-    fun getKernelSpoofRelease(): String =
-        runBlocking(Dispatchers.IO) { getUnameValue() }.takeUnless { SuSFSConfig.isDefaultSpoofValue(it) }.orEmpty()
+    suspend fun getKernelSpoofRelease(): String =
+        getUnameValue().takeUnless { SuSFSConfig.isDefaultSpoofValue(it) }.orEmpty()
 
-    fun getKernelSpoofVersion(): String =
-        runBlocking(Dispatchers.IO) { getBuildTimeValue() }.takeUnless { SuSFSConfig.isDefaultSpoofValue(it) }.orEmpty()
+    suspend fun getKernelSpoofVersion(): String =
+        getBuildTimeValue().takeUnless { SuSFSConfig.isDefaultSpoofValue(it) }.orEmpty()
 
     suspend fun setAutoStartEnabled(enabled: Boolean) =
         SuSFSConfig.set(SuSFSConfig.KEY_AUTO_START_ENABLED, if (enabled) "true" else "false")

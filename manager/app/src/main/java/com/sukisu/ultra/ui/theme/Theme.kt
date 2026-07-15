@@ -29,7 +29,7 @@ enum class ColorMode(val value: Int) {
     val isSystem: Boolean get() = value == 0 || value == 3
     val isDark: Boolean get() = value == 2 || value == 5 || value == 6
     val isAmoled: Boolean get() = value == 6
-    val isMonet: Boolean get() = value >= 3
+    val isMonet: Boolean get() = this == MONET_SYSTEM || this == MONET_LIGHT || this == MONET_DARK
 
     fun toNonMonetMode(): Int = when (this) {
         MONET_SYSTEM -> 0
@@ -41,8 +41,21 @@ enum class ColorMode(val value: Int) {
     fun toMonetMode(): Int = when (this) {
         SYSTEM -> 3
         LIGHT -> 4
-        DARK -> 5
+        DARK, DARK_AMOLED -> 5
         else -> value
+    }
+
+    fun forMiuix(monetEnabled: Boolean): ColorMode {
+        if (isAmoled) {
+            return if (monetEnabled) MONET_DARK else DARK
+        }
+        if (monetEnabled && !isMonet) {
+            return fromValue(toMonetMode())
+        }
+        if (!monetEnabled && isMonet) {
+            return fromValue(toNonMonetMode())
+        }
+        return this
     }
 }
 
@@ -73,14 +86,7 @@ object ThemeController {
 
         if (uiMode == "miuix") {
             val miuixMonet = repo.miuixMonet
-            val colorMode = ColorMode.fromValue(colorModeValue)
-            colorModeValue = if (!miuixMonet && colorMode.isMonet) {
-                colorMode.toNonMonetMode()
-            } else if (miuixMonet && !colorMode.isMonet) {
-                colorMode.toMonetMode()
-            } else {
-                colorModeValue
-            }
+            colorModeValue = ColorMode.fromValue(colorModeValue).forMiuix(miuixMonet).value
         }
 
         val colorMode = ColorMode.fromValue(colorModeValue)

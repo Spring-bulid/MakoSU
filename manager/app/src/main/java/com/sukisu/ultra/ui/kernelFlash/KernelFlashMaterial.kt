@@ -137,7 +137,7 @@ fun KernelFlashMaterial(
                     .verticalScroll(scrollState)
             ) {
                 LaunchedEffect(logText) {
-                    scrollState.animateScrollTo(scrollState.maxValue)
+                    scrollState.scrollTo(scrollState.maxValue)
                 }
                 Text(
                     modifier = Modifier.padding(16.dp),

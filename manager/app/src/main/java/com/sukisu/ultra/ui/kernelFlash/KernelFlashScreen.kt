@@ -7,11 +7,8 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.sukisu.ultra.R
 import com.sukisu.ultra.ui.LocalUiMode
@@ -43,10 +40,6 @@ fun KernelFlashScreen(
     val scope = rememberCoroutineScope()
     val activity = LocalActivity.current
 
-    var logText by rememberSaveable { mutableStateOf("") }
-    var showFloatAction by rememberSaveable { mutableStateOf(false) }
-    val logContent = rememberSaveable { StringBuilder() }
-
     val horizonKernelState = remember {
         if (KernelFlashStateHolder.currentState != null &&
             KernelFlashStateHolder.currentUri == kernelUri &&
@@ -70,12 +63,10 @@ fun KernelFlashScreen(
 
     val flashComplete = stringResource(R.string.horizon_flash_complete)
 
-    val onFlashComplete = {
-        showFloatAction = true
-        KernelFlashStateHolder.isFlashing = false
-    }
-
     LaunchedEffect(flashState.isCompleted, flashState.error) {
+        if (flashState.isCompleted || flashState.error.isNotEmpty()) {
+            KernelFlashStateHolder.isFlashing = false
+        }
         if (flashState.isCompleted && flashState.error.isEmpty()) {
             val intent = activity?.intent
             val isFromExternalIntent = intent?.action?.let { action ->
@@ -92,50 +83,29 @@ fun KernelFlashScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(horizonKernelState) {
         if (!KernelFlashStateHolder.isFlashing && !flashState.isCompleted && flashState.error.isEmpty()) {
-            withContext(Dispatchers.IO) {
-                KernelFlashStateHolder.isFlashing = true
-                val worker = HorizonKernelWorker(
-                    context = context,
-                    state = horizonKernelState,
-                    slot = selectedSlot,
-                    kpmPatchEnabled = kpmPatchEnabled,
-                    kpmUndoPatch = kpmUndoPatch
-                )
-                worker.uri = kernelUri
-                worker.setOnFlashCompleteListener(onFlashComplete)
-                worker.start()
-
-                while (flashState.error.isEmpty() && !flashState.isCompleted) {
-                    if (flashState.logs.isNotEmpty()) {
-                        logText = flashState.logs.joinToString("\n")
-                        logContent.clear()
-                        logContent.append(logText)
-                    }
-                    delay(100)
-                }
-
-                if (flashState.error.isNotEmpty()) {
-                    logText += "\n${flashState.error}\n"
-                    logContent.append("\n${flashState.error}\n")
-                    KernelFlashStateHolder.isFlashing = false
-                }
-            }
-        } else {
-            logText = flashState.logs.joinToString("\n")
-            if (flashState.error.isNotEmpty()) {
-                logText += "\n${flashState.error}\n"
-            } else if (flashState.isCompleted) {
-                logText += "\n$flashComplete\n\n\n"
-                showFloatAction = true
-            }
+            KernelFlashStateHolder.isFlashing = true
+            HorizonKernelWorker(
+                context = context,
+                state = horizonKernelState,
+                archiveUri = kernelUri,
+                slot = selectedSlot,
+                kpmPatchEnabled = kpmPatchEnabled,
+                kpmUndoPatch = kpmUndoPatch
+            ).start()
         }
     }
 
+    val logText = buildString {
+        append(flashState.logs.joinToString("\n"))
+        if (flashState.error.isNotEmpty()) append("\n${flashState.error}\n")
+        else if (flashState.isCompleted) append("\n$flashComplete\n")
+    }.trimStart('\n')
+
     val actions = KernelFlashActions(
         onBack = {
-            if (!flashState.isFlashing || flashState.isCompleted || flashState.error.isNotEmpty()) {
+            if (!KernelFlashStateHolder.isFlashing || flashState.isCompleted || flashState.error.isNotEmpty()) {
                 if (flashState.isCompleted || flashState.error.isNotEmpty()) {
                     KernelFlashStateHolder.clear()
                 }
@@ -143,7 +113,7 @@ fun KernelFlashScreen(
             }
         },
         onSaveLog = { logContentValue ->
-            scope.launch {
+            scope.launch(Dispatchers.IO) {
                 val format = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault())
                 val date = format.format(Date())
                 val file = File(

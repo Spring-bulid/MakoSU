@@ -193,7 +193,7 @@ fun saveLog(
     showMessage: (String) -> Unit
 ): () -> Unit {
     return {
-        scope.launch {
+        scope.launch(Dispatchers.IO) {
             val format = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault())
             val date = format.format(Date())
             val file = File(
@@ -201,7 +201,9 @@ fun saveLog(
                 "KernelSU_install_log_${date}.log"
             )
             file.writeText(logContent.toString())
-            showMessage("Log saved to ${file.absolutePath}")
+            withContext(Dispatchers.Main) {
+                showMessage("Log saved to ${file.absolutePath}")
+            }
         }
     }
 }

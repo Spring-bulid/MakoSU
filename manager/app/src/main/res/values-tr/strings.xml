@@ -350,7 +350,7 @@
     <string name="kpm_args">Parametreler</string>
     <string name="kpm_control">Çalıştır (Execute)</string>
     <string name="close_notice">Kapat</string>
-    <string name="kernel_module_notice">Aşağıdaki çekirdek modülü işlevleri KernelPatch tarafından geliştirilmiş ve SukiSU Ultra\'nın çekirdek modülü işlevlerini içerecek şekilde değiştirilmiştir</string>
+    <string name="kernel_module_notice">Aşağıdaki çekirdek modülü işlevleri KernelPatch tarafından geliştirilmiş ve MakoSU için uyarlanmıştır</string>
     <string name="kpm_control_success">Başarılı</string>
     <string name="kpm_control_failed">Başarısız</string>
     <string name="not_supported">Desteklenmiyor</string>

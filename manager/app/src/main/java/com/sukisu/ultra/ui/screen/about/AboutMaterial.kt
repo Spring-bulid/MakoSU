@@ -27,9 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sukisu.ultra.R
 import com.sukisu.ultra.ui.component.material.ExpressiveScaffold
@@ -79,9 +79,8 @@ fun AboutScreenMaterial(
                             .background(Color.White)
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                            painter = painterResource(id = R.mipmap.makosu_launcher_primary),
                             contentDescription = null,
-                            contentScale = FixedScale(1f)
                         )
                     }
                     Text(
@@ -93,6 +92,13 @@ fun AboutScreenMaterial(
                     Text(
                         text = state.versionName,
                         fontSize = MaterialTheme.typography.bodyMedium.fontSize
+                    )
+                    Text(
+                        modifier = Modifier.padding(top = 8.dp),
+                        text = state.copyright,
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
                     )
                 }
             }

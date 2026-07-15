@@ -42,7 +42,7 @@ class KpmViewModel(
     fun getTempFile(): File? = tempFile
 
     fun fetchModuleList() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isRefreshing = true, error = null) }
 
             repo.getModuleList()

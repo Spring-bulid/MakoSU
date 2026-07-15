@@ -4,6 +4,7 @@
 #include "uts_spoof.h"
 #include "infra/symbol_resolver.h"
 #include "klog.h"
+#include "infra/gki1_imports.h"
 
 static void do_spoof_version(struct rw_semaphore *sem, struct uts_namespace *ns,
                              const char *release, const char *version)

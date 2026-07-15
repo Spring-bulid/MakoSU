@@ -367,7 +367,7 @@
     <string name="kpm_args">Параметры</string>
     <string name="kpm_control">Выполнить</string>
     <string name="close_notice">Закрыть</string>
-    <string name="kernel_module_notice">Следующие модульные функции ядра были разработаны KernelPatch и изменены для включения в него функций модуля ядра SukiSU Ultra</string>
+    <string name="kernel_module_notice">Следующие функции модуля ядра были разработаны KernelPatch и адаптированы для MakoSU</string>
     <string name="kpm_control_success">Успешно</string>
     <string name="kpm_control_failed">Провален</string>
     <string name="not_supported">Не поддерживается</string>

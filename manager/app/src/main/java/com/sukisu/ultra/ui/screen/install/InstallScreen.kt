@@ -29,6 +29,7 @@ import com.sukisu.ultra.ui.kernelFlash.rememberAnyKernel3State
 import com.sukisu.ultra.ui.navigation3.LocalNavigator
 import com.sukisu.ultra.ui.navigation3.Route
 import com.sukisu.ultra.ui.screen.flash.FlashIt
+import com.sukisu.ultra.ui.screen.susfs.util.SuSFSConfig
 import com.sukisu.ultra.ui.screen.susfs.util.SuSFSManager
 import com.sukisu.ultra.ui.util.LkmSelection
 import com.sukisu.ultra.ui.util.getAvailablePartitions
@@ -64,14 +65,23 @@ fun InstallScreen(
     var enableAdb by rememberSaveable { mutableStateOf(false) }
     var forceBackup by rememberSaveable { mutableStateOf(false) }
 
-    // Read the configuration from the boot image ksu_config
-    val bootConfig by produceState(initialValue = BootConfig()) { value = getBootConfig() }
-    var spoofRelease by rememberSaveable { mutableStateOf(SuSFSManager.getKernelSpoofRelease()) }
-    var spoofVersion by rememberSaveable { mutableStateOf(SuSFSManager.getKernelSpoofVersion()) }
+    val initialSpoof by produceState<Pair<String, String>?>(initialValue = null) {
+        val saved = runCatching { SuSFSManager.getCurrentModuleConfig() }.getOrNull()
+        val bootConfig = getBootConfig()
+        value = bootConfig.spoofRelease.ifEmpty {
+            saved?.unameValue?.takeUnless(SuSFSConfig::isDefaultSpoofValue).orEmpty()
+        } to bootConfig.spoofVersion.ifEmpty {
+            saved?.buildTimeValue?.takeUnless(SuSFSConfig::isDefaultSpoofValue).orEmpty()
+        }
+    }
+    var spoofRelease by rememberSaveable { mutableStateOf("") }
+    var spoofVersion by rememberSaveable { mutableStateOf("") }
 
-    LaunchedEffect(bootConfig) {
-        spoofRelease = bootConfig.spoofRelease.ifEmpty { spoofRelease }
-        spoofVersion = bootConfig.spoofVersion.ifEmpty { spoofVersion }
+    LaunchedEffect(initialSpoof) {
+        initialSpoof?.let { (release, version) ->
+            if (spoofRelease.isEmpty()) spoofRelease = release
+            if (spoofVersion.isEmpty()) spoofVersion = version
+        }
     }
 
     val currentKmi by produceState(initialValue = "") { value = getCurrentKmi() }

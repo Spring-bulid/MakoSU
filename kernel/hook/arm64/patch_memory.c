@@ -13,6 +13,7 @@
 #include "linux/stop_machine.h"
 #include "asm/cacheflush.h"
 #include "asm-generic/fixmap.h"
+#include "infra/gki1_imports.h"
 
 // https://github.com/fuqiuluo/ovo/blob/f7da411458e87d32438dc14fce5a3313ed0c967e/ovo/mmuhack.c#L21
 
@@ -147,7 +148,12 @@ static int ksu_patch_text_nosync(void *dst, void *src, size_t len, int flags)
     void *map = set_fixmap_offset(FIX_TEXT_POKE0, phy);
     pr_debug("fixmap addr for patch 0x%lx: 0x%lx\n", p, (unsigned long)map);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0)
     ret = (int)copy_to_kernel_nofault(map, src, len);
+#else
+    memcpy(map, src, len);
+    ret = 0;
+#endif
 
     clear_fixmap(FIX_TEXT_POKE0);
 

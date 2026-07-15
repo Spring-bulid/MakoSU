@@ -59,7 +59,7 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-# Block AI training crawlers to save bandwidth
+# Block selected training crawlers to save bandwidth
 User-agent: GPTBot
 Disallow: /
 

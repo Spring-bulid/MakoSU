@@ -1,0 +1,22 @@
+name: Check Line Endings
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject CRLF in source files
+        run: |
+          files="$(git grep -Il $'\r' -- '*.sh' '*.rs' '*.kt' '*.kts' '*.xml' '*.yml' '*.yaml' || true)"
+          test -z "$files" || { printf 'CRLF is not allowed in:\n%s\n' "$files"; exit 1; }
+      - name: Verify manager identity contract
+        run: bash ./scripts/verify-manager-contract.sh
