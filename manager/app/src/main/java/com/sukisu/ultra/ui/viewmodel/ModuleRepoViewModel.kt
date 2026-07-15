@@ -57,7 +57,6 @@ class ModuleRepoViewModel(
         if (list.isEmpty()) return list
         return when (order) {
             RepoSort.UPDATED -> list.sortedByDescending { it.latestReleaseTime }
-            RepoSort.CREATED -> list.sortedByDescending { it.createdAt }
             RepoSort.NAME -> {
                 val collator = Collator.getInstance(Locale.getDefault())
                 list.sortedWith(compareBy(collator) { it.moduleName })

@@ -32,7 +32,10 @@ data class RepoModuleArg(
     val moduleName: String,
     val authors: String,
     val authorsList: List<AuthorArg>,
+    val summary: String = "",
     val latestRelease: String,
     val latestReleaseTime: String,
-    val releases: List<ReleaseArg>
+    val downloadUrl: String = "",
+    val repoUrl: String = "",
+    val releases: List<ReleaseArg> = emptyList(),
 ) : Parcelable

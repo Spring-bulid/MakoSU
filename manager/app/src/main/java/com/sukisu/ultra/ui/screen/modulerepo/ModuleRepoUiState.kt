@@ -6,7 +6,6 @@ import com.sukisu.ultra.ui.component.SearchStatus
 
 enum class RepoSort {
     UPDATED,
-    CREATED,
     NAME,
     STARS,
 }

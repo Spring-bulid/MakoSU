@@ -3,20 +3,12 @@ package com.sukisu.ultra.ui.screen.modulerepo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 import com.sukisu.ultra.ui.navigation3.LocalNavigator
 import com.sukisu.ultra.ui.navigation3.Route
 import com.sukisu.ultra.ui.screen.flash.FlashIt
-import com.sukisu.ultra.ui.util.module.fetchModuleDetail
 import com.sukisu.ultra.ui.viewmodel.ModuleRepoViewModel
 import com.sukisu.ultra.ui.viewmodel.ModuleViewModel
 
@@ -45,14 +37,43 @@ fun ModuleRepoScreen() {
         onSearchStatusChange = viewModel::updateSearchStatus,
         onSetSortOrder = viewModel::setSortOrder,
         onOpenRepoDetail = { module ->
+            val downloadUrl = module.latestAsset?.downloadUrl.orEmpty()
+            val assetName = module.latestAsset?.name
+                ?: downloadUrl.substringAfterLast('/').ifBlank { "${module.moduleId}.zip" }
+            val releaseName = module.latestRelease.ifBlank { assetName }
+            val releases = if (downloadUrl.isNotEmpty()) {
+                listOf(
+                    ReleaseArg(
+                        tagName = releaseName,
+                        name = releaseName,
+                        publishedAt = module.latestReleaseTime,
+                        assets = listOf(
+                            ReleaseAssetArg(
+                                name = assetName,
+                                downloadUrl = downloadUrl,
+                                size = module.latestAsset?.size ?: 0L,
+                                downloadCount = module.latestAsset?.downloadCount ?: 0,
+                            )
+                        ),
+                        descriptionHTML = module.summary,
+                    )
+                )
+            } else {
+                emptyList()
+            }
             val args = RepoModuleArg(
                 moduleId = module.moduleId,
                 moduleName = module.moduleName,
                 authors = module.authors,
                 authorsList = module.authorList.map { AuthorArg(it.name, it.link) },
-                latestRelease = module.latestRelease,
+                summary = module.summary,
+                latestRelease = releaseName,
                 latestReleaseTime = module.latestReleaseTime,
-                releases = emptyList()
+                downloadUrl = downloadUrl,
+                repoUrl = module.repoUrl.ifBlank {
+                    module.authorList.firstOrNull()?.link.orEmpty()
+                },
+                releases = releases,
             )
             navigator.push(Route.ModuleRepoDetail(args))
         },
@@ -65,53 +86,39 @@ fun ModuleRepoScreen() {
 fun ModuleRepoDetailScreen(module: RepoModuleArg) {
     val navigator = LocalNavigator.current
     val uriHandler = LocalUriHandler.current
-    var readmeHtml by remember(module.moduleId) { mutableStateOf<String?>(null) }
-    var readmeLoaded by remember(module.moduleId) { mutableStateOf(false) }
-    var detailReleases by remember(module.moduleId) { mutableStateOf<List<ReleaseArg>>(emptyList()) }
-    var webUrl by remember(module.moduleId) { mutableStateOf("https://modules.kernelsu.org/module/${module.moduleId}") }
-    var sourceUrl by remember(module.moduleId) { mutableStateOf("https://github.com/KernelSU-Modules-Repo/${module.moduleId}") }
-
-    LaunchedEffect(module.moduleId) {
-        if (module.moduleId.isNotEmpty()) {
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    val detail = fetchModuleDetail(module.moduleId)
-                    if (detail != null) {
-                        readmeHtml = detail.readmeHtml
-                        if (detail.url.isNotEmpty() && detail.url != "null") {
-                            webUrl = detail.url
-                        }
-                        if (detail.sourceUrl.isNotEmpty() && detail.sourceUrl != "null") {
-                            sourceUrl = detail.sourceUrl
-                        }
-                        detailReleases = detail.releases.map { r ->
-                            ReleaseArg(
-                                tagName = r.tagName,
-                                name = r.name,
-                                publishedAt = r.publishedAt,
-                                assets = r.assets.map { a -> ReleaseAssetArg(a.name, a.downloadUrl, a.size, a.downloadCount) },
-                                descriptionHTML = r.descriptionHTML
-                            )
-                        }
-                    } else {
-                        detailReleases = emptyList()
-                    }
-                }.onSuccess {
-                    readmeLoaded = true
-                }.onFailure {
-                    readmeLoaded = true
-                    detailReleases = emptyList()
-                }
-            }
+    val sourceUrl = module.repoUrl.ifBlank {
+        module.authorsList.firstOrNull()?.link.orEmpty()
+    }
+    val webUrl = sourceUrl
+    val detailReleases = module.releases.ifEmpty {
+        if (module.downloadUrl.isNotEmpty()) {
+            listOf(
+                ReleaseArg(
+                    tagName = module.latestRelease.ifBlank { module.moduleId },
+                    name = module.latestRelease.ifBlank { module.moduleId },
+                    publishedAt = module.latestReleaseTime,
+                    assets = listOf(
+                        ReleaseAssetArg(
+                            name = module.downloadUrl.substringAfterLast('/')
+                                .ifBlank { "${module.moduleId}.zip" },
+                            downloadUrl = module.downloadUrl,
+                            size = module.releases.firstOrNull()?.assets?.firstOrNull()?.size ?: 0L,
+                            downloadCount = module.releases.firstOrNull()?.assets?.firstOrNull()?.downloadCount ?: 0,
+                        )
+                    ),
+                    descriptionHTML = module.summary,
+                )
+            )
         } else {
-            readmeLoaded = true
+            emptyList()
         }
     }
+    val readmeHtml = module.summary.takeIf { it.isNotBlank() }
 
     val state = ModuleRepoDetailUiState(
         module = module,
         readmeHtml = readmeHtml,
-        readmeLoaded = readmeLoaded,
+        readmeLoaded = true,
         detailReleases = detailReleases,
         webUrl = webUrl,
         sourceUrl = sourceUrl,

@@ -446,12 +446,11 @@ class ModuleViewModel(
                     if (parts.size == 2) {
                         fetchReleaseDescriptionHtml(parts[0], parts[1])?.let {
                             changelog = it
-                            html = true
                         }
                     }
                 }
 
-                if (changelog.isBlank()) {
+                if (changelog.isBlank() && (changelogUrl.startsWith("http://") || changelogUrl.startsWith("https://"))) {
                     changelog = runCatching {
                         ksuApp.okhttpClient.newCall(
                             Request.Builder().url(changelogUrl).build()
@@ -464,13 +463,8 @@ class ModuleViewModel(
         if (changelog.isBlank()) {
             withContext(Dispatchers.IO) {
                 runCatching {
-                    val latestTag = fetchModuleDetail(module.id)?.latestTag.orEmpty()
-                    if (latestTag.isNotBlank()) {
-                        fetchReleaseDescriptionHtml(module.id, latestTag)?.let {
-                            changelog = it
-                            html = true
-                        }
-                    }
+                    val detail = fetchModuleDetail(module.id)
+                    changelog = detail?.readme.orEmpty()
                 }
             }
         }

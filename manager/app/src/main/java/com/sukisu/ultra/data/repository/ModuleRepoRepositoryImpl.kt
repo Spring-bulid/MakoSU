@@ -14,7 +14,17 @@ import org.json.JSONObject
 class ModuleRepoRepositoryImpl : ModuleRepoRepository {
 
     companion object {
-        private const val MODULES_URL = "https://modules.kernelsu.org/modules.json"
+        private const val MODULES_URL =
+            "https://gitee.com/JT22/MakoSU_ModuleDownload/raw/main/modules.json"
+
+        private fun stripTicks(s: String): String {
+            val t = s.trim()
+            return if (t.startsWith("`") && t.endsWith("`") && t.length >= 2) {
+                t.substring(1, t.length - 1)
+            } else {
+                t
+            }
+        }
     }
 
     override suspend fun fetchModules(): Result<List<RepoModule>> = withContext(Dispatchers.IO) {
@@ -49,10 +59,7 @@ class ModuleRepoRepositoryImpl : ModuleRepoRepository {
                 .mapNotNull { idx ->
                     val authorObj = authorsArray.optJSONObject(idx) ?: return@mapNotNull null
                     val name = authorObj.optString("name", "").trim()
-                    var link = authorObj.optString("link", "").trim()
-                    if (link.startsWith("`") && link.endsWith("`") && link.length >= 2) {
-                        link = link.substring(1, link.length - 1)
-                    }
+                    val link = stripTicks(authorObj.optString("link", ""))
                     if (name.isEmpty()) null else Author(name = name, link = link)
                 }
         } else {
@@ -62,8 +69,6 @@ class ModuleRepoRepositoryImpl : ModuleRepoRepository {
         val summary = item.optString("summary", "")
         val metamodule = item.optBoolean("metamodule", false)
         val stargazerCount = item.optInt("stargazerCount", 0)
-        val updatedAt = item.optString("updatedAt", "")
-        val createdAt = item.optString("createdAt", "")
 
         var latestRelease = ""
         var latestReleaseTime = ""
@@ -73,23 +78,23 @@ class ModuleRepoRepositoryImpl : ModuleRepoRepository {
         if (lr != null) {
             val lrName = lr.optString("name", lr.optString("version", ""))
             val lrTime = lr.optString("time", "")
-            var lrUrl = lr.optString("downloadUrl", "")
-            lrUrl = lrUrl.trim().let {
-                var s = it
-                if (s.startsWith("`") && s.endsWith("`") && s.length >= 2) {
-                    s = s.substring(1, s.length - 1)
-                }
-                s
-            }
+            val lrUrl = stripTicks(lr.optString("downloadUrl", ""))
 
             latestVersionCode = lr.optInt("versionCode", 0).toLong()
             latestRelease = lrName
             latestReleaseTime = lrTime
             if (lrUrl.isNotEmpty()) {
                 val fileName = lrUrl.substringAfterLast('/')
-                latestAsset = ReleaseAsset(name = fileName, downloadUrl = lrUrl, size = 0L)
+                latestAsset = ReleaseAsset(
+                    name = fileName,
+                    downloadUrl = lrUrl,
+                    size = lr.optLong("size", 0L),
+                    downloadCount = lr.optInt("downloadCount", 0),
+                )
             }
         }
+
+        val repoUrl = item.optString("repoUrl", "").trim().let { stripTicks(it) }
 
         return RepoModule(
             moduleId = moduleId,
@@ -99,12 +104,11 @@ class ModuleRepoRepositoryImpl : ModuleRepoRepository {
             summary = summary,
             metamodule = metamodule,
             stargazerCount = stargazerCount,
-            updatedAt = updatedAt,
-            createdAt = createdAt,
             latestRelease = latestRelease,
             latestReleaseTime = latestReleaseTime,
             latestVersionCode = latestVersionCode,
             latestAsset = latestAsset,
+            repoUrl = repoUrl,
         )
     }
 }

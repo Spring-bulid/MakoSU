@@ -170,7 +170,6 @@ fun ModuleRepoScreenMiuix(
                                     ListPopupColumn {
                                         val sortOptions = listOf(
                                             RepoSort.UPDATED to R.string.module_repos_sort_updated,
-                                            RepoSort.CREATED to R.string.module_repos_sort_created,
                                             RepoSort.NAME to R.string.module_repos_sort_name,
                                             RepoSort.STARS to R.string.module_repos_sort_stars,
                                         )

@@ -12,7 +12,8 @@ data class Author(
 data class ReleaseAsset(
     val name: String,
     val downloadUrl: String,
-    val size: Long
+    val size: Long,
+    val downloadCount: Int = 0,
 )
 
 @Immutable
@@ -24,10 +25,9 @@ data class RepoModule(
     val summary: String,
     val metamodule: Boolean,
     val stargazerCount: Int,
-    val updatedAt: String,
-    val createdAt: String,
     val latestRelease: String,
     val latestReleaseTime: String,
     val latestVersionCode: Long,
     val latestAsset: ReleaseAsset?,
+    val repoUrl: String = "",
 )

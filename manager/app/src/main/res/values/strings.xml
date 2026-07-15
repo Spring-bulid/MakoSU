@@ -49,8 +49,7 @@
     <string name="module_sort_action_first">Action first</string>
     <string name="module_sort_enabled_first">Enabled first</string>
     <string name="module_repos">Repos</string>
-    <string name="module_repos_sort_updated">Updated time</string>
-    <string name="module_repos_sort_created">Created time</string>
+    <string name="module_repos_sort_updated">Release time</string>
     <string name="module_repos_sort_name">Name</string>
     <string name="module_repos_sort_stars">Stars</string>
     <string name="module_repos_source_code">Source code</string>
