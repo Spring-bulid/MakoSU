@@ -7,6 +7,10 @@ import com.sukisu.ultra.ksuApp
 import com.sukisu.ultra.ui.util.module.LatestVersionInfo
 import okhttp3.Request
 
+private const val MAKOSU_RELEASES_API =
+    "https://api.github.com/repos/Spring-bulid/MakoSU/releases/latest"
+private val MAKOSU_RELEASE_APK = Regex("^MakoSU_v(.+?)_(\\d+)-release\\.apk$")
+
 /**
  * @author weishu
  * @date 2023/6/22.
@@ -38,11 +42,16 @@ suspend fun download(
 
 fun checkNewVersion(): LatestVersionInfo {
     if (!isNetworkAvailable(ksuApp)) return LatestVersionInfo()
-    val url = "https://api.github.com/repos/SukiSU-Ultra/SukiSU-Ultra/releases/latest"
     // default null value if failed
     val defaultValue = LatestVersionInfo()
     runCatching {
-        ksuApp.okhttpClient.newCall(Request.Builder().url(url).build()).execute()
+        ksuApp.okhttpClient.newCall(
+            Request.Builder()
+                .url(MAKOSU_RELEASES_API)
+                .header("Accept", "application/vnd.github+json")
+                .header("User-Agent", "MakoSU-Manager")
+                .build()
+        ).execute()
             .use { response ->
                 if (!response.isSuccessful) {
                     return defaultValue
@@ -51,26 +60,22 @@ fun checkNewVersion(): LatestVersionInfo {
                 val json = org.json.JSONObject(body)
                 val changelog = json.optString("body")
 
-                val assets = json.getJSONArray("assets")
+                val assets = json.optJSONArray("assets") ?: return defaultValue
+                var latest: LatestVersionInfo? = null
                 for (i in 0 until assets.length()) {
                     val asset = assets.getJSONObject(i)
-                    val name = asset.getString("name")
-                    if (!name.endsWith(".apk")) {
-                        continue
+                    val matchResult = MAKOSU_RELEASE_APK.matchEntire(asset.optString("name"))
+                        ?: continue
+                    val versionCode = matchResult.groupValues[2].toLongOrNull() ?: continue
+                    val downloadUrl = asset.optString("browser_download_url")
+                    if (downloadUrl.isBlank()) continue
+
+                    val candidate = LatestVersionInfo(versionCode, downloadUrl, changelog)
+                    if (candidate.versionCode > (latest?.versionCode ?: Long.MIN_VALUE)) {
+                        latest = candidate
                     }
-
-                    val regex = Regex("v(.+?)_(\\d+)-")
-                    val matchResult = regex.find(name) ?: continue
-                    matchResult.groupValues[1]
-                    val versionCode = matchResult.groupValues[2].toLong()
-                    val downloadUrl = asset.getString("browser_download_url")
-
-                    return LatestVersionInfo(
-                        versionCode,
-                        downloadUrl,
-                        changelog
-                    )
                 }
+                return latest ?: defaultValue
 
             }
     }
