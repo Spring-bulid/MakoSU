@@ -238,6 +238,7 @@
     <string name="color_blue_grey">Blue Grey</string>
     <string name="color_sakura">Sakura</string>
     <string name="network_offline">Not connected to network</string>
+    <string name="module_repos_load_failed">Unable to load module catalog</string>
     <string name="network_retry">Retry</string>
     <string name="tab_readme">README</string>
     <string name="tab_releases">Releases</string>

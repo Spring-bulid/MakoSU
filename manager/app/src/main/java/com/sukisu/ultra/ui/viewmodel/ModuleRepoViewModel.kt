@@ -148,9 +148,14 @@ class ModuleRepoViewModel(
                     _uiState.update { it.copy(isRefreshing = false) }
                 }.onFailure { e ->
                     Log.e(TAG, "fetch modules failed", e)
+                    val message = if (!isNetworkAvailable(ksuApp)) {
+                        R.string.network_offline
+                    } else {
+                        R.string.module_repos_load_failed
+                    }
                     Toast.makeText(
                         ksuApp,
-                        ksuApp.getString(R.string.network_offline), Toast.LENGTH_SHORT
+                        ksuApp.getString(message), Toast.LENGTH_SHORT
                     ).show()
                     _uiState.update {
                         it.copy(

@@ -10,12 +10,15 @@ import com.sukisu.ultra.ui.util.isNetworkAvailable
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 
 class ModuleRepoRepositoryImpl : ModuleRepoRepository {
 
     companion object {
-        private const val MODULES_URL =
-            "https://gitee.com/JT22/MakoSU_ModuleDownload/raw/main/modules.json"
+        private val moduleCatalogUrls = listOf(
+            "https://gitee.com/JT22/MakoSU_ModuleDownload/raw/main/modules.json",
+            "https://raw.githubusercontent.com/irislys/MakoSU_ModuleDownload/main/modules.json",
+        )
 
         private fun stripTicks(s: String): String {
             val t = s.trim()
@@ -33,20 +36,32 @@ class ModuleRepoRepositoryImpl : ModuleRepoRepository {
                 throw Exception("Network unavailable")
             }
 
-            val request = Request.Builder().url(MODULES_URL).build()
-            ksuApp.okhttpClient.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    throw Exception("Fetch failed: ${response.code}")
-                }
-
-                val body = response.body.string()
-                val json = JSONArray(body)
-                (0 until json.length()).mapNotNull { idx ->
-                    val item = json.optJSONObject(idx) ?: return@mapNotNull null
-                    parseRepoModule(item)
-                }
+            val json = fetchCatalog()
+            (0 until json.length()).mapNotNull { idx ->
+                val item = json.optJSONObject(idx) ?: return@mapNotNull null
+                parseRepoModule(item)
             }
         }
+    }
+
+    private fun fetchCatalog(): JSONArray {
+        var lastFailure: Exception? = null
+
+        for (url in moduleCatalogUrls) {
+            try {
+                val body = ksuApp.okhttpClient.newCall(Request.Builder().url(url).build()).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        throw IOException("Module catalog request failed: HTTP ${response.code}")
+                    }
+                    response.body.string()
+                }
+                return JSONArray(body)
+            } catch (error: Exception) {
+                lastFailure = error
+            }
+        }
+
+        throw IOException("All module catalog sources failed", lastFailure)
     }
 
     private fun parseRepoModule(item: JSONObject): RepoModule? {

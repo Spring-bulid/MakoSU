@@ -6,8 +6,10 @@ import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
 
-private const val MODULES_URL =
-    "https://gitee.com/JT22/MakoSU_ModuleDownload/raw/main/modules.json"
+private val moduleCatalogUrls = listOf(
+    "https://gitee.com/JT22/MakoSU_ModuleDownload/raw/main/modules.json",
+    "https://raw.githubusercontent.com/irislys/MakoSU_ModuleDownload/main/modules.json",
+)
 
 data class ModuleDetail(
     val readme: String,
@@ -52,11 +54,21 @@ fun stripTicks(s: String): String {
 
 private fun fetchCatalogArray(): JSONArray? {
     if (!isNetworkAvailable(ksuApp)) return null
-    return runCatching {
-        ksuApp.okhttpClient.newCall(Request.Builder().url(MODULES_URL).build()).execute().use { resp ->
-            if (!resp.isSuccessful) null else JSONArray(resp.body.string())
+    for (url in moduleCatalogUrls) {
+        val catalog = runCatching {
+            ksuApp.okhttpClient.newCall(Request.Builder().url(url).build()).execute().use { response ->
+                if (!response.isSuccessful) {
+                    null
+                } else {
+                    JSONArray(response.body.string())
+                }
+            }
+        }.getOrNull()
+        if (catalog != null) {
+            return catalog
         }
-    }.getOrNull()
+    }
+    return null
 }
 
 private fun findCatalogModule(moduleId: String): JSONObject? {

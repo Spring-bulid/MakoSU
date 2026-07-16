@@ -211,6 +211,7 @@
     <string name="color_blue_grey">灰蓝</string>
     <string name="color_sakura">樱花</string>
     <string name="network_offline">未连接到网络</string>
+    <string name="module_repos_load_failed">模块目录加载失败</string>
     <string name="network_retry">重试</string>
     <string name="tab_readme">自述</string>
     <string name="tab_releases">版本</string>

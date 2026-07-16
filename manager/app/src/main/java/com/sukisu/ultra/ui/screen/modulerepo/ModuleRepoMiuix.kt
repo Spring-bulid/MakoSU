@@ -408,6 +408,22 @@ fun ModuleRepoScreenMiuix(
                                     onClick = actions.onRefresh,
                                 )
                             }
+                        } else if (state.error != null) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = stringResource(R.string.module_repos_load_failed),
+                                    color = colorScheme.onSurfaceVariantSummary,
+                                    fontSize = 16.sp,
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                TextButton(
+                                    modifier = Modifier
+                                        .padding(horizontal = 24.dp)
+                                        .fillMaxWidth(),
+                                    text = stringResource(R.string.network_retry),
+                                    onClick = actions.onRefresh,
+                                )
+                            }
                         } else {
                             InfiniteProgressIndicator()
                         }
