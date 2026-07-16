@@ -106,8 +106,8 @@ git_branch       = $(shell cd $(KSU_SRC) && $(GIT_BIN) rev-parse --abbrev-ref HE
 git_latest_tag   = $(shell cd $(KSU_SRC) && $(GIT_BIN) describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
 
 # This is the Manager/driver protocol contract, not an upstream commit count.
-KSU_VERSION     := 40838
-VERSION_TAG     := $(or $(git_latest_tag),4.1.6)
+KSU_VERSION     := 40839
+VERSION_TAG     := $(or $(git_latest_tag),4.1.7)
 KSU_VERSION_FULL := $(if $(call git_short_sha),v$(VERSION_TAG)-$(call git_short_sha)@$(call git_branch),v$(VERSION_TAG)-$(REPO_NAME)-unknown@unknown)
 $(info -- $(REPO_NAME) version: $(KSU_VERSION) [$(KSU_VERSION_FULL)])
 

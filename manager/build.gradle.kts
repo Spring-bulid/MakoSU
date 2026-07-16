@@ -13,7 +13,7 @@ extra["androidCompileNdkVersion"] = libs.versions.ndk.get()
 extra["androidSourceCompatibility"] = JavaVersion.VERSION_21
 extra["androidTargetCompatibility"] = JavaVersion.VERSION_21
 // Keep the Manager and the released KernelSU LKM driver on one version contract.
-extra["managerVersionCode"] = 40838
+extra["managerVersionCode"] = 40839
 extra["managerVersionName"] = getVersionName()
 
 fun getGitDescribe(): String {
