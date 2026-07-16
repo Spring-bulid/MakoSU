@@ -10,11 +10,9 @@ fun isNetworkAvailable(context: Context): Boolean {
     val network = cm.activeNetwork ?: return false
     val caps = cm.getNetworkCapabilities(network) ?: return false
 
-    val hasTransport = caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-            caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-            caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-
-    return hasTransport &&
-            caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-            caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    // VALIDATED depends on Android reaching its own probe endpoints. On VPNs,
+    // private DNS, and some regional networks that can be false even when the
+    // configured module catalog is reachable. Let the actual HTTP request make
+    // the final reachability decision instead.
+    return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
