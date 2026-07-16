@@ -1,0 +1,37 @@
+name: Publish LKM Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: Completed Build LKM workflow run ID
+        required: true
+        type: string
+      release_tag:
+        description: Draft release tag to receive the seven LKM files
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download LKM artifacts
+        uses: actions/download-artifact@v8
+        with:
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ github.token }}
+          merge-multiple: true
+          path: lkm
+
+      - name: Publish LKM files to draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          draft: true
+          fail_on_unmatched_files: true
+          files: lkm/*_kernelsu.ko
