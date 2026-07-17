@@ -143,7 +143,7 @@ void __init ksu_syscall_hook_manager_init(void)
     ret = tracepoint_probe_register((struct tracepoint *)ksu_gki1_import___tracepoint_sys_enter,
                                     (void *)ksu_sys_enter_handler, NULL);
 #else
-    ret = register_trace_sys_enter(ksu_sys_enter_handler, NULL);
+    ret = register_trace_prio_sys_enter(ksu_sys_enter_handler, NULL, INT_MIN);
 #endif
 #ifndef CONFIG_KRETPROBES
     ksu_mark_running_process_locked();
