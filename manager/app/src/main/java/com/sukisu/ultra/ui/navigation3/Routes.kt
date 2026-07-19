@@ -52,6 +52,26 @@ sealed interface Route : NavKey, Parcelable {
 
     @Parcelize
     @Serializable
+    data object SettingsGeneral : Route
+
+    @Parcelize
+    @Serializable
+    data object SettingsFeatures : Route
+
+    @Parcelize
+    @Serializable
+    data object SettingsBehavior : Route
+
+    @Parcelize
+    @Serializable
+    data object SettingsModule : Route
+
+    @Parcelize
+    @Serializable
+    data object SettingsMore : Route
+
+    @Parcelize
+    @Serializable
     data object AppProfileTemplate : Route
 
     @Parcelize

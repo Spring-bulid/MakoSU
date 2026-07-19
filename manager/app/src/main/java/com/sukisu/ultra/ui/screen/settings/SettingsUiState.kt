@@ -3,76 +3,65 @@ package com.sukisu.ultra.ui.screen.settings
 import androidx.compose.runtime.Immutable
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
+import com.sukisu.ultra.ui.navigation.NavMode
 import com.sukisu.ultra.ui.screen.home.HomeLayout
 
 @Immutable
 data class SettingsUiState(
-    val homeLayout: HomeLayout = HomeLayout.Standard,
+    val homeLayout: HomeLayout = HomeLayout.Pure,
+    val navMode: NavMode = NavMode.Floating,
+    val floatingAutoHide: Boolean = true,
+    val floatingSwipeHide: Boolean = true,
     val checkUpdate: Boolean = true,
     val checkModuleUpdate: Boolean = true,
-    val alternativeIcon : Boolean = false,
+    val alternativeIcon: Boolean = false,
     val themeMode: Int = 0,
-    val miuixMonet: Boolean = false,
     val keyColor: Int = 0,
     val colorStyle: String = PaletteStyle.TonalSpot.name,
     val colorSpec: String = ColorSpec.SpecVersion.SPEC_2025.name,
-    val enablePredictiveBack: Boolean = false,
-    val enableBlur: Boolean = true,
-    val enableFloatingBottomBar: Boolean = false,
-    val enableFloatingBottomBarBlur: Boolean = false,
+    val customBackgroundEnabled: Boolean = false,
+    val customBackgroundUri: String? = null,
+    val customBackgroundOpacity: Float = 1f,
+    val customBackgroundBlur: Float = 6f,
+    val customBackgroundDim: Float = 0.05f,
+    val moduleBannerEnabled: Boolean = true,
+    val moduleBannerCustomEnabled: Boolean = true,
+    val moduleBannerCustomOpacityEnabled: Boolean = false,
+    val moduleBannerOpacity: Float = 0.42f,
     val pageScale: Float = 1.0f,
     val enableWebDebugging: Boolean = false,
     val showFullStatus: Boolean = true,
 
-    // Su Compat
     val suCompatStatus: String = "",
-    val suCompatMode: Int = 0, // 0: enable default, 1: disable until reboot, 2: disable always
+    val suCompatMode: Int = 0,
     val isSuEnabled: Boolean = false,
 
-    // Kernel Umount
     val kernelUmountStatus: String = "",
     val isKernelUmountEnabled: Boolean = false,
 
-    // SELinux Hide
     val selinuxHideStatus: String = "",
     val isSelinuxHideEnabled: Boolean = false,
 
-    // SU Log
     val sulogStatus: String = "",
     val isSulogEnabled: Boolean = false,
 
-    // Umount Modules
     val isDefaultUmountModules: Boolean = false,
 
-    // ADB Root
     val adbRootStatus: String = "",
     val isAdbRootEnabled: Boolean = false,
 
     val isLkmMode: Boolean = false,
     val isLateLoadMode: Boolean = false,
 
-    // Auto Jailbreak
-    val autoJailbreak: Boolean = false
+    val autoJailbreak: Boolean = false,
 )
 
 @Immutable
-data class SettingsScreenActions(
-    val onSetCheckUpdate: (Boolean) -> Unit,
-    val onSetCheckModuleUpdate: (Boolean) -> Unit,
-    val onOpenTheme: () -> Unit,
-    val onSetHomeLayout: (HomeLayout) -> Unit,
-    val onOpenProfileTemplate: () -> Unit,
-    val onSetSuCompatMode: (Int) -> Unit,
-    val onSetKernelUmountEnabled: (Boolean) -> Unit,
-    val onSetSelinuxHideEnabled: (Boolean) -> Unit,
-    val onSetSulogEnabled: (Boolean) -> Unit,
-    val onSetAdbRootEnabled: (Boolean) -> Unit,
-    val onSetDefaultUmountModules: (Boolean) -> Unit,
-    val onSetEnableWebDebugging: (Boolean) -> Unit,
-    val onSetAutoJailbreak: (Boolean) -> Unit,
-    val onOpenAbout: () -> Unit,
-    val onSetAlternativeIcon: (Boolean) -> Unit,
-    val onOpenTools: () -> Unit,
-    val onOpenKpm: () -> Unit,
-    val onOpenSusfsConfig: () -> Unit,
+data class SettingsHomeActions(
+    val onOpenGeneral: () -> Unit,
+    val onOpenAppearance: () -> Unit,
+    val onOpenFeatures: () -> Unit,
+    val onOpenBehavior: () -> Unit,
+    val onOpenModule: () -> Unit,
+    val onOpenMore: () -> Unit,
 )

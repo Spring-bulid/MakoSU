@@ -10,6 +10,9 @@ import androidx.compose.material.icons.rounded.Adb
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.RemoveModerator
 import androidx.compose.material.icons.rounded.RestartAlt
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,10 +45,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.overlay.OverlayDialog
 
 enum class FlashingStatus {
     FLASHING,
@@ -230,34 +229,34 @@ fun JailbreakFlashWarningDialog(
         }
     }
 
-    OverlayDialog(
-        show = true,
-        title = stringResource(android.R.string.dialog_alert_title),
+    AlertDialog(
         onDismissRequest = onDismiss,
-        content = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        title = {
+            Text(stringResource(android.R.string.dialog_alert_title))
+        },
+        text = {
             Text(
                 text = stringResource(R.string.jailbreak_flash_warning),
             )
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    TextButton(
-                        text = stringResource(android.R.string.cancel),
-                        onClick = onDismiss,
-                        modifier = Modifier.weight(1f),
-                    )
-                    TextButton(
-                        text = if (countdown > 0) {
-                            stringResource(R.string.jailbreak_flash_warning_countdown, countdown)
-                        } else {
-                            stringResource(R.string.install_next)
-                        },
-                        onClick = onConfirm,
-                        enabled = countdown == 0,
-                        colors = ButtonDefaults.textButtonColorsPrimary(),
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(android.R.string.cancel))
             }
         },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = countdown == 0,
+            ) {
+                Text(
+                    if (countdown > 0) {
+                        stringResource(R.string.jailbreak_flash_warning_countdown, countdown)
+                    } else {
+                        stringResource(R.string.install_next)
+                    }
+                )
+                }
+            },
     )
 }

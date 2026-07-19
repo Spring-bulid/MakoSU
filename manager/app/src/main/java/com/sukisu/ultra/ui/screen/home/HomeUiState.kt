@@ -26,7 +26,7 @@ data class HomeUiState(
     val moduleCount: Int,
     val systemInfo: SystemInfo,
     val showFullStatus: Boolean = true,
-    val homeLayout: HomeLayout = HomeLayout.Standard,
+    val homeLayout: HomeLayout = HomeLayout.Pure,
 ) {
     val isSELinuxPermissive: Boolean
         get() = systemInfo.selinuxStatus == "Permissive"

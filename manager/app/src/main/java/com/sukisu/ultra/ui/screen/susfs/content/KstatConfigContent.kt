@@ -1,9 +1,7 @@
 package com.sukisu.ultra.ui.screen.susfs.content
 
 import androidx.compose.runtime.Composable
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
-import com.sukisu.ultra.ui.screen.susfs.content.miuix.KstatConfigContentMiuix
+import com.sukisu.ultra.ui.screen.susfs.content.material.KstatConfigContentMaterial
 
 @Composable
 fun KstatConfigContent(
@@ -19,16 +17,16 @@ fun KstatConfigContent(
     onUpdateKstat: (String) -> Unit,
     onUpdateKstatFullClone: (String) -> Unit
 ) {
-    KstatConfigContentMiuix(
+    KstatConfigContentMaterial(
             kstatConfigs = kstatConfigs,
             addKstatPaths = addKstatPaths,
             isLoading = isLoading,
             onAddKstatStatically = onAddKstatStatically,
             onAddKstat = onAddKstat,
             onRemoveKstatConfig = onRemoveKstatConfig,
-            onEditKstatConfig = onEditKstatConfig,
+            onEditKstatConfig = { path -> onEditKstatConfig?.invoke(path) },
             onRemoveAddKstat = onRemoveAddKstat,
-            onEditAddKstat = onEditAddKstat,
+            onEditAddKstat = { path -> onEditAddKstat?.invoke(path) },
             onUpdateKstat = onUpdateKstat,
             onUpdateKstatFullClone = onUpdateKstatFullClone
         )

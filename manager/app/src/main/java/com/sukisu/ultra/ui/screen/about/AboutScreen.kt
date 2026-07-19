@@ -6,8 +6,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.sukisu.ultra.BuildConfig
 import com.sukisu.ultra.R
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 import com.sukisu.ultra.ui.navigation3.LocalNavigator
 
 @Composable
@@ -27,6 +25,9 @@ fun AboutScreen() {
         appName = stringResource(R.string.app_name),
         versionName = BuildConfig.VERSION_NAME,
         copyright = stringResource(R.string.about_icon_copyright),
+        folkPatchCredit = stringResource(R.string.about_folkpatch_credit),
+        folkPatchWebsiteLabel = stringResource(R.string.about_folkpatch_website),
+        folkPatchWebsiteUrl = stringResource(R.string.about_folkpatch_website_url),
         links = extractLinks(htmlString),
     )
     val actions = AboutScreenActions(
@@ -34,5 +35,5 @@ fun AboutScreen() {
         onOpenLink = uriHandler::openUri,
     )
 
-    AboutScreenMiuix(state, actions)
+    AboutScreenMaterial(state, actions)
 }

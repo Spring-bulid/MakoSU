@@ -8,8 +8,6 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.sukisu.ultra.data.repository.SettingsRepository
 import com.sukisu.ultra.data.repository.SettingsRepositoryImpl
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 
 enum class ColorMode(val value: Int) {
     SYSTEM(0),
@@ -29,32 +27,6 @@ enum class ColorMode(val value: Int) {
     val isAmoled: Boolean get() = value == 6
     val isMonet: Boolean get() = this == MONET_SYSTEM || this == MONET_LIGHT || this == MONET_DARK
 
-    fun toNonMonetMode(): Int = when (this) {
-        MONET_SYSTEM -> 0
-        MONET_LIGHT -> 1
-        MONET_DARK, DARK_AMOLED -> 2
-        else -> value
-    }
-
-    fun toMonetMode(): Int = when (this) {
-        SYSTEM -> 3
-        LIGHT -> 4
-        DARK, DARK_AMOLED -> 5
-        else -> value
-    }
-
-    fun forMiuix(monetEnabled: Boolean): ColorMode {
-        if (isAmoled) {
-            return if (monetEnabled) MONET_DARK else DARK
-        }
-        if (monetEnabled && !isMonet) {
-            return fromValue(toMonetMode())
-        }
-        if (!monetEnabled && isMonet) {
-            return fromValue(toNonMonetMode())
-        }
-        return this
-    }
 }
 
 data class AppSettings(
@@ -79,11 +51,7 @@ fun ColorSpec.SpecVersion.effectiveFor(style: PaletteStyle): ColorSpec.SpecVersi
 
 object ThemeController {
     fun getAppSettings(repo: SettingsRepository = SettingsRepositoryImpl()): AppSettings {
-        val colorModeValue = ColorMode.fromValue(repo.themeMode)
-            .forMiuix(repo.miuixMonet)
-            .value
-
-        val colorMode = ColorMode.fromValue(colorModeValue)
+        val colorMode = ColorMode.fromValue(repo.themeMode)
         val keyColor = repo.keyColor
         val paletteStyleStr = repo.colorStyle
         val paletteStyle = try {
@@ -105,10 +73,9 @@ object ThemeController {
 @Composable
 fun KernelSUTheme(
     appSettings: AppSettings = ThemeController.getAppSettings(),
-    uiMode: UiMode = LocalUiMode.current,
     content: @Composable () -> Unit
 ) {
-    MiuixKernelSUTheme(
+    MaterialKernelSUTheme(
         appSettings = appSettings,
         content = content
     )
@@ -127,8 +94,6 @@ fun isInDarkTheme(): Boolean {
 
 val LocalColorMode = staticCompositionLocalOf { 0 }
 
-val LocalEnableBlur = staticCompositionLocalOf { false }
+val LocalCustomBackgroundEnabled = staticCompositionLocalOf { false }
 
-val LocalEnableFloatingBottomBar = staticCompositionLocalOf { false }
-
-val LocalEnableFloatingBottomBarBlur = staticCompositionLocalOf { false }
+val LocalCustomBackgroundOpacity = staticCompositionLocalOf { 1f }

@@ -1,9 +1,7 @@
 package com.sukisu.ultra.ui.screen.susfs.component
 
 import androidx.compose.runtime.Composable
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
-import com.sukisu.ultra.ui.screen.susfs.component.miuix.AddPathDialogMiuix
+import com.sukisu.ultra.ui.screen.susfs.component.material.AddPathDialogMaterial
 
 @Composable
 fun AddPathDialog(
@@ -15,7 +13,7 @@ fun AddPathDialog(
     labelRes: Int,
     initialValue: String = ""
 ) {
-    AddPathDialogMiuix(
+    AddPathDialogMaterial(
             showDialog = showDialog,
             onDismiss = onDismiss,
             onConfirm = onConfirm,

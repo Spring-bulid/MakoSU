@@ -7,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +30,7 @@ fun AppProfileTemplateScreen() {
     val clipboard = LocalClipboard.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val snackBarHost = remember { SnackbarHostState() }
     val requestKey = "template_edit"
 
     LaunchedEffect(Unit) {
@@ -110,8 +112,9 @@ fun AppProfileTemplateScreen() {
         },
     )
 
-    AppProfileTemplateScreenMiuix(
+    AppProfileTemplateScreenMaterial(
             state = uiState,
             actions = actions,
+            snackBarHost = snackBarHost,
         )
 }

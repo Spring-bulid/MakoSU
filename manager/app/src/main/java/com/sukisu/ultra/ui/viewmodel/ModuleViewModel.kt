@@ -2,6 +2,10 @@ package com.sukisu.ultra.ui.viewmodel
 
 import android.os.SystemClock
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +35,8 @@ import com.sukisu.ultra.data.repository.SettingsRepository
 import com.sukisu.ultra.data.repository.SettingsRepositoryImpl
 import com.sukisu.ultra.ksuApp
 import com.sukisu.ultra.ui.component.SearchStatus
+import com.sukisu.ultra.ui.screen.module.ModuleBannerInfo
+import com.sukisu.ultra.ui.screen.module.ModuleBannerStore
 import com.sukisu.ultra.ui.screen.module.ModuleConfirmDialogState
 import com.sukisu.ultra.ui.screen.module.ModuleConfirmRequest
 import com.sukisu.ultra.ui.screen.module.ModuleEffect
@@ -38,6 +44,8 @@ import com.sukisu.ultra.ui.screen.module.ModuleUiState
 import com.sukisu.ultra.ui.util.hasMagisk
 import com.sukisu.ultra.ui.util.module.fetchModuleDetail
 import com.sukisu.ultra.ui.util.module.fetchReleaseDescriptionHtml
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import okhttp3.Request
 import java.text.Collator
 import java.util.Locale
@@ -53,6 +61,41 @@ class ModuleViewModel(
     
     companion object {
         private const val TAG = "ModuleViewModel"
+    }
+
+    // FolkPatch APModuleViewModel: mutableStateMapOf + bannerSemaphore(4)
+    private val bannerCache = mutableStateMapOf<String, ModuleBannerInfo>()
+    val bannerSemaphore = Semaphore(4)
+
+    /**
+     * Bumped after module list refresh so ModuleItem LaunchedEffect retries banners
+     * that previously resolved to empty (transient shell/IO misses).
+     */
+    var bannerLoadGeneration by mutableIntStateOf(0)
+        private set
+
+    fun getBannerInfo(id: String): ModuleBannerInfo? = bannerCache[id]
+
+    fun putBannerInfo(id: String, info: ModuleBannerInfo) {
+        bannerCache[id] = info
+    }
+
+    fun removeBannerInfo(id: String) {
+        bannerCache.remove(id)
+    }
+
+    fun clearBannerCache() {
+        bannerCache.clear()
+        bannerLoadGeneration++
+    }
+
+    private fun pruneBannerCache(validIds: Set<String>) {
+        val keysToRemove = bannerCache.keys.filter { it !in validIds }
+        keysToRemove.forEach { bannerCache.remove(it) }
+        // Drop sticky empty misses so next generation reloads from disk
+        val emptyKeys = bannerCache.filter { !it.value.hasContent }.keys.toList()
+        emptyKeys.forEach { bannerCache.remove(it) }
+        bannerLoadGeneration++
     }
 
     private data class ModuleUpdateSignature(
@@ -246,9 +289,38 @@ class ModuleViewModel(
                     modules = parsedModules,
                 )
             }
+            // FolkPatch: prune banner cache to current module ids
+            pruneBannerCache(parsedModules.map { it.id }.toSet())
             // Trigger recalculation of moduleList
             updateModuleList(resort)
             isNeedRefresh = false
+        }
+
+        // Prefetch banners in background (serialized shell IO inside store)
+        if (settingsRepo.moduleBannerEnabled && parsedModules.isNotEmpty()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val allowCustom = settingsRepo.moduleBannerCustomEnabled
+                for (module in parsedModules) {
+                    val cached = getBannerInfo(module.id)
+                    if (cached != null && cached.hasContent) continue
+                    runCatching {
+                        bannerSemaphore.withPermit {
+                            val loaded = ModuleBannerStore.loadFromDisk(
+                                context = ksuApp,
+                                moduleId = module.id,
+                                allowCustom = allowCustom,
+                            )
+                            withContext(Dispatchers.Main) {
+                                if (loaded != null) {
+                                    putBannerInfo(module.id, loaded)
+                                } else if (getBannerInfo(module.id) == null) {
+                                    putBannerInfo(module.id, ModuleBannerInfo(null, null))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

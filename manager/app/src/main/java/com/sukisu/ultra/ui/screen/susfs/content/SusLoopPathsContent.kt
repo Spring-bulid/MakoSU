@@ -1,9 +1,7 @@
 package com.sukisu.ultra.ui.screen.susfs.content
 
 import androidx.compose.runtime.Composable
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
-import com.sukisu.ultra.ui.screen.susfs.content.miuix.SusLoopPathsContentMiuix
+import com.sukisu.ultra.ui.screen.susfs.content.material.SusLoopPathsContentMaterial
 
 @Composable
 fun SusLoopPathsContent(
@@ -14,12 +12,12 @@ fun SusLoopPathsContent(
     onEditLoopPath: ((String) -> Unit)? = null,
     onReset: (() -> Unit)? = null
 ) {
-    SusLoopPathsContentMiuix(
+    SusLoopPathsContentMaterial(
             susLoopPaths = susLoopPaths,
             isLoading = isLoading,
             onAddLoopPath = onAddLoopPath,
             onRemoveLoopPath = onRemoveLoopPath,
-            onEditLoopPath = onEditLoopPath,
-            onReset = onReset
+            onEditLoopPath = { path -> onEditLoopPath?.invoke(path) },
+            onReset = { onReset?.invoke() }
         )
 }

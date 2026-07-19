@@ -8,6 +8,9 @@ data class AboutUiState(
     val appName: String,
     val versionName: String,
     val copyright: String,
+    val folkPatchCredit: String,
+    val folkPatchWebsiteLabel: String,
+    val folkPatchWebsiteUrl: String,
     val links: List<LinkInfo>,
 )
 

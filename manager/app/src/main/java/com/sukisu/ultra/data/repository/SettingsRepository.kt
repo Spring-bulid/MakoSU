@@ -2,18 +2,30 @@ package com.sukisu.ultra.data.repository
 
 interface SettingsRepository {
     var homeLayout: String
+    /** FolkPatch nav_mode: floating | bottom | rail | auto */
+    var navMode: String
+    var floatingAutoHide: Boolean
+    var floatingSwipeHide: Boolean
     var checkUpdate: Boolean
     var checkModuleUpdate: Boolean
     var alternativeIcon : Boolean
     var themeMode: Int
-    var miuixMonet: Boolean
     var keyColor: Int
     var colorStyle: String
     var colorSpec: String
-    var enablePredictiveBack: Boolean
-    var enableBlur: Boolean
-    var enableFloatingBottomBar: Boolean
-    var enableFloatingBottomBarBlur: Boolean
+    var customBackgroundEnabled: Boolean
+    var customBackgroundUri: String?
+    var customBackgroundOpacity: Float
+    var customBackgroundBlur: Float
+    var customBackgroundDim: Float
+    /** FolkPatch: show module card banners */
+    var moduleBannerEnabled: Boolean
+    /** FolkPatch: allow long-press custom folk banner */
+    var moduleBannerCustomEnabled: Boolean
+    /** FolkPatch: use custom banner image alpha */
+    var moduleBannerCustomOpacityEnabled: Boolean
+    /** FolkPatch bannerCustomOpacity 0..1 */
+    var moduleBannerOpacity: Float
     var pageScale: Float
     var enableWebDebugging: Boolean
     var moduleSortEnabledFirst: Boolean

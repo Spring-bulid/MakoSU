@@ -1,36 +1,20 @@
 package com.sukisu.ultra
 
 import android.app.Application
-import android.content.pm.ApplicationInfo
-import android.os.Build
 import android.os.UserManager
 import android.system.Os
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
-import com.sukisu.ultra.data.repository.SettingsRepositoryImpl
 import com.sukisu.ultra.ui.viewmodel.SuperUserViewModel
 import okhttp3.Cache
 import okhttp3.OkHttpClient
-import org.lsposed.hiddenapibypass.HiddenApiBypass
 import java.io.File
 import java.util.Locale
 
 lateinit var ksuApp: KernelSUApplication
 
 class KernelSUApplication : Application(), ViewModelStoreOwner {
-
-    companion object {
-        fun setEnableOnBackInvokedCallback(appInfo: ApplicationInfo, enable: Boolean) {
-            runCatching {
-                val applicationInfoClass = ApplicationInfo::class.java
-                val method = applicationInfoClass.getDeclaredMethod("setEnableOnBackInvokedCallback", Boolean::class.javaPrimitiveType)
-                method.isAccessible = true
-                method.invoke(appInfo, enable)
-            }
-        }
-    }
-
     lateinit var okhttpClient: OkHttpClient
     private val appViewModelStore by lazy { ViewModelStore() }
 
@@ -43,12 +27,6 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
 
         if (!isUserUnlocked()) {
             return
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            val enable = SettingsRepositoryImpl().enablePredictiveBack
-            HiddenApiBypass.addHiddenApiExemptions("Landroid/content/pm/ApplicationInfo;->setEnableOnBackInvokedCallback")
-            setEnableOnBackInvokedCallback(applicationInfo, enable)
         }
 
         val superUserViewModel = ViewModelProvider(this)[SuperUserViewModel::class.java]

@@ -2,8 +2,6 @@ package com.sukisu.ultra.ui.kernelFlash
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 import com.sukisu.ultra.ui.screen.install.InstallMethod
 
 @Composable
@@ -12,7 +10,7 @@ fun rememberAnyKernel3State(
     preselectedKernelUri: String?,
     horizonKernelSummary: String,
     isAbDevice: Boolean
-) = rememberAnyKernel3StateMiuix(
+) = rememberAnyKernel3StateMaterial(
     installMethodState = installMethodState,
     preselectedKernelUri = preselectedKernelUri,
     horizonKernelSummary = horizonKernelSummary,
@@ -26,7 +24,7 @@ fun KpmPatchSelectionDialog(
     onDismiss: () -> Unit,
     onOptionSelected: (KpmPatchOption) -> Unit,
 ) {
-    KpmPatchSelectionDialogMiuix(
+    KpmPatchSelectionDialogMaterial(
         show = show,
         currentOption = currentOption,
         onDismiss = onDismiss,

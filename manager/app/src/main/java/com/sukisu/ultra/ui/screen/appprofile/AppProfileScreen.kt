@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -32,6 +33,7 @@ fun AppProfileScreen(uid: Int) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val snackBarHost = remember { SnackbarHostState() }
     val viewModel: SuperUserViewModel = viewModel()
     val appGroupState = remember(uid) {
         derivedStateOf {
@@ -120,8 +122,9 @@ fun AppProfileScreen(uid: Int) {
         },
     )
 
-    AppProfileScreenMiuix(
+    AppProfileScreenMaterial(
             state = state,
             actions = actions,
+            snackBarHost = snackBarHost,
         )
 }

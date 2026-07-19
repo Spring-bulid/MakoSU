@@ -125,8 +125,6 @@
     <string name="app_profile_affects_following_apps">影響以下應用</string>
     <string name="settings_check_update">檢查更新</string>
     <string name="settings_check_update_summary">在應用啟動後自動檢查是否有最新版</string>
-    <string name="settings_enable_predictive_back">預測性返回手勢</string>
-    <string name="settings_enable_predictive_back_summary">啟用對預測性返回手勢的支援</string>
     <string name="settings_module_check_update">檢查模組更新</string>
     <string name="grant_root_failed">獲取 root 失敗！</string>
     <string name="home_pr_build_warning">當前為 PR 除錯構建，請勿在生產環境中使用！</string>

@@ -13,8 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sukisu.ultra.R
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 import com.sukisu.ultra.ui.component.dialog.ConfirmResult
 import com.sukisu.ultra.ui.component.dialog.rememberConfirmDialog
 import com.sukisu.ultra.ui.util.getRootShell
@@ -161,7 +159,7 @@ fun KpmScreen(
         },
     )
 
-    KpmMiuix(
+    KpmMaterial(
             viewModel = viewModel,
             actions = actions,
             bottomInnerPadding = bottomInnerPadding

@@ -12,8 +12,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.sukisu.ultra.R
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 import com.sukisu.ultra.ui.component.dialog.ConfirmResult
 import com.sukisu.ultra.ui.component.dialog.rememberConfirmDialog
 import com.sukisu.ultra.ui.navigation3.LocalNavigator
@@ -145,7 +143,7 @@ fun UmountManagerScreen() {
         showAddDialog = showAddDialog
     )
 
-    UmountManagerMiuix(
+    UmountManagerMaterial(
             state = state,
             actions = actions
         )

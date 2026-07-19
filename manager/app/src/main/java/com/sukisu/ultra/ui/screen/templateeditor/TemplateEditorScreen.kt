@@ -13,8 +13,6 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import com.sukisu.ultra.R
 import com.sukisu.ultra.toOrdinalList
 import com.sukisu.ultra.toRootProfileFlags
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 import com.sukisu.ultra.ui.navigation3.LocalNavigator
 import com.sukisu.ultra.ui.util.deleteAppProfileTemplate
 import com.sukisu.ultra.ui.viewmodel.TemplateViewModel
@@ -23,9 +21,8 @@ import com.sukisu.ultra.ui.viewmodel.TemplateViewModel
 fun TemplateEditorScreen(template: TemplateViewModel.TemplateInfo, readOnly: Boolean) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
-    val uiMode = LocalUiMode.current
     val isCreation = template.id.isBlank()
-    val autoSave = uiMode == UiMode.Miuix && !isCreation
+    val autoSave = !isCreation
 
     var currentTemplate by rememberSaveable { mutableStateOf(template) }
     var idErrorHint by remember { mutableStateOf("") }
@@ -64,17 +61,15 @@ fun TemplateEditorScreen(template: TemplateViewModel.TemplateInfo, readOnly: Boo
     )
 
     fun saveCurrentTemplate() {
-        if (uiMode == UiMode.Miuix) {
-            when (idCheck(currentTemplate.id)) {
-                1 -> {
-                    showToast(idConflictError)
-                    return
-                }
+        when (idCheck(currentTemplate.id)) {
+            1 -> {
+                showToast(idConflictError)
+                return
+            }
 
-                2 -> {
-                    showToast(idInvalidError)
-                    return
-                }
+            2 -> {
+                showToast(idInvalidError)
+                return
             }
         }
 
@@ -128,7 +123,7 @@ fun TemplateEditorScreen(template: TemplateViewModel.TemplateInfo, readOnly: Boo
         },
     )
 
-    TemplateEditorScreenMiuix(
+    TemplateEditorScreenMaterial(
             state = uiState,
             actions = actions,
         )

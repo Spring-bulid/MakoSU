@@ -112,8 +112,6 @@
     <string name="app_profile_affects_following_apps">Mempengaruhi apl berikut</string>
     <string name="settings_check_update">Periksa pembaruan</string>
     <string name="settings_check_update_summary">Memeriksa pembaruan secara otomatis saat membuka aplikasi.</string>
-    <string name="settings_enable_predictive_back">Gerakan kembali prediktif</string>
-    <string name="settings_enable_predictive_back_summary">Aktifkan dukungan gerakan kembali prediktif.</string>
     <string name="settings_module_check_update">Periksa pembaruan modul</string>
     <string name="grant_root_failed">Gagal memberikan akses root!</string>
     <string name="home_pr_build_warning">Ini adalah versi PR debug untuk permintaan perubahan (Pull Requests). JANGAN gunakan di lingkungan produksi!</string>

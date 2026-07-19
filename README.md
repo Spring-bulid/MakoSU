@@ -6,7 +6,7 @@
 
 面向 GKI Android 设备的内核 Root 管理器，关注 KMI 匹配、SuSFS 配置可靠性和可恢复维护。
 
-[项目官网](https://spring-bulid.github.io/MakoSU/) | [在线文档](https://spring-bulid.github.io/MakoSU/guide/) | [GitHub Releases](https://github.com/Spring-bulid/MakoSU/releases) | [问题反馈](https://github.com/Spring-bulid/MakoSU/issues)
+[项目官网](https://spring-bulid.github.io/MakoSU/) | [在线文档](https://spring-bulid.github.io/MakoSU/guide/) | [中文修复说明](docs/zh/FIXES.md) | [GitHub Releases](https://github.com/Spring-bulid/MakoSU/releases) | [问题反馈](https://github.com/Spring-bulid/MakoSU/issues)
 
 [![最新发行](https://img.shields.io/github/v/release/Spring-bulid/MakoSU?label=Release&logo=github)](https://github.com/Spring-bulid/MakoSU/releases/latest)
 [![网站部署](https://github.com/Spring-bulid/MakoSU/actions/workflows/deploy-website.yml/badge.svg)](https://github.com/Spring-bulid/MakoSU/actions/workflows/deploy-website.yml)

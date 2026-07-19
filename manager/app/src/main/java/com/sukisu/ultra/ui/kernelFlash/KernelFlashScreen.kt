@@ -11,8 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.sukisu.ultra.R
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 import com.sukisu.ultra.ui.kernelFlash.state.HorizonKernelState
 import com.sukisu.ultra.ui.kernelFlash.state.HorizonKernelWorker
 import com.sukisu.ultra.ui.navigation3.LocalNavigator
@@ -132,7 +130,7 @@ fun KernelFlashScreen(
         }
     )
 
-    KernelFlashMiuix(
+    KernelFlashMaterial(
             state = flashState,
             actions = actions,
             logText = logText,

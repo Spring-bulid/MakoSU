@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.sukisu.ultra.data.repository.SettingsRepository
 import com.sukisu.ultra.data.repository.SettingsRepositoryImpl
 import com.sukisu.ultra.ksuApp
-import com.sukisu.ultra.ui.UiMode
 import com.sukisu.ultra.ui.theme.ThemeController
 
 class MainActivityViewModel(
@@ -46,10 +45,11 @@ class MainActivityViewModel(
         return MainActivityUiState(
             appSettings = ThemeController.getAppSettings(),
             pageScale = settingRepo.pageScale,
-            enableBlur = settingRepo.enableBlur,
-            enableFloatingBottomBar = settingRepo.enableFloatingBottomBar,
-            enableFloatingBottomBarBlur = settingRepo.enableFloatingBottomBarBlur,
-            uiMode = UiMode.Miuix,
+            customBackgroundEnabled = settingRepo.customBackgroundEnabled && !settingRepo.customBackgroundUri.isNullOrBlank(),
+            customBackgroundUri = settingRepo.customBackgroundUri,
+            customBackgroundOpacity = settingRepo.customBackgroundOpacity,
+            customBackgroundBlur = settingRepo.customBackgroundBlur,
+            customBackgroundDim = settingRepo.customBackgroundDim,
         )
     }
 
@@ -59,11 +59,12 @@ class MainActivityViewModel(
             "key_color",
             "color_style",
             "color_spec",
-            "miuix_monet",
             "page_scale",
-            "enable_blur",
-            "enable_floating_bottom_bar",
-            "enable_floating_bottom_bar_blur",
+            "custom_background_enabled",
+            "custom_background_uri",
+            "custom_background_opacity",
+            "custom_background_blur",
+            "custom_background_dim",
         )
     }
 }

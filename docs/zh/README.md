@@ -6,7 +6,7 @@
 
 MakoSU 是 [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra) 的下游项目。本仓库主要维护管理器、随版本发布的 KMI 模块、SuSFS 用户空间功能和相关构建脚本。
 
-[项目官网](https://spring-bulid.github.io/MakoSU/) | [在线文档](https://spring-bulid.github.io/MakoSU/guide/) | [GitHub Releases](https://github.com/Spring-bulid/MakoSU/releases) | [问题反馈](https://github.com/Spring-bulid/MakoSU/issues)
+[项目官网](https://spring-bulid.github.io/MakoSU/) | [在线文档](https://spring-bulid.github.io/MakoSU/guide/) | [中文修复说明](FIXES.md) | [GitHub Releases](https://github.com/Spring-bulid/MakoSU/releases) | [问题反馈](https://github.com/Spring-bulid/MakoSU/issues)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-orange.svg?logo=gnu)](../../LICENSE)
 [![Manager](https://img.shields.io/badge/Manager-Android%208.0%2B-3DDC84.svg?logo=android)](#兼容范围)

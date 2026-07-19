@@ -43,7 +43,7 @@ import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.ext.task.list.items.TaskListItemsExtension
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import androidx.compose.material3.MaterialTheme
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import kotlin.math.abs
@@ -359,7 +359,7 @@ private data class MarkdownColors(
 
 @Composable
 private fun getMarkdownColors(containerColor: androidx.compose.ui.graphics.Color?): MarkdownColors {
-    val bgArgb = containerColor?.toArgb() ?: MiuixTheme.colorScheme.surfaceContainer.toArgb()
+    val bgArgb = containerColor?.toArgb() ?: MaterialTheme.colorScheme.surfaceContainer.toArgb()
     val bgLuminance = relativeLuminance(bgArgb)
 
     fun makeVariant(delta: Float, ratio: Double): Int {
@@ -374,7 +374,7 @@ private fun getMarkdownColors(containerColor: androidx.compose.ui.graphics.Color
     return MarkdownColors(
         bgCode = cssColorFromArgb(makeVariant(codeDelta, 1.1)),
         bgRowAlt = cssColorFromArgb(makeVariant(rowAltDelta, 1.05)),
-        fgDefault = cssColorFromArgb(MiuixTheme.colorScheme.onSurface.toArgb()),
-        fgLink = cssColorFromArgb(MiuixTheme.colorScheme.primary.toArgb())
+        fgDefault = cssColorFromArgb(MaterialTheme.colorScheme.onSurface.toArgb()),
+        fgLink = cssColorFromArgb(MaterialTheme.colorScheme.primary.toArgb())
     )
 }

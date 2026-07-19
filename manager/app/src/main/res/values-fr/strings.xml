@@ -202,8 +202,6 @@
     <string name="jailbreak_mode">Mode Jailbreak</string>
     <string name="home_jailbreak">Jailbreak</string>
     <string name="jailbreak_timeout">Le jailbreak a peut-être échoué, consultez les journaux</string>
-    <string name="settings_enable_predictive_back">Geste de retour prédictif</string>
-    <string name="settings_enable_predictive_back_summary">Activez la prise en charge du geste de retour prédictif.</string>
     <string name="home_pr_build_warning">Ceci est une version de débogage issue d\'une PR. Ne l\'utilisez PAS en production !</string>
     <string name="home_pr_kernel_warning">Le noyau a été construit avec la prise en charge de signature PR. Ce noyau n\'est pas destiné à être utilisé en production !</string>
     <string name="jailbreak_flash_warning">Vous êtes en **mode Jailbreak**. En flashant une partition sur un appareil dont le **bootloader est verrouillé** entraînera l\'échec d\'Android Verified Boot (AVB) et pourrait **empêcher le démarrage de l\'appareil**.\n\nAssurez-vous que votre bootloader est bien déverrouillé avant de continuer !</string>

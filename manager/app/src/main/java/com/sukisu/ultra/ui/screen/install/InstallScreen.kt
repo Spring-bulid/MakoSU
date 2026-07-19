@@ -14,6 +14,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -49,6 +50,7 @@ fun InstallScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val resources = LocalResources.current
+    val snackBarHost = remember { SnackbarHostState() }
 
     var installMethod by rememberSaveable { mutableStateOf<InstallMethod?>(null) }
     var lkmSelection by rememberSaveable { mutableStateOf<LkmSelection>(LkmSelection.KmiNone) }
@@ -341,5 +343,5 @@ fun InstallScreen(
         }
     )
 
-    InstallScreenMiuix(state, actions)
+    InstallScreenMaterial(state, actions, snackBarHost)
 }

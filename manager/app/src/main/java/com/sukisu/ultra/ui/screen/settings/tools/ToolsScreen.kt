@@ -13,8 +13,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.sukisu.ultra.R
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 import com.sukisu.ultra.ui.navigation3.LocalNavigator
 import com.sukisu.ultra.ui.navigation3.Route
 import kotlinx.coroutines.Dispatchers
@@ -110,7 +108,7 @@ fun ToolsScreen() {
         selinuxLoading = selinuxLoading
     )
 
-    ToolsMiuix(
+    ToolsMaterial(
             state = state,
             actions = actions
         )

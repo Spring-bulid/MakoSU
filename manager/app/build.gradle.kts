@@ -205,6 +205,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
     implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigationevent.compose)
 
     implementation(libs.com.github.topjohnwu.libsu.core)
@@ -227,11 +228,6 @@ dependencies {
 
     implementation(libs.hiddenapibypass)
 
-    implementation(libs.miuix.ui)
-    implementation(libs.miuix.icons)
-    implementation(libs.miuix.navigation3.ui)
-    implementation(libs.miuix.preference)
-    implementation(libs.miuix.blur)
 
     implementation(platform(libs.okhttp.bom))
     implementation(libs.okhttp)
@@ -239,6 +235,7 @@ dependencies {
     implementation(libs.material.kolor)
 
     implementation(libs.appiconloader)
+    implementation(libs.coil.compose)
 }
 
 kotlin {

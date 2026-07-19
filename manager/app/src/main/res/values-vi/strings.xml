@@ -134,8 +134,6 @@
     <string name="app_profile_affects_following_apps">Ảnh hưởng đến các ứng dụng sau</string>
     <string name="settings_check_update">Kiểm tra cập nhật</string>
     <string name="settings_check_update_summary">Tự động kiểm tra cập nhật khi mở ứng dụng.</string>
-    <string name="settings_enable_predictive_back">Cử chỉ quay lại dự đoán</string>
-    <string name="settings_enable_predictive_back_summary">Kích hoạt tính năng hỗ trợ cử chỉ quay lại dự đoán.</string>
     <string name="settings_module_check_update">Kiểm tra cập nhật module</string>
     <string name="grant_root_failed">Cấp quyền root thất bại!</string>
     <string name="home_pr_build_warning">Đây là bản dựng gỡ lỗi cho yêu cầu kéo (PR). KHÔNG sử dụng nó trong môi trường sản xuất!</string>

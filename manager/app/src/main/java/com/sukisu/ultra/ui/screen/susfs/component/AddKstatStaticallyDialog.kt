@@ -1,9 +1,7 @@
 package com.sukisu.ultra.ui.screen.susfs.component
 
 import androidx.compose.runtime.Composable
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
-import com.sukisu.ultra.ui.screen.susfs.component.miuix.AddKstatStaticallyDialogMiuix
+import com.sukisu.ultra.ui.screen.susfs.component.material.AddKstatStaticallyDialogMaterial
 
 @Composable
 fun AddKstatStaticallyDialog(
@@ -13,7 +11,7 @@ fun AddKstatStaticallyDialog(
     isLoading: Boolean,
     initialConfig: String = ""
 ) {
-    AddKstatStaticallyDialogMiuix(
+    AddKstatStaticallyDialogMaterial(
             showDialog = showDialog,
             onDismiss = onDismiss,
             onConfirm = onConfirm,

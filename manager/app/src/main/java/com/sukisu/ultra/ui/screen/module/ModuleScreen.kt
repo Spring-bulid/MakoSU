@@ -153,7 +153,7 @@ fun ModulePager(
         },
     )
 
-    ModulePagerMiuix(
+    ModulePagerMaterial(
         uiState = rawUiState,
         confirmDialogState = rawUiState.confirmDialogState,
         moduleEvent = viewModel.moduleEvent,

@@ -1,8 +1,6 @@
 package com.sukisu.ultra.ui.kernelFlash.component
 
 import androidx.compose.runtime.Composable
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 
 @Composable
 fun SlotSelectionDialog(
@@ -10,7 +8,7 @@ fun SlotSelectionDialog(
     onDismiss: () -> Unit,
     onSlotSelected: (String) -> Unit,
 ) {
-    SlotSelectionDialogMiuix(
+    SlotSelectionDialogMaterial(
             show = show,
             onDismiss = onDismiss,
             onSlotSelected = onSlotSelected

@@ -2,6 +2,7 @@ package com.sukisu.ultra.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
@@ -9,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
 @Stable
 data class SearchStatus(
@@ -37,7 +37,7 @@ data class SearchStatus(
     fun TopAppBarAnim(
         modifier: Modifier = Modifier,
         visible: Boolean = shouldCollapsed(),
-        backgroundColor: Color = colorScheme.surface,
+        backgroundColor: Color = MaterialTheme.colorScheme.surface,
         content: @Composable () -> Unit
     ) {
         Box(modifier = modifier) {

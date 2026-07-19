@@ -1,8 +1,6 @@
 package com.sukisu.ultra.ui.component.choosekmidialog
 
 import androidx.compose.runtime.Composable
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 
 @Composable
 fun ChooseKmiDialog(
@@ -10,5 +8,5 @@ fun ChooseKmiDialog(
     onDismissRequest: () -> Unit,
     onSelected: (String?) -> Unit
 ) {
-    ChooseKmiDialogMiuix(show, onDismissRequest, onSelected)
+    ChooseKmiDialogMaterial(show, onDismissRequest, onSelected)
 }

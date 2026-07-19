@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.dropUnlessResumed
 import kotlinx.coroutines.launch
@@ -23,6 +24,7 @@ fun ExecuteModuleActionScreen(moduleId: String, fromShortcut: Boolean = false) {
     val scope = rememberCoroutineScope()
     var text by rememberSaveable { mutableStateOf("") }
     val logContent = remember { StringBuilder() }
+    val snackBarHost = remember { SnackbarHostState() }
     var isComplete by rememberSaveable { mutableStateOf(false) }
     val exitExecute = {
         if (fromShortcut && activity != null) {
@@ -67,5 +69,5 @@ fun ExecuteModuleActionScreen(moduleId: String, fromShortcut: Boolean = false) {
         onClose = exitExecute,
     )
 
-    ExecuteModuleActionScreenMiuix(state, actions)
+    ExecuteModuleActionScreenMaterial(state, actions, snackBarHost)
 }

@@ -7,8 +7,6 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.sukisu.ultra.R
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 
 data class RebootListOption(
     @param:StringRes val labelRes: Int,
@@ -37,5 +35,5 @@ fun getRebootListOption(): List<RebootListOption> {
 
 @Composable
 fun RebootListPopup() {
-    RebootListPopupMiuix()
+    RebootListPopupMaterial()
 }

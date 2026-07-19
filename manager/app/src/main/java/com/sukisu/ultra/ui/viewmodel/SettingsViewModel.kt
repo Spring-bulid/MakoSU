@@ -18,6 +18,7 @@ import com.sukisu.ultra.data.repository.SettingsRepository
 import com.sukisu.ultra.data.repository.SettingsRepositoryImpl
 import com.sukisu.ultra.ksuApp
 import com.sukisu.ultra.ui.screen.settings.SettingsUiState
+import com.sukisu.ultra.ui.navigation.NavMode
 import com.sukisu.ultra.ui.screen.home.HomeLayout
 import com.sukisu.ultra.ui.theme.ColorMode
 
@@ -38,12 +39,16 @@ class SettingsViewModel(
             val checkModuleUpdate = repo.checkModuleUpdate
             val alternativeIcon = repo.alternativeIcon
             val themeMode = repo.themeMode
-            val miuixMonet = repo.miuixMonet
             val keyColor = repo.keyColor
-            val enablePredictiveBack = repo.enablePredictiveBack
-            val enableBlur = repo.enableBlur
-            val enableFloatingBottomBar = repo.enableFloatingBottomBar
-            val enableFloatingBottomBarBlur = repo.enableFloatingBottomBarBlur
+            val customBackgroundEnabled = repo.customBackgroundEnabled
+            val customBackgroundUri = repo.customBackgroundUri
+            val customBackgroundOpacity = repo.customBackgroundOpacity
+            val customBackgroundBlur = repo.customBackgroundBlur
+            val customBackgroundDim = repo.customBackgroundDim
+            val moduleBannerEnabled = repo.moduleBannerEnabled
+            val moduleBannerCustomEnabled = repo.moduleBannerCustomEnabled
+            val moduleBannerCustomOpacityEnabled = repo.moduleBannerCustomOpacityEnabled
+            val moduleBannerOpacity = repo.moduleBannerOpacity
             val pageScale = repo.pageScale
             val enableWebDebugging = repo.enableWebDebugging
             val showFullStatus = repo.showFullStatus
@@ -68,22 +73,32 @@ class SettingsViewModel(
             val isAdbRootEnabled = repo.getAdbRootPersistValue() == 1L
             val isDefaultUmountModules = repo.isDefaultUmountModules()
             val homeLayout = HomeLayout.fromValue(repo.homeLayout)
+            val navMode = NavMode.fromValue(repo.navMode)
+            val floatingAutoHide = repo.floatingAutoHide
+            val floatingSwipeHide = repo.floatingSwipeHide
             val autoJailbreak = repo.autoJailbreak
             val isLateLoadMode = Natives.isLateLoadMode
 
             _uiState.update {
                 it.copy(
                     homeLayout = homeLayout,
+                    navMode = navMode,
+                    floatingAutoHide = floatingAutoHide,
+                    floatingSwipeHide = floatingSwipeHide,
                     checkUpdate = checkUpdate,
                     checkModuleUpdate = checkModuleUpdate,
                     alternativeIcon = alternativeIcon,
                     themeMode = themeMode,
-                    miuixMonet = miuixMonet,
                     keyColor = keyColor,
-                    enablePredictiveBack = enablePredictiveBack,
-                    enableBlur = enableBlur,
-                    enableFloatingBottomBar = enableFloatingBottomBar,
-                    enableFloatingBottomBarBlur = enableFloatingBottomBarBlur,
+                    customBackgroundEnabled = customBackgroundEnabled,
+                    customBackgroundUri = customBackgroundUri,
+                    customBackgroundOpacity = customBackgroundOpacity,
+                    customBackgroundBlur = customBackgroundBlur,
+                    customBackgroundDim = customBackgroundDim,
+                    moduleBannerEnabled = moduleBannerEnabled,
+                    moduleBannerCustomEnabled = moduleBannerCustomEnabled,
+                    moduleBannerCustomOpacityEnabled = moduleBannerCustomOpacityEnabled,
+                    moduleBannerOpacity = moduleBannerOpacity,
                     pageScale = pageScale,
                     enableWebDebugging = enableWebDebugging,
                     showFullStatus = showFullStatus,
@@ -115,8 +130,28 @@ class SettingsViewModel(
     }
 
     fun setHomeLayout(layout: HomeLayout) {
+        // Write exactly the enum value; HomePager re-reads only via UiRefresh (no multi-listener race)
         repo.homeLayout = layout.value
         _uiState.update { it.copy(homeLayout = layout) }
+        com.sukisu.ultra.ui.theme.UiRefresh.bump()
+    }
+
+    fun setNavMode(mode: NavMode) {
+        repo.navMode = mode.value
+        _uiState.update { it.copy(navMode = NavMode.fromValue(repo.navMode)) }
+        com.sukisu.ultra.ui.theme.UiRefresh.bump()
+    }
+
+    fun setFloatingAutoHide(enabled: Boolean) {
+        repo.floatingAutoHide = enabled
+        _uiState.update { it.copy(floatingAutoHide = enabled) }
+        com.sukisu.ultra.ui.theme.UiRefresh.bump()
+    }
+
+    fun setFloatingSwipeHide(enabled: Boolean) {
+        repo.floatingSwipeHide = enabled
+        _uiState.update { it.copy(floatingSwipeHide = enabled) }
+        com.sukisu.ultra.ui.theme.UiRefresh.bump()
     }
 
     fun setCheckModuleUpdate(enabled: Boolean) {
@@ -130,26 +165,13 @@ class SettingsViewModel(
     }
 
     fun setThemeMode(mode: Int) {
-        val effectiveMode = if (_uiState.value.miuixMonet) {
-            ColorMode.fromValue(mode).forMiuix(monetEnabled = true).value
-        } else {
-            mode
-        }
-        repo.themeMode = effectiveMode
-        _uiState.update { it.copy(themeMode = effectiveMode) }
+        repo.themeMode = mode
+        _uiState.update { it.copy(themeMode = mode) }
     }
 
     fun setColorMode(mode: ColorMode) {
         repo.themeMode = mode.value
         _uiState.update { it.copy(themeMode = mode.value) }
-    }
-
-    fun setMiuixMonet(enabled: Boolean) {
-        val currentThemeMode = repo.themeMode
-        val newThemeMode = ColorMode.fromValue(currentThemeMode).forMiuix(enabled).value
-        repo.miuixMonet = enabled
-        repo.themeMode = newThemeMode
-        _uiState.update { it.copy(miuixMonet = enabled, themeMode = newThemeMode) }
     }
 
     fun setKeyColor(color: Int) {
@@ -167,24 +189,76 @@ class SettingsViewModel(
         _uiState.update { it.copy(colorSpec = spec) }
     }
 
-    fun setEnablePredictiveBack(enabled: Boolean) {
-        repo.enablePredictiveBack = enabled
-        _uiState.update { it.copy(enablePredictiveBack = enabled) }
+
+    fun setCustomBackgroundEnabled(enabled: Boolean) {
+        val effectiveEnabled = enabled && !repo.customBackgroundUri.isNullOrBlank()
+        repo.customBackgroundEnabled = effectiveEnabled
+        _uiState.update { it.copy(customBackgroundEnabled = effectiveEnabled) }
     }
 
-    fun setEnableBlur(enabled: Boolean) {
-        repo.enableBlur = enabled
-        _uiState.update { it.copy(enableBlur = enabled) }
+    fun setCustomBackground(uri: String) {
+        repo.customBackgroundUri = uri
+        repo.customBackgroundEnabled = true
+        _uiState.update {
+            it.copy(
+                customBackgroundEnabled = true,
+                customBackgroundUri = uri,
+            )
+        }
     }
 
-    fun setEnableFloatingBottomBar(enabled: Boolean) {
-        repo.enableFloatingBottomBar = enabled
-        _uiState.update { it.copy(enableFloatingBottomBar = enabled) }
+    fun clearCustomBackground() {
+        repo.customBackgroundEnabled = false
+        repo.customBackgroundUri = null
+        _uiState.update {
+            it.copy(
+                customBackgroundEnabled = false,
+                customBackgroundUri = null,
+            )
+        }
     }
 
-    fun setEnableFloatingBottomBarBlur(enabled: Boolean) {
-        repo.enableFloatingBottomBarBlur = enabled
-        _uiState.update { it.copy(enableFloatingBottomBarBlur = enabled) }
+    fun setCustomBackgroundOpacity(opacity: Float) {
+        val value = opacity.coerceIn(0f, 1f)
+        repo.customBackgroundOpacity = value
+        _uiState.update { it.copy(customBackgroundOpacity = value) }
+    }
+
+    fun setCustomBackgroundBlur(blur: Float) {
+        val value = blur.coerceIn(0f, 24f)
+        repo.customBackgroundBlur = value
+        _uiState.update { it.copy(customBackgroundBlur = value) }
+    }
+
+    fun setCustomBackgroundDim(dim: Float) {
+        val value = dim.coerceIn(0f, 0.3f)
+        repo.customBackgroundDim = value
+        _uiState.update { it.copy(customBackgroundDim = value) }
+    }
+
+    fun setModuleBannerEnabled(enabled: Boolean) {
+        repo.moduleBannerEnabled = enabled
+        _uiState.update { it.copy(moduleBannerEnabled = enabled) }
+        com.sukisu.ultra.ui.theme.UiRefresh.bump()
+    }
+
+    fun setModuleBannerCustomEnabled(enabled: Boolean) {
+        repo.moduleBannerCustomEnabled = enabled
+        _uiState.update { it.copy(moduleBannerCustomEnabled = enabled) }
+        com.sukisu.ultra.ui.theme.UiRefresh.bump()
+    }
+
+    fun setModuleBannerCustomOpacityEnabled(enabled: Boolean) {
+        repo.moduleBannerCustomOpacityEnabled = enabled
+        _uiState.update { it.copy(moduleBannerCustomOpacityEnabled = enabled) }
+        com.sukisu.ultra.ui.theme.UiRefresh.bump()
+    }
+
+    fun setModuleBannerOpacity(opacity: Float) {
+        val value = opacity.coerceIn(0.05f, 1f)
+        repo.moduleBannerOpacity = value
+        _uiState.update { it.copy(moduleBannerOpacity = value) }
+        com.sukisu.ultra.ui.theme.UiRefresh.bump()
     }
 
     fun setPageScale(scale: Float) {

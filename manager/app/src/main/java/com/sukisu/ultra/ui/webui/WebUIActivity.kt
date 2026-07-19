@@ -13,8 +13,8 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,11 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 import com.sukisu.ultra.ui.theme.KernelSUTheme
 import com.sukisu.ultra.ui.theme.ThemeController
-import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 
 @SuppressLint("SetJavaScriptEnabled")
 class WebUIActivity : ComponentActivity() {
@@ -57,10 +54,8 @@ class WebUIActivity : ComponentActivity() {
                 onDispose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
             }
 
-            CompositionLocalProvider(LocalUiMode provides UiMode.Miuix) {
-                KernelSUTheme(appSettings = appSettings, uiMode = UiMode.Miuix) {
-                    MainContent(activity = this, onFinish = { finish() })
-                }
+            KernelSUTheme(appSettings = appSettings) {
+                MainContent(activity = this, onFinish = { finish() })
             }
         }
     }
@@ -114,6 +109,6 @@ private fun LoadingContent() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        InfiniteProgressIndicator()
+                CircularProgressIndicator()
     }
 }

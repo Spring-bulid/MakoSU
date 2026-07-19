@@ -31,7 +31,20 @@ class SettingsRepositoryImpl : SettingsRepository {
 
     override var homeLayout: String
         get() = prefs.getString("home_layout", HomeLayout.DEFAULT_VALUE) ?: HomeLayout.DEFAULT_VALUE
-        set(value) = prefs.edit { putString("home_layout", value) }
+        // commit=true: notify listeners immediately (apply can race with UI switches)
+        set(value) = prefs.edit(commit = true) { putString("home_layout", value) }
+
+    override var navMode: String
+        get() = prefs.getString("nav_mode", "floating") ?: "floating"
+        set(value) = prefs.edit(commit = true) { putString("nav_mode", value) }
+
+    override var floatingAutoHide: Boolean
+        get() = prefs.getBoolean("floating_auto_hide", true)
+        set(value) = prefs.edit(commit = true) { putBoolean("floating_auto_hide", value) }
+
+    override var floatingSwipeHide: Boolean
+        get() = prefs.getBoolean("floating_swipe_hide", true)
+        set(value) = prefs.edit(commit = true) { putBoolean("floating_swipe_hide", value) }
 
     override var checkUpdate: Boolean
         get() = prefs.getBoolean("check_update", true)
@@ -49,10 +62,6 @@ class SettingsRepositoryImpl : SettingsRepository {
         get() = prefs.getInt("color_mode", 0)
         set(value) = prefs.edit { putInt("color_mode", value) }
 
-    override var miuixMonet: Boolean
-        get() = prefs.getBoolean("miuix_monet", false)
-        set(value) = prefs.edit { putBoolean("miuix_monet", value) }
-
     override var keyColor: Int
         get() = prefs.getInt("key_color", 0)
         set(value) = prefs.edit { putInt("key_color", value) }
@@ -65,21 +74,42 @@ class SettingsRepositoryImpl : SettingsRepository {
         get() = prefs.getString("color_spec", ColorSpec.SpecVersion.SPEC_2025.name) ?: ColorSpec.SpecVersion.SPEC_2025.name
         set(value) = prefs.edit { putString("color_spec", value) }
 
-    override var enablePredictiveBack: Boolean
-        get() = prefs.getBoolean("enable_predictive_back", false)
-        set(value) = prefs.edit { putBoolean("enable_predictive_back", value) }
+    override var customBackgroundEnabled: Boolean
+        get() = prefs.getBoolean("custom_background_enabled", false)
+        set(value) = prefs.edit { putBoolean("custom_background_enabled", value) }
 
-    override var enableBlur: Boolean
-        get() = prefs.getBoolean("enable_blur", false)
-        set(value) = prefs.edit { putBoolean("enable_blur", value) }
+    override var customBackgroundUri: String?
+        get() = prefs.getString("custom_background_uri", null)
+        set(value) = prefs.edit { putString("custom_background_uri", value) }
 
-    override var enableFloatingBottomBar: Boolean
-        get() = prefs.getBoolean("enable_floating_bottom_bar", false)
-        set(value) = prefs.edit { putBoolean("enable_floating_bottom_bar", value) }
+    override var customBackgroundOpacity: Float
+        get() = prefs.getFloat("custom_background_opacity", 1f).coerceIn(0f, 1f)
+        set(value) = prefs.edit { putFloat("custom_background_opacity", value.coerceIn(0f, 1f)) }
 
-    override var enableFloatingBottomBarBlur: Boolean
-        get() = prefs.getBoolean("enable_floating_bottom_bar_blur", false)
-        set(value) = prefs.edit { putBoolean("enable_floating_bottom_bar_blur", value) }
+    override var customBackgroundBlur: Float
+        get() = prefs.getFloat("custom_background_blur", 6f).coerceIn(0f, 24f)
+        set(value) = prefs.edit { putFloat("custom_background_blur", value.coerceIn(0f, 24f)) }
+
+    override var customBackgroundDim: Float
+        get() = prefs.getFloat("custom_background_dim", 0.05f).coerceIn(0f, 0.3f)
+        set(value) = prefs.edit { putFloat("custom_background_dim", value.coerceIn(0f, 0.3f)) }
+
+    override var moduleBannerEnabled: Boolean
+        get() = prefs.getBoolean("module_banner_enabled", true)
+        set(value) = prefs.edit(commit = true) { putBoolean("module_banner_enabled", value) }
+
+    override var moduleBannerCustomEnabled: Boolean
+        get() = prefs.getBoolean("module_banner_custom_enabled", true)
+        set(value) = prefs.edit(commit = true) { putBoolean("module_banner_custom_enabled", value) }
+
+    override var moduleBannerCustomOpacityEnabled: Boolean
+        get() = prefs.getBoolean("module_banner_custom_opacity_enabled", false)
+        set(value) = prefs.edit(commit = true) { putBoolean("module_banner_custom_opacity_enabled", value) }
+
+    override var moduleBannerOpacity: Float
+        // Default slightly higher than Folk 0.18 so banners are actually visible
+        get() = prefs.getFloat("module_banner_opacity", 0.42f).coerceIn(0.05f, 1f)
+        set(value) = prefs.edit(commit = true) { putFloat("module_banner_opacity", value.coerceIn(0.05f, 1f)) }
 
     override var pageScale: Float
         get() = prefs.getFloat("page_scale", 1.0f)

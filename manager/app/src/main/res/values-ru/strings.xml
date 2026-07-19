@@ -136,8 +136,6 @@
     <string name="app_profile_affects_following_apps">Влияет на следующие приложения</string>
     <string name="settings_check_update">Проверять наличие обновлений</string>
     <string name="settings_check_update_summary">Автоматическая проверка обновлений при открытии приложения.</string>
-    <string name="settings_enable_predictive_back">Предиктивный жест назад</string>
-    <string name="settings_enable_predictive_back_summary">Включить </string>
     <string name="settings_module_check_update">Проверять обновления модулей</string>
     <string name="grant_root_failed">Не удалось выдать root!</string>
     <string name="home_pr_build_warning">Это debug-сборка. НЕ используйте в продакшене</string>

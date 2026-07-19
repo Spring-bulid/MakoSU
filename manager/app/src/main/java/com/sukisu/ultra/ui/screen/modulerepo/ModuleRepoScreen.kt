@@ -79,7 +79,7 @@ fun ModuleRepoScreen() {
         },
     )
 
-    ModuleRepoScreenMiuix(uiState, actions)
+    ModuleRepoScreenMaterial(uiState, actions)
 }
 
 @Composable
@@ -130,5 +130,5 @@ fun ModuleRepoDetailScreen(module: RepoModuleArg) {
         onInstallModule = { uri -> navigator.push(Route.Flash(FlashIt.FlashModules(listOf(uri)))) },
     )
 
-    ModuleRepoDetailScreenMiuix(state, actions)
+    ModuleRepoDetailScreenMaterial(state, actions)
 }

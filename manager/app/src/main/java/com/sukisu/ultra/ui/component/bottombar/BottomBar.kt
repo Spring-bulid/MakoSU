@@ -16,10 +16,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
-import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import kotlin.math.abs
 
 class MainPagerState(
@@ -86,17 +82,20 @@ fun rememberMainPagerState(
 
 @Composable
 fun BottomBar(
-    blurBackdrop: LayerBackdrop?,
-    backdrop: Backdrop,
     modifier: Modifier = Modifier,
+    isFloating: Boolean = true,
+    onUserInteraction: (() -> Unit)? = null,
 ) {
-    BottomBarMiuix(blurBackdrop, backdrop, modifier)
+    BottomBarMaterial(
+        modifier = modifier,
+        isFloating = isFloating,
+        onUserInteraction = onUserInteraction,
+    )
 }
 
 @Composable
 fun SideRail(
-    blurBackdrop: LayerBackdrop?,
     modifier: Modifier = Modifier,
 ) {
-    NavigationRailMiuix(blurBackdrop, modifier)
+    NavigationRailMaterial(modifier)
 }

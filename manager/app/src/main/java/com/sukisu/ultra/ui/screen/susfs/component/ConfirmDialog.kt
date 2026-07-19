@@ -1,9 +1,7 @@
 package com.sukisu.ultra.ui.screen.susfs.component
 
 import androidx.compose.runtime.Composable
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
-import com.sukisu.ultra.ui.screen.susfs.component.miuix.ConfirmDialogMiuix
+import com.sukisu.ultra.ui.screen.susfs.component.material.ConfirmDialogMaterial
 
 @Composable
 fun ConfirmDialog(
@@ -14,7 +12,7 @@ fun ConfirmDialog(
     messageRes: Int,
     isLoading: Boolean = false
 ) {
-    ConfirmDialogMiuix(
+    ConfirmDialogMaterial(
             showDialog = showDialog,
             onDismiss = onDismiss,
             onConfirm = onConfirm,

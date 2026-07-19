@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.dropUnlessResumed
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +30,7 @@ fun FlashScreen(flashIt: FlashIt) {
     val scope = rememberCoroutineScope()
     var text by rememberSaveable { mutableStateOf("") }
     val logContent = remember { StringBuilder() }
+    val snackBarHost = remember { SnackbarHostState() }
     var showRebootAction by rememberSaveable { mutableStateOf(false) }
     var flashingStatus by rememberSaveable { mutableStateOf(FlashingStatus.FLASHING) }
     val needJailbreakWarning = flashIt is FlashIt.FlashBoot && Natives.isLateLoadMode
@@ -86,5 +88,5 @@ fun FlashScreen(flashIt: FlashIt) {
         onDismissJailbreakWarning = dropUnlessResumed { navigator.pop() },
     )
 
-    FlashScreenMiuix(state, actions)
+    FlashScreenMaterial(state, actions, snackBarHost)
 }

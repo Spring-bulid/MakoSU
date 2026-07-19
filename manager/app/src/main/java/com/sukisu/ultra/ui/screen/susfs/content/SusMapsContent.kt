@@ -1,9 +1,7 @@
 package com.sukisu.ultra.ui.screen.susfs.content
 
 import androidx.compose.runtime.Composable
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
-import com.sukisu.ultra.ui.screen.susfs.content.miuix.SusMapsContentMiuix
+import com.sukisu.ultra.ui.screen.susfs.content.material.SusMapsContentMaterial
 
 @Composable
 fun SusMapsContent(
@@ -14,12 +12,12 @@ fun SusMapsContent(
     onEditSusMap: ((String) -> Unit)? = null,
     onReset: (() -> Unit)? = null
 ) {
-    SusMapsContentMiuix(
+    SusMapsContentMaterial(
             susMaps = susMaps,
             isLoading = isLoading,
             onAddSusMap = onAddSusMap,
             onRemoveSusMap = onRemoveSusMap,
-            onEditSusMap = onEditSusMap,
-            onReset = onReset
+            onEditSusMap = { path -> onEditSusMap?.invoke(path) },
+            onReset = { onReset?.invoke() }
         )
 }

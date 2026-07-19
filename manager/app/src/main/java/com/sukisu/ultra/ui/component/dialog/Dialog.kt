@@ -22,8 +22,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.parcelize.Parcelize
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 import kotlin.coroutines.resume
 
 private const val TAG = "DialogComponent"
@@ -300,7 +298,7 @@ fun rememberLoadingDialog(): LoadingDialogHandle {
     val visible = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    LoadingDialogMiuix(visible)
+    LoadingDialogMaterial(visible)
 
     return remember {
         LoadingDialogHandleImpl(visible, coroutineScope)
@@ -324,7 +322,7 @@ private fun rememberConfirmDialog(visuals: ConfirmDialogVisuals, callback: Confi
         }
     )
 
-    ConfirmDialogMiuix(
+    ConfirmDialogMaterial(
             handle.visuals,
             confirm = { coroutineScope.launch { resultChannel.send(ConfirmResult.Confirmed) } },
             dismiss = { coroutineScope.launch { resultChannel.send(ConfirmResult.Canceled) } },

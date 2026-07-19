@@ -3,8 +3,6 @@ package com.sukisu.ultra.ui.component.profile
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.sukisu.ultra.Natives
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
 
 @Composable
 fun AppProfileConfig(
@@ -14,7 +12,7 @@ fun AppProfileConfig(
     profile: Natives.Profile,
     onProfileChange: (Natives.Profile) -> Unit,
 ) {
-    AppProfileConfigMiuix(
+    AppProfileConfigMaterial(
             modifier = modifier,
             fixedName = fixedName,
             enabled = enabled,
@@ -31,9 +29,8 @@ fun RootProfileConfig(
     profile: Natives.Profile,
     onProfileChange: (Natives.Profile) -> Unit,
 ) {
-    RootProfileConfigMiuix(
+    RootProfileConfigMaterial(
             modifier = modifier,
-            fixedName = fixedName,
             enabled = enabled,
             profile = profile,
             onProfileChange = onProfileChange
@@ -48,8 +45,7 @@ fun TemplateConfig(
     onManageTemplate: () -> Unit = {},
     onProfileChange: (Natives.Profile) -> Unit
 ) {
-    TemplateConfigMiuix(
-            modifier = modifier,
+    TemplateConfigMaterial(
             profile = profile,
             onViewTemplate = onViewTemplate,
             onManageTemplate = onManageTemplate,

@@ -2,9 +2,7 @@ package com.sukisu.ultra.ui.screen.susfs.content
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
-import com.sukisu.ultra.ui.screen.susfs.content.miuix.BasicSettingsContentMiuix
+import com.sukisu.ultra.ui.screen.susfs.content.material.BasicSettingsContentMaterial
 
 @Composable
 fun BasicSettingsContent(
@@ -32,7 +30,7 @@ fun BasicSettingsContent(
     onApply: (() -> Unit)? = null,
     onConfigReload: () -> Unit
 ) {
-    BasicSettingsContentMiuix(
+    BasicSettingsContentMaterial(
             unameValue = unameValue,
             onUnameValueChange = onUnameValueChange,
             buildTimeValue = buildTimeValue,

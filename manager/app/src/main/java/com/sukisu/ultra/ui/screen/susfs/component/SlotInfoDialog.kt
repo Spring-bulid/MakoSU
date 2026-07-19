@@ -1,9 +1,7 @@
 package com.sukisu.ultra.ui.screen.susfs.component
 
 import androidx.compose.runtime.Composable
-import com.sukisu.ultra.ui.LocalUiMode
-import com.sukisu.ultra.ui.UiMode
-import com.sukisu.ultra.ui.screen.susfs.component.miuix.SlotInfoDialogMiuix
+import com.sukisu.ultra.ui.screen.susfs.component.material.SlotInfoDialogMaterial
 import com.sukisu.ultra.ui.screen.susfs.util.SlotInfo
 
 @Composable
@@ -17,7 +15,7 @@ fun SlotInfoDialog(
     onUseUname: (String) -> Unit,
     onUseBuildTime: (String) -> Unit
 ) {
-    SlotInfoDialogMiuix(
+    SlotInfoDialogMaterial(
             showDialog = showDialog,
             onDismiss = onDismiss,
             slotInfoList = slotInfoList,
