@@ -1,4 +1,4 @@
-﻿---
+---
 title: KMI 兼容性
 description: 判断 MakoSU 正式 KMI 是否与 Android 设备内核匹配。
 ---

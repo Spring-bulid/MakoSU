@@ -1,4 +1,4 @@
-﻿---
+---
 title: 安装与更新
 description: 安全安装、更新 MakoSU Manager 与正式 KMI 模块。
 ---

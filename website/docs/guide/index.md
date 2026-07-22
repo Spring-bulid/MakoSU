@@ -1,4 +1,4 @@
-﻿---
+---
 title: MakoSU 文档
 description: MakoSU 安装、KMI 兼容、SuSFS 与故障恢复指南。
 outline: false

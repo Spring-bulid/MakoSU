@@ -1,4 +1,4 @@
-﻿---
+---
 title: 故障排查与救砖
 description: 排查 MakoSU 未识别、LKM 失败、启动异常与 SuSFS 问题。
 ---
