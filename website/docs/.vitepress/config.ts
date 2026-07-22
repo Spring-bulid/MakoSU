@@ -81,7 +81,8 @@ export default defineConfig({
       themeConfig: {
         nav: [
           { text: 'Home', link: '/en/' },
-          { text: 'Docs', link: '/en/guide/' },
+          { text: 'Intro', link: '/en/guide/' },
+          { text: 'Start', link: '/en/guide/installation' },
           { text: 'Features', link: '/en/#features' },
           { text: 'Compatibility', link: '/en/#compatibility' },
         ],
@@ -152,18 +153,11 @@ export default defineConfig({
       dark: 'github-dark',
     },
   },
-  sitemap: {
-    hostname: 'https://spring-bulid.github.io/MakoSU',
-    transformItems(items) {
-      return items.filter((item) => !item.url.includes('/en/'))
-    },
-  },
 
   head: [
-    ['link', { rel: 'icon', href: '/favicon-96x96.png' }],
-    ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
-    ['link', { rel: 'manifest', href: '/site.webmanifest' }],
-    ['meta', { name: 'theme-color', content: '#2f7259' }],
+    ['link', { rel: 'icon', href: '/makosu-manager.png' }],
+    ['link', { rel: 'canonical', href: 'https://spring-bulid.github.io/MakoSU/' }],
+    ['meta', { name: 'google-site-verification', content: 'PBl3dQvf9vW7_qapJhY7j6x8t43HPpF7bjzMn5RreYU' }],
     ['meta', { name: 'og:type', content: 'website' }],
     ['meta', { name: 'og:locale', content: 'zh-Hans' }],
     ['meta', { name: 'og:site_name', content: 'MakoSU' }],

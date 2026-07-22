@@ -1,139 +1,73 @@
-@import './custom-block.css';
-@import './doc-fade-in.css';
-@import './home.css';
-
-:root:where(:lang(fa)) {
-  --vp-font-family-base:
-    'Vazirmatn', 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-}
+﻿/* MakoSU VitePress theme — exact FolkPatch match */
 
 :root {
-  --vp-home-hero-name-color: #1f252c;
-  --vp-home-hero-name-background: none;
+  /* ── FolkPatch brand (blue) ── */
+  --vp-c-brand-1: #3b82f6;
+  --vp-c-brand-2: #2563eb;
+  --vp-c-brand-3: #1d4ed8;
+  --vp-c-brand-soft: rgba(59, 130, 246, 0.14);
+
+  /* ── Hero gradient matching FolkPatch ── */
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #8b5cf6 100%);
   --vp-home-hero-image-background-image: none;
   --vp-home-hero-image-filter: none;
 
-  /* MakoSU documentation colors */
-  --vp-c-brand-1: #2f7259;
-  --vp-c-brand-2: #28634d;
-  --vp-c-brand-3: #245b46;
-  --vp-c-brand-soft: rgba(47, 114, 89, 0.14);
+  /* ── Layout matching FolkPatch ── */
+  --vp-nav-height: 64px;
+  --vp-sidebar-width: 272px;
+  --vp-layout-max-width: 1440px;
 
-  /* Button contrast improvements */
-  --vp-button-brand-bg: #2f7259;
+  /* ── Font matching FolkPatch ── */
+  --vp-font-family-base: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --vp-font-family-mono: ui-monospace, 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+
+  /* ── Buttons ── */
+  --vp-button-brand-bg: var(--vp-c-brand-1);
   --vp-button-brand-text: #ffffff;
-  --vp-button-brand-hover-bg: #245b46;
-  --vp-button-brand-hover-text: #ffffff;
-  --vp-button-brand-active-bg: #1c4938;
-  --vp-button-brand-active-text: #ffffff;
+  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
 }
 
-/* Dark mode color overrides for better contrast */
-.dark:root {
-  --vp-c-brand-1: #78c7a4;
-  --vp-c-brand-2: #64b790;
-  --vp-c-brand-3: #4f9f79;
-  --vp-c-brand-soft: rgba(120, 199, 164, 0.16);
+[data-theme='dark'] {
+  --vp-c-brand-1: #60a5fa;
+  --vp-c-brand-2: #3b82f6;
+  --vp-c-brand-3: #2563eb;
+  --vp-c-brand-soft: rgba(96, 165, 250, 0.16);
 
-  --vp-button-brand-bg: #78c7a4;
+  --vp-home-hero-name-background: linear-gradient(135deg, #60a5fa 0%, #22d3ee 50%, #a78bfa 100%);
+
+  --vp-button-brand-bg: #60a5fa;
   --vp-button-brand-text: #000000;
-  --vp-button-brand-hover-bg: #91d7b9;
-  --vp-button-brand-hover-text: #000000;
-  --vp-button-brand-active-bg: #64b790;
-  --vp-button-brand-active-text: #000000;
 }
 
 @media (min-width: 640px) {
-  :root {
-    --vp-home-hero-image-filter: blur(56px);
-  }
+  :root { --vp-home-hero-image-filter: blur(56px); }
 }
-
 @media (min-width: 960px) {
-  :root {
-    --vp-home-hero-image-filter: blur(68px);
-  }
+  :root { --vp-home-hero-image-filter: blur(68px); }
 }
 
-.VPHero .VPImage {
-  filter: drop-shadow(-2px 4px 6px rgba(0, 0, 0, 0.2));
-  padding: 18px;
+/* ── FolkPatch-style nav ── */
+.VPNav {
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
-/* used in reference/default-theme-search */
-img[src='/search.png'] {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+.VPNavBar {
+  border-bottom: 1px solid var(--vp-c-divider);
 }
 
-/* Enhanced button contrast for accessibility */
+/* ── Smooth transitions ── */
 .VPButton.brand {
-  background-color: var(--vp-button-brand-bg) !important;
-  color: var(--vp-button-brand-text) !important;
-  border: none;
   font-weight: 600;
-  text-shadow: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-
 .VPButton.brand:hover {
-  background-color: var(--vp-button-brand-hover-bg) !important;
-  color: var(--vp-button-brand-hover-text) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(47, 114, 89, 0.32);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
 }
 
-.VPButton.brand:active {
-  background-color: var(--vp-button-brand-active-bg) !important;
-  color: var(--vp-button-brand-active-text) !important;
-  transform: translateY(0);
-}
-
-/* Dark mode support for buttons */
-.dark .VPButton.brand {
-  background-color: #78c7a4 !important;
-  color: #000000 !important;
-}
-
-.dark .VPButton.brand:hover {
-  background-color: #91d7b9 !important;
-  color: #000000 !important;
-  box-shadow: 0 4px 12px rgba(120, 199, 164, 0.32);
-}
-
-.dark .VPButton.brand:active {
-  background-color: #64b790 !important;
-  color: #000000 !important;
-}
-
-/* Ensure proper contrast for all text elements */
-.VPButton.brand .text {
-  color: inherit !important;
-}
-
-/* Focus states for accessibility */
-.VPButton.brand:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 2px;
-}
-
-.dark .VPButton.brand:focus-visible {
-  outline: 2px solid #000000;
-  outline-offset: 2px;
-}
-
-@font-face {
-  font-family: 'HarmonyOS Sans SC';
-  src: url('/HarmonyOS_Sans_SC.ttf') format('truetype');
-}
-
-body {
-  font-family: 'HarmonyOS Sans SC', sans-serif;
-  line-height: 1.8;
-  letter-spacing: 0;
-  word-spacing: normal;
-}
-
+/* ── Homepage full-width override ── */
 .VPHome .vp-doc.container,
 .VPHome .vp-doc.container > div,
 .VPHome .vp-doc.container > div > div {
@@ -141,28 +75,4 @@ body {
   max-width: none !important;
   margin: 0 !important;
   padding: 0 !important;
-}
-
-p,
-li,
-a,
-span,
-div,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  word-break: break-word;
-  text-justify: inter-ideograph;
-  -ms-text-autospace: ideograph-alpha;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-pre,
-code {
-  letter-spacing: normal;
-  word-spacing: normal;
 }

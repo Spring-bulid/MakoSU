@@ -1,34 +1,36 @@
+﻿/* MakoSU Home — FolkPatch-aligned styling */
+
 .mako-home {
   width: 100%;
   margin: 0;
   overflow-x: clip;
-  color: #20242b;
-  background: #f7f9f7;
 }
 
 .mako-shell {
-  width: min(1180px, calc(100% - 48px));
+  width: min(1152px, calc(100% - 48px));
   margin: 0 auto;
 }
 
+/* ── Hero ── */
 .mako-hero {
   position: relative;
   display: flex;
-  min-height: calc(100svh - 112px);
+  min-height: calc(100svh - 64px);
   max-height: 720px;
   overflow: hidden;
-  background: #edf3ee;
-  border-bottom: 1px solid #dce4de;
+  background: var(--vp-c-bg);
+  border-bottom: 1px solid var(--vp-c-divider);
 }
 
 .mako-hero-art {
   position: absolute;
   top: 50%;
   right: max(3vw, 24px);
-  width: min(52vw, 690px);
-  height: min(72vh, 690px);
+  width: min(48vw, 600px);
+  height: min(64vh, 600px);
   object-fit: contain;
   transform: translateY(-48%);
+  opacity: 0.85;
 }
 
 .mako-hero-content {
@@ -38,67 +40,64 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 72px 0 56px;
+  padding: 64px 0 48px;
 }
 
 .mako-kicker {
-  margin: 0 0 18px;
-  color: #2f7259;
+  margin: 0 0 14px;
+  color: var(--vp-c-brand-1);
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.4;
-  letter-spacing: 0;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .mako-hero h1 {
   margin: 0;
-  color: #1d2229;
-  font-size: 76px;
+  font-size: 72px;
   font-weight: 800;
   line-height: 0.98;
-  letter-spacing: 0;
+  letter-spacing: -0.02em;
+  color: var(--vp-c-text-1);
 }
 
 .mako-hero-title {
-  max-width: 660px;
-  margin: 22px 0 0;
-  color: #1d2229;
-  font-size: 30px;
+  max-width: 640px;
+  margin: 20px 0 0;
+  font-size: 28px;
   font-weight: 700;
   line-height: 1.25;
+  color: var(--vp-c-text-1);
 }
 
 .mako-hero-lead {
-  max-width: 610px;
-  margin: 18px 0 0;
-  color: #535d59;
-  font-size: 17px;
-  line-height: 1.8;
+  max-width: 600px;
+  margin: 16px 0 0;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--vp-c-text-2);
 }
 
 .mako-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 28px;
+  gap: 10px;
+  margin-top: 26px;
 }
 
 .mako-button {
   display: inline-flex;
-  min-height: 44px;
+  min-height: 42px;
   align-items: center;
   justify-content: center;
   padding: 0 20px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none !important;
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease,
-    transform 160ms ease;
+  transition: all 0.15s ease;
 }
 
 .mako-button:hover {
@@ -107,213 +106,236 @@
 
 .mako-button-primary {
   color: #fff !important;
-  background: #2f7259;
+  background: var(--vp-c-brand-1);
 }
 
 .mako-button-primary:hover {
-  background: #245b46;
+  background: var(--vp-c-brand-2);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
 }
 
 .mako-button-secondary {
-  color: #252b31 !important;
-  background: #fff;
-  border-color: #bdc9c0;
+  color: var(--vp-c-text-1) !important;
+  background: var(--vp-c-bg-soft);
+  border-color: var(--vp-c-divider);
 }
 
 .mako-button-secondary:hover {
-  border-color: #73877a;
+  border-color: var(--vp-c-brand-1);
 }
 
 .mako-facts {
   display: grid;
-  width: min(650px, 100%);
+  width: min(640px, 100%);
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
-  margin: 40px 0 0;
+  margin: 36px 0 0;
   padding: 0;
-  border-top: 1px solid #bdc9c0;
+  border-top: 1px solid var(--vp-c-divider);
 }
 
 .mako-facts > div {
   min-width: 0;
-  padding: 16px 18px 0 0;
+  padding: 14px 16px 0 0;
 }
 
 .mako-facts dt {
-  color: #20242b;
-  font-size: 15px;
-  font-weight: 750;
+  font-size: 14px;
+  font-weight: 700;
   line-height: 1.4;
+  color: var(--vp-c-text-1);
 }
 
 .mako-facts dd {
   margin: 4px 0 0;
-  color: #65706b;
   font-size: 12px;
   line-height: 1.5;
+  color: var(--vp-c-text-3);
 }
 
+/* ── Sections ── */
 .mako-section {
-  padding: 96px 0;
+  padding: 88px 0;
 }
 
 .mako-section-heading {
-  max-width: 760px;
-  margin-bottom: 42px;
+  max-width: 720px;
+  margin-bottom: 40px;
 }
 
 .mako-section-heading-wide {
-  max-width: 900px;
+  max-width: 880px;
 }
 
 .mako-section h2 {
   margin: 0;
-  color: inherit;
-  font-size: 40px;
-  font-weight: 760;
+  font-size: 38px;
+  font-weight: 750;
   line-height: 1.2;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
+  color: var(--vp-c-text-1);
 }
 
 .mako-section-heading > p:last-child,
-.mako-split-copy > p:last-of-type,
-.mako-safety-inner p {
-  margin: 18px 0 0;
-  color: #606963;
-  font-size: 16px;
-  line-height: 1.8;
+.mako-split-copy > p:last-of-type {
+  margin: 16px 0 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--vp-c-text-2);
 }
 
+/* ── Feature Grid ── */
 .mako-feature-section {
-  background: #fff;
+  background: var(--vp-c-bg-soft);
 }
 
 .mako-feature-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 .mako-feature {
-  min-height: 236px;
-  padding: 26px;
-  background: #f5f7f5;
-  border: 1px solid #e0e6e1;
-  border-radius: 8px;
+  min-height: 220px;
+  padding: 24px;
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mako-feature:hover {
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.dark .mako-feature:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
 .mako-feature-index {
-  color: #c05d63;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
+  color: var(--vp-c-brand-1);
 }
 
 .mako-feature h3,
 .mako-susfs-list h3 {
-  margin: 28px 0 0;
-  color: #242a31;
-  font-size: 20px;
-  font-weight: 720;
+  margin: 24px 0 0;
+  font-size: 18px;
+  font-weight: 700;
   line-height: 1.35;
-  letter-spacing: 0;
+  color: var(--vp-c-text-1);
 }
 
 .mako-feature p,
 .mako-susfs-list p {
-  margin: 12px 0 0;
-  color: #626b66;
-  font-size: 14px;
-  line-height: 1.75;
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--vp-c-text-2);
 }
 
+/* ── KMI Matrix ── */
 .mako-split {
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(520px, 1.18fr);
-  gap: 72px;
+  grid-template-columns: minmax(0, 0.8fr) minmax(500px, 1.2fr);
+  gap: 64px;
   align-items: start;
 }
 
 .mako-split-copy {
   position: sticky;
-  top: 96px;
+  top: 88px;
 }
 
 .mako-text-link {
   display: inline-flex;
-  margin-top: 26px;
-  color: #2f7259 !important;
+  margin-top: 24px;
+  color: var(--vp-c-brand-1) !important;
   font-size: 14px;
-  font-weight: 750;
+  font-weight: 700;
   text-decoration: none !important;
 }
 
+.mako-text-link:hover {
+  color: var(--vp-c-brand-2) !important;
+}
+
 .mako-kmi-section {
-  background: #f0f3f0;
+  background: var(--vp-c-bg);
 }
 
 .mako-kmi-list {
-  border-top: 2px solid #2c332f;
+  border-top: 2px solid var(--vp-c-text-1);
 }
 
 .mako-kmi-row {
   display: grid;
-  grid-template-columns: 1fr 90px minmax(180px, 1fr);
-  gap: 18px;
+  grid-template-columns: 1fr 90px minmax(170px, 1fr);
+  gap: 16px;
   align-items: center;
-  min-height: 62px;
-  border-bottom: 1px solid #cfd8d1;
+  min-height: 58px;
+  border-bottom: 1px solid var(--vp-c-divider);
   font-size: 14px;
+  color: var(--vp-c-text-1);
 }
 
 .mako-kmi-row strong {
-  color: #c05d63;
+  color: var(--vp-c-brand-1);
 }
 
 .mako-kmi-row code {
   padding: 0;
-  color: #3b4540;
   background: transparent;
   font-size: 13px;
+  color: var(--vp-c-text-2);
 }
 
+/* ── SuSFS ── */
 .mako-susfs-section {
   color: #f2f4f2;
-  background: #242a28;
+  background: #1e2328;
+}
+
+.dark .mako-susfs-section {
+  background: #161a1d;
 }
 
 .mako-susfs-section .mako-kicker {
-  color: #82c7a7;
+  color: var(--vp-c-brand-1);
 }
 
 .mako-susfs-section .mako-split-copy > p:last-of-type,
 .mako-susfs-list p {
-  color: #b8c1bc;
+  color: #b0b8c0;
+}
+
+.mako-susfs-section h2 {
+  color: #fff;
 }
 
 .mako-susfs-list {
-  border-top: 1px solid #57615c;
+  border-top: 1px solid #404850;
 }
 
 .mako-susfs-list > div {
   display: grid;
-  grid-template-columns: 150px 1fr;
-  gap: 28px;
-  padding: 24px 0;
-  border-bottom: 1px solid #414a45;
+  grid-template-columns: 140px 1fr;
+  gap: 24px;
+  padding: 22px 0;
+  border-bottom: 1px solid #363d44;
 }
 
 .mako-susfs-list h3 {
   margin: 0;
   color: #fff;
-  font-size: 17px;
+  font-size: 16px;
 }
 
-.mako-susfs-list p {
-  margin: 0;
-}
-
+/* ── Contract ── */
 .mako-contract-section {
-  background: #fff;
+  background: var(--vp-c-bg-soft);
 }
 
 .mako-contract-grid {
@@ -321,152 +343,105 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 0;
   padding: 0;
-  border-top: 2px solid #2c332f;
+  border-top: 2px solid var(--vp-c-text-1);
 }
 
 .mako-contract-grid > div {
   min-width: 0;
-  padding: 24px 24px 0 0;
+  padding: 22px 22px 0 0;
 }
 
 .mako-contract-grid dt {
-  color: #717974;
   font-size: 13px;
+  color: var(--vp-c-text-3);
 }
 
 .mako-contract-grid dd {
-  margin: 8px 0 0;
-  color: #22282e;
+  margin: 6px 0 0;
   font-family: var(--vp-font-family-mono);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   overflow-wrap: anywhere;
+  color: var(--vp-c-text-1);
 }
 
+/* ── Safety ── */
 .mako-safety-section {
   color: #fff;
-  background: #b9575e;
+  background: #1a1d23;
 }
 
-.mako-safety-section .mako-kicker,
-.mako-safety-inner p {
-  color: #ffe9e7;
+.dark .mako-safety-section {
+  background: #111316;
+}
+
+.mako-safety-section .mako-kicker {
+  color: var(--vp-c-brand-1);
+}
+
+.mako-safety-section h2 {
+  color: #fff;
+}
+
+.mako-safety-section p {
+  color: #a0a8b4;
 }
 
 .mako-safety-inner {
   display: flex;
-  gap: 44px;
+  gap: 40px;
   align-items: center;
   justify-content: space-between;
 }
 
 .mako-safety-inner > div {
-  max-width: 780px;
+  max-width: 740px;
 }
 
 .mako-button-light {
   flex: 0 0 auto;
-  color: #7a3238 !important;
-  background: #fff;
+  color: #fff !important;
+  background: var(--vp-c-brand-1);
 }
 
+.mako-button-light:hover {
+  background: var(--vp-c-brand-2);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+
+/* ── Footer ── */
 .mako-home-footer {
-  padding: 54px 0 64px;
-  background: #f7f9f7;
+  padding: 48px 0 56px;
+  background: var(--vp-c-bg);
+  border-top: 1px solid var(--vp-c-divider);
 }
 
 .mako-home-footer .mako-shell {
   display: flex;
-  gap: 32px;
+  gap: 28px;
   align-items: center;
 }
 
 .mako-home-footer img {
-  width: 180px;
+  width: 160px;
   height: auto;
+  opacity: 0.7;
 }
 
 .mako-home-footer p {
-  max-width: 660px;
+  max-width: 640px;
   margin: 0;
-  color: #69716d;
   font-size: 12px;
   line-height: 1.7;
+  color: var(--vp-c-text-3);
 }
 
-.dark .mako-home {
-  color: #eef2ef;
-  background: #171a19;
-}
-
-.dark .mako-hero {
-  background: #edf3ee;
-  border-color: #dce4de;
-}
-
-.dark .mako-hero-art {
-  opacity: 1;
-}
-
-.dark .mako-feature h3,
-.dark .mako-contract-grid dd {
-  color: #f5f7f5;
-}
-
-.dark .mako-section-heading > p:last-child,
-.dark .mako-split-copy > p:last-of-type,
-.dark .mako-feature p,
-.dark .mako-home-footer p {
-  color: #adb7b1;
-}
-
-.dark .mako-hero h1,
-.dark .mako-hero-title,
-.dark .mako-facts dt {
-  color: #1d2229;
-}
-
-.dark .mako-hero-lead,
-.dark .mako-facts dd {
-  color: #535d59;
-}
-
-.dark .mako-feature-section,
-.dark .mako-contract-section {
-  background: #171a19;
-}
-
-.dark .mako-feature {
-  background: #202522;
-  border-color: #343b37;
-}
-
-.dark .mako-kmi-section {
-  background: #1d211f;
-}
-
-.dark .mako-kmi-list,
-.dark .mako-contract-grid {
-  border-color: #d9dfdb;
-}
-
-.dark .mako-kmi-row {
-  border-color: #3c4540;
-}
-
-.dark .mako-kmi-row code {
-  color: #c8d0cb;
-}
-
-.dark .mako-home-footer {
-  background: #171a19;
-}
-
+/* ── Responsive ── */
 @media (max-width: 960px) {
   .mako-hero-art {
-    right: -10%;
-    width: 64vw;
-    opacity: 0.32;
+    right: -8%;
+    width: 56vw;
+    opacity: 0.28;
   }
 
   .mako-feature-grid {
@@ -475,7 +450,7 @@
 
   .mako-split {
     grid-template-columns: 1fr;
-    gap: 44px;
+    gap: 40px;
   }
 
   .mako-split-copy {
@@ -484,44 +459,43 @@
 
   .mako-contract-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 28px 0;
   }
 }
 
 @media (max-width: 640px) {
   .mako-shell {
-    width: min(100% - 32px, 1180px);
+    width: min(100% - 32px, 1152px);
   }
 
   .mako-hero {
-    min-height: calc(100svh - 96px);
+    min-height: calc(100svh - 80px);
     max-height: none;
   }
 
   .mako-hero-art {
     top: auto;
-    right: -18%;
-    bottom: -6%;
-    width: 108vw;
-    height: 62vh;
-    opacity: 0.16;
+    right: -14%;
+    bottom: -4%;
+    width: 100vw;
+    height: 56vh;
+    opacity: 0.14;
     transform: none;
   }
 
   .mako-hero-content {
-    padding: 54px 0 38px;
+    padding: 48px 0 32px;
   }
 
   .mako-hero h1 {
-    font-size: 54px;
+    font-size: 50px;
   }
 
   .mako-hero-title {
-    font-size: 25px;
+    font-size: 23px;
   }
 
   .mako-hero-lead {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .mako-actions,
@@ -530,11 +504,11 @@
   }
 
   .mako-section {
-    padding: 72px 0;
+    padding: 64px 0;
   }
 
   .mako-section h2 {
-    font-size: 31px;
+    font-size: 29px;
   }
 
   .mako-feature-grid {
@@ -546,9 +520,9 @@
   }
 
   .mako-kmi-row {
-    grid-template-columns: 1fr 58px;
-    gap: 12px;
-    padding: 14px 0;
+    grid-template-columns: 1fr 56px;
+    gap: 10px;
+    padding: 12px 0;
   }
 
   .mako-kmi-row code {
@@ -557,17 +531,16 @@
 
   .mako-susfs-list > div {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 6px;
   }
 
   .mako-contract-grid {
     grid-template-columns: 1fr;
-    gap: 0;
   }
 
   .mako-contract-grid > div {
-    padding: 18px 0;
-    border-bottom: 1px solid #d5ddd7;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--vp-c-divider);
   }
 
   .mako-safety-inner,
@@ -581,6 +554,6 @@
   }
 
   .mako-home-footer img {
-    width: min(220px, 70vw);
+    width: min(200px, 65vw);
   }
 }

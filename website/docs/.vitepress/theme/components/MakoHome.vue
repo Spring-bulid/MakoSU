@@ -12,7 +12,7 @@ const copy = computed(() =>
   isZh.value
     ? {
         eyebrow: 'MAKOSU MANAGER / GKI 2.0',
-        title: '把复杂的内核 Root 维护，收进一个可靠的管理器里。',
+        title: '把复杂的内核 Root 维护，收进一个可靠的管理器里',
         lead: 'MakoSU 统一管理权限、KMI 匹配、SuSFS、KPM、模块与内核刷写，并让签名身份和发布模块保持一致。',
         start: '了解功能',
         docs: '查看文档',
@@ -25,8 +25,7 @@ const copy = computed(() =>
         ],
         featureKicker: 'MANAGER CAPABILITIES',
         featureTitle: '日常操作更直接，失败路径更可控',
-        featureLead:
-          '功能围绕真实维护场景组织：识别设备、选择正确模块、管理隐藏配置，并为刷写失败保留恢复空间。',
+        featureLead: '功能围绕真实维护场景组织：识别设备、选择正确模块、管理隐藏配置，并为刷写失败保留恢复空间。',
         features: [
           ['01', '智能 KMI 匹配', '读取 Android KMI 标记并匹配对应 LKM，避免只看内核主版本强行加载。'],
           ['02', 'SuSFS 集中管理', '统一管理隐藏路径、映射、stat、vname、日志与自动启动配置。'],
@@ -37,13 +36,11 @@ const copy = computed(() =>
         ],
         kmiKicker: 'RELEASE KMI SET',
         kmiTitle: '七组正式 KMI，不靠模糊匹配碰运气',
-        kmiLead:
-          '当前发布面向 GKI 2.0。厂商 ABI、符号、配置和 KMI 标记仍需一致；5.4/GKI 1.0 暂不列入正式发布。',
+        kmiLead: '当前发布面向 GKI 2.0。厂商 ABI、符号、配置和 KMI 标记仍需一致；5.4/GKI 1.0 暂不列入正式发布。',
         kmiAction: '查看发布身份契约',
         susfsKicker: 'SUSFS USERSPACE',
         susfsTitle: '配置可靠性优先于功能堆叠',
-        susfsLead:
-          'MakoSU 对 SuSFS 用户空间链路做了事务化处理，减少卡顿、并发覆盖和启动阶段的不可恢复状态。',
+        susfsLead: 'MakoSU 对 SuSFS 用户空间链路做了事务化处理，减少卡顿、并发覆盖和启动阶段的不可恢复状态。',
         susfsItems: [
           ['原子保存', '临时文件、fsync 与原子替换降低异常中断后的配置损坏风险。'],
           ['严格解析', '拒绝截断数据、重复字段、超长内容和尾随垃圾数据。'],
@@ -52,8 +49,7 @@ const copy = computed(() =>
         ],
         contractKicker: 'RELEASE CONTRACT',
         contractTitle: '管理器与内核必须认同同一个身份',
-        contractLead:
-          '更换包名或证书不是单独的界面修改。任何身份字段发生变化，都需要重新构建 KMI 并验证 APK v2 证书。',
+        contractLead: '更换包名或证书不是单独的界面修改。任何身份字段发生变化，都需要重新构建 KMI 并验证 APK v2 证书。',
         contract: [
           ['应用包名', 'com.makosu.manager'],
           ['证书 DER 大小', '0x0549'],
@@ -61,76 +57,65 @@ const copy = computed(() =>
           ['用户空间 ABI', 'arm64 / armv7 / x86_64'],
         ],
         safetyTitle: '刷写前，先准备好恢复路径',
-        safetyLead:
-          '错误的内核、LKM、签名身份或目标分区都可能导致设备无法启动。请备份原始镜像，并确认 Fastboot 或 Recovery 可用。',
+        safetyLead: '错误的内核、LKM、签名身份或目标分区都可能导致设备无法启动。请备份原始镜像，并确认 Fastboot 或 Recovery 可用。',
         safetyAction: '查看源码',
-        copyright:
-          '与 Senren Banka 相关的角色及视觉素材归属于 YUZUSOFT 及其各自权利持有人。MakoSU 为非官方维护项目。',
+        copyright: '由 Senren Bright 与 MakoSU 维护者创建 · 按发布契约分发 · 所有代码公开可审查',
       }
     : {
         eyebrow: 'MAKOSU MANAGER / GKI 2.0',
-        title: 'Reliable kernel-root management packed into one clean manager.',
-        lead: 'MakoSU keeps permissions, KMI matching, SuSFS, KPM, modules, and kernel flashing consistent under a single release contract.',
-        start: 'Explore features',
-        docs: 'Read the docs',
+        title: 'Put complex kernel root maintenance into one reliable manager.',
+        lead: 'MakoSU unifies permission management, KMI matching, SuSFS, KPM, modules, and kernel flashing while keeping signature identity and release artifacts consistent.',
+        start: 'See features',
+        docs: 'Read docs',
         source: 'View source',
         facts: [
-          ['Android 8.0+', 'Min manager version'],
-          ['5.10 - 6.12', 'Official KMI support'],
-          ['7 KMI groups', 'Bundled per release'],
-          ['3 ABIs', 'Rust userspace components'],
+          ['Android 8.0+', 'Minimum manager version'],
+          ['5.10 – 6.12', 'Formal KMI range'],
+          ['7 KMI variants', 'Included per release'],
+          ['3 ABI targets', 'Rust userspace components'],
         ],
         featureKicker: 'MANAGER CAPABILITIES',
-        featureTitle: 'Surgical daily operations with clear failure stories',
-        featureLead:
-          'Features are organised around real maintenance workflows: identify the device, select the right module, manage hiding configuration, and keep recovery space for failed flashes.',
+        featureTitle: 'Direct daily operations, controlled failure paths',
+        featureLead: 'The feature set is organized around real maintenance workflows: identify the device, pick the right module, manage hiding configs, and preserve recovery paths when flashing fails.',
         features: [
-          ['01', 'Smart KMI matching', 'Reads the Android KMI marker and selects the matching LKM instead of guessing from the kernel major version.'],
-          ['02', 'Unified SuSFS management', 'Configure paths, maps, stat, vname, logging, and auto-start from one surface.'],
-          ['03', 'Recoverable module updates', 'New modules are staged and verified; if activation fails the manager rolls back to the last-known-good module and configuration.'],
-          ['04', 'Signature identity contract', 'Manager package name, APK Release certificate, and kernel-side expected hash are maintained as one release contract.'],
-          ['05', 'KPM & flash tooling', 'KPM, module management, boot-image patching, and kernel flashing from a single entry point.'],
-          ['06', 'Material + Miuix', 'Two UI skins, theme switching, and fallback icons balance information density with operational speed.'],
+          ['01', 'Smart KMI matching', 'Reads the Android KMI marker and loads the corresponding LKM instead of forcing a load based only on the kernel major version.'],
+          ['02', 'Centralized SuSFS', 'Manages hidden paths, mappings, stat, vname, logs, and auto-start configs in one place.'],
+          ['03', 'Recoverable module updates', 'New modules are staged and validated first; on failure, the manager tries to restore the previous config and module state.'],
+          ['04', 'Signature identity contract', 'The package name, APK Release certificate, and expected kernel hash are maintained as a single release contract.'],
+          ['05', 'KPM and flashing tools', 'Provides KPM, module management, boot image patching, and kernel flashing.'],
+          ['06', 'Material + Miuix', 'Two management UIs, theme switching, and fallback icons — balancing information density with operational efficiency.'],
         ],
         kmiKicker: 'RELEASE KMI SET',
-        kmiTitle: 'Seven official KMI groups, not fuzzy matching',
-        kmiLead:
-          'This release targets GKI 2.0. OEM ABI, symbols, configuration, and KMI marker must still align; 5.4/GKI 1.0 is not part of the official release set. ',
-        kmiAction: 'See the release contract',
+        kmiTitle: 'Seven formal KMI variants — no fuzzy matching',
+        kmiLead: 'Current releases target GKI 2.0. Vendor ABI, symbols, config, and KMI markers must still match; 5.4 / GKI 1.0 is not included in the formal release set.',
+        kmiAction: 'View release contract',
         susfsKicker: 'SUSFS USERSPACE',
-        susfsTitle: 'Configuration safety before feature count',
-        susfsLead:
-          'MakoSU wraps SuSFS userspace operations in transactional helpers to reduce jank, concurrent overwrites, and unrecoverable states during boot.',
+        susfsTitle: 'Configuration reliability over feature stacking',
+        susfsLead: 'MakoSU applies transactional handling to the SuSFS userspace chain, reducing jank, concurrent overwrites, and unrecoverable states during boot.',
         susfsItems: [
-          ['Atomic writes', 'Temp files, fsync, and atomic rename reduce corruption risk after unexpected interruption.'],
-          ['Strict parsing', 'Rejects truncated data, duplicate keys, oversized values, and trailing garbage.'],
-          ['Single-shot read', 'The manager reads the full configuration with a single root call, avoiding UI lag from repeated shell invocations.'],
-          ['Failure rollback', 'Auto-start modules and backup restore try to get back to the last usable state when something goes wrong.'],
+          ['Atomic save', 'Temporary files, fsync, and atomic replacement reduce the risk of config corruption after abnormal interruption.'],
+          ['Strict parsing', 'Rejects truncated data, duplicate fields, oversized content, and trailing garbage.'],
+          ['Single read', 'The manager reads the entire config in one root call, reducing UI lag caused by repeated command invocations.'],
+          ['Failure rollback', 'Auto-start modules and backup recovery attempt to return to the last known good state on failure.'],
         ],
         contractKicker: 'RELEASE CONTRACT',
-        contractTitle: 'Manager and kernel must agree on identity',
-        contractLead:
-          'Changing the package name or certificate is not a cosmetic edit. Any identity field change requires a proper KMI rebuild and APK v2 certificate verification.',
+        contractTitle: 'The manager and kernel must agree on one identity',
+        contractLead: 'Changing the package name or certificate is not a cosmetic UI change. Any identity field change requires rebuilding the KMI and re-verifying the APK v2 certificate.',
         contract: [
-          ['Package name', 'com.makosu.manager'],
+          ['Application ID', 'com.makosu.manager'],
           ['Certificate DER size', '0x0549'],
-          ['Release KMIs', '7'],
-          ['Userspace ABIs', 'arm64 / armv7 / x86_64'],
+          ['Release KMI variants', '7'],
+          ['Userspace ABI', 'arm64 / armv7 / x86_64'],
         ],
-        safetyTitle: 'Prepare recovery before flashing',
-        safetyLead:
-          'A mismatched kernel, LKM, signing identity, or target partition can make a device unbootable. Keep the original image and a working Fastboot or Recovery path.',
+        safetyTitle: 'Prepare a recovery path before flashing',
+        safetyLead: 'Wrong kernel, LKM, signature identity, or target partition can leave a device unable to boot. Back up the original image and confirm Fastboot or Recovery is available.',
         safetyAction: 'View source',
-        copyright:
-          'Characters and visual material related to Senren Banka belong to YUZUSOFT and their respective rightsholders. MakoSU is an unofficial maintenance project.',
+        copyright: 'Created by Senren Bright and MakoSU maintainers · Distributed per the release contract · All source is open for review',
       }
 )
 
 const kmiRows = [
-  ['Android 12', '5.10', 'android12-5.10'],
-  ['Android 13', '5.10', 'android13-5.10'],
   ['Android 13', '5.15', 'android13-5.15'],
-  ['Android 14', '5.15', 'android14-5.15'],
   ['Android 14', '6.1', 'android14-6.1'],
   ['Android 15', '6.6', 'android15-6.6'],
   ['Android 16', '6.12', 'android16-6.12'],
@@ -246,3 +231,47 @@ const kmiRows = [
     </footer>
   </div>
 </template>
+
+<style scoped>
+.mako-home {
+  width: 100%;
+}
+
+.mako-kicker {
+  color: var(--vp-c-brand-1);
+}
+
+.mako-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mako-button-primary {
+  background: var(--vp-c-brand-1) !important;
+  color: #fff !important;
+}
+
+.mako-button-primary:hover {
+  background: var(--vp-c-brand-2) !important;
+}
+
+.mako-button-secondary {
+  background: var(--vp-c-bg-soft) !important;
+  color: var(--vp-c-text-1) !important;
+  border: 1px solid var(--vp-c-divider) !important;
+}
+
+.mako-button-light {
+  background: var(--vp-c-brand-1) !important;
+  color: #fff !important;
+}
+
+.mako-text-link {
+  color: var(--vp-c-brand-1) !important;
+}
+
+.mako-text-link:hover {
+  color: var(--vp-c-brand-2) !important;
+}
+</style>
