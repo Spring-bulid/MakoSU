@@ -1,42 +1,57 @@
-﻿/* MakoSU VitePress theme — exact FolkPatch match */
+/* MakoSU VitePress theme — FolkPatch Plume theme match */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  /* ── FolkPatch brand (blue) ── */
-  --vp-c-brand-1: #3b82f6;
-  --vp-c-brand-2: #2563eb;
-  --vp-c-brand-3: #1d4ed8;
-  --vp-c-brand-soft: rgba(59, 130, 246, 0.14);
+  /* ── FolkPatch Plume brand (purple gradient) ── */
+  --vp-c-brand-1: #8b5cf6;
+  --vp-c-brand-2: #7c3aed;
+  --vp-c-brand-3: #6d28d9;
+  --vp-c-brand-soft: rgba(139, 92, 246, 0.14);
 
-  /* ── Hero gradient matching FolkPatch ── */
+  /* ── Purple accent ── */
+  --vp-c-purple-1: #a78bfa;
+  --vp-c-purple-2: #8b5cf6;
+  --vp-c-purple-3: #7c3aed;
+
+  /* ── Hero gradient matching FolkPatch Plume ── */
   --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #8b5cf6 100%);
+  --vp-home-hero-name-background: linear-gradient(315deg, #a78bfa 15%, #8b5cf6 65%, #7c3aed 100%);
   --vp-home-hero-image-background-image: none;
   --vp-home-hero-image-filter: none;
 
-  /* ── Layout matching FolkPatch ── */
+  /* ── Layout ── */
   --vp-nav-height: 64px;
   --vp-sidebar-width: 272px;
   --vp-layout-max-width: 1440px;
 
-  /* ── Font matching FolkPatch ── */
-  --vp-font-family-base: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --vp-font-family-mono: ui-monospace, 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+  /* ── Font ── */
+  --vp-font-family-base: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --vp-font-family-mono: ui-monospace, 'Menlo', 'Monaco', 'Consolas', monospace;
+
+  /* ── Hero text ── */
+  --vp-c-text-hero-name: var(--vp-c-text-1);
+  --vp-c-text-hero-tagline: var(--vp-c-text-2);
+  --vp-c-text-hero-text: var(--vp-c-text-2);
 
   /* ── Buttons ── */
   --vp-button-brand-bg: var(--vp-c-brand-1);
   --vp-button-brand-text: #ffffff;
   --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-alt-bg: var(--vp-c-bg-soft);
+  --vp-button-alt-text: var(--vp-c-text-1);
+  --vp-button-alt-hover-bg: var(--vp-c-bg-mute);
 }
 
 [data-theme='dark'] {
-  --vp-c-brand-1: #60a5fa;
-  --vp-c-brand-2: #3b82f6;
-  --vp-c-brand-3: #2563eb;
-  --vp-c-brand-soft: rgba(96, 165, 250, 0.16);
+  --vp-c-brand-1: #a78bfa;
+  --vp-c-brand-2: #8b5cf6;
+  --vp-c-brand-3: #7c3aed;
+  --vp-c-brand-soft: rgba(167, 139, 250, 0.16);
 
-  --vp-home-hero-name-background: linear-gradient(135deg, #60a5fa 0%, #22d3ee 50%, #a78bfa 100%);
+  --vp-home-hero-name-background: linear-gradient(315deg, #c4b5fd 15%, #a78bfa 65%, #8b5cf6 100%);
 
-  --vp-button-brand-bg: #60a5fa;
+  --vp-button-brand-bg: #a78bfa;
   --vp-button-brand-text: #000000;
 }
 
@@ -47,7 +62,7 @@
   :root { --vp-home-hero-image-filter: blur(68px); }
 }
 
-/* ── FolkPatch-style nav ── */
+/* ── FolkPatch-style nav (frosted glass) ── */
 .VPNav {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
@@ -57,17 +72,35 @@
   border-bottom: 1px solid var(--vp-c-divider);
 }
 
-/* ── Smooth transitions ── */
+/* ── Smooth button transitions (FolkPatch style) ── */
 .VPButton.brand {
   font-weight: 600;
+  border-radius: 8px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
 .VPButton.brand:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
 }
 
-/* ── Homepage full-width override ── */
+.VPButton.alt {
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--vp-c-divider);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.VPButton.alt:hover {
+  transform: translateY(-1px);
+  border-color: var(--vp-c-brand-1);
+}
+
+/* ── Homepage full-width ── */
+.VPHome {
+  padding: 0 !important;
+}
+
 .VPHome .vp-doc.container,
 .VPHome .vp-doc.container > div,
 .VPHome .vp-doc.container > div > div {
@@ -75,4 +108,31 @@
   max-width: none !important;
   margin: 0 !important;
   padding: 0 !important;
+}
+
+/* ── Hide default VitePress hero/features on home (we use custom MakoHome) ── */
+.VPHome .VPHero {
+  display: none !important;
+}
+
+.VPHome .VPFeatures {
+  display: none !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--vp-c-divider);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vp-c-text-3);
 }

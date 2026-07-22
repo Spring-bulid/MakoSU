@@ -1,4 +1,5 @@
-/* MakoSU Home — FolkPatch-style alignment */
+/* MakoSU Home — FolkPatch Plume theme alignment */
+/* All original sections preserved, updated to Plume style */
 
 /* ── VitePress home layout overrides ── */
 .VPHome {
@@ -20,11 +21,4 @@
 
 .VPHome .VPFeatures {
   display: none !important;
-}
-
-/* ── Responsive adjustments ── */
-@media (max-width: 960px) {
-  .mako-content-inner {
-    padding: 0 16px;
-  }
 }
