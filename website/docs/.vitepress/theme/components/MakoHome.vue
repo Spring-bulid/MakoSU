@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
 import { useData, withBase } from 'vitepress'
 
@@ -28,20 +28,12 @@ const copy = computed(() =>
         featureLead:
           '功能围绕真实维护场景组织：识别设备、选择正确模块、管理隐藏配置，并为刷写失败保留恢复空间。',
         features: [
-          [
-            '01',
-            '智能 KMI 匹配',
-            '读取 Android KMI 标记并匹配对应 LKM，避免只看内核主版本强行加载。',
-          ],
-          ['02', 'SuSFS 集中管理', '统一管理隐藏路径、映射、Kstat、uname、日志与自动启动配置。'],
+          ['01', '智能 KMI 匹配', '读取 Android KMI 标记并匹配对应 LKM，避免只看内核主版本强行加载。'],
+          ['02', 'SuSFS 集中管理', '统一管理隐藏路径、映射、stat、vname、日志与自动启动配置。'],
           ['03', '可恢复的模块更新', '新模块先暂存和校验，启用失败时尝试恢复旧配置与旧模块状态。'],
-          [
-            '04',
-            '签名身份契约',
-            '管理器包名、APK Release 证书与内核预期哈希作为同一发布契约维护。',
-          ],
-          ['05', 'KPM 与刷写工具', '提供 KPM、模块管理、启动镜像修补和内核刷写入口。'],
-          ['06', 'Material 与 Miuix', '两套管理界面、主题切换和备用图标，兼顾信息密度与操作效率。'],
+          ['04', '签名身份契约', '管理器包名、APK Release 证书与内核预期哈希作为同一发布契约维护。'],
+          ['05', 'KPM 与刷写工具', '提供 KPM、模块管理、启动镜像修补和内核刷写入库。'],
+          ['06', 'Material + Miuix', '两套管理界面、主题切换和备用图标，兼顾信息密度与操作效率。'],
         ],
         kmiKicker: 'RELEASE KMI SET',
         kmiTitle: '七组正式 KMI，不靠模糊匹配碰运气',
@@ -73,90 +65,54 @@ const copy = computed(() =>
           '错误的内核、LKM、签名身份或目标分区都可能导致设备无法启动。请备份原始镜像，并确认 Fastboot 或 Recovery 可用。',
         safetyAction: '查看源码',
         copyright:
-          '与《千恋＊万花》相关的角色与视觉素材归 YUZUSOFT 及相应权利人所有。MakoSU 为非官方维护项目。',
+          '与 Senren Banka 相关的角色及视觉素材归属于 YUZUSOFT 及其各自权利持有人。MakoSU 为非官方维护项目。',
       }
     : {
         eyebrow: 'MAKOSU MANAGER / GKI 2.0',
-        title: 'Reliable kernel-root maintenance in one focused manager.',
-        lead: 'MakoSU brings permissions, KMI matching, SuSFS, KPM, modules, and kernel flashing into one release contract.',
+        title: 'Reliable kernel-root management packed into one clean manager.',
+        lead: 'MakoSU keeps permissions, KMI matching, SuSFS, KPM, modules, and kernel flashing consistent under a single release contract.',
         start: 'Explore features',
-        docs: 'Read docs',
+        docs: 'Read the docs',
         source: 'View source',
         facts: [
-          ['Android 8.0+', 'Manager minimum'],
-          ['5.10 - 6.12', 'Release KMI range'],
-          ['7 KMIs', 'Bundled per release'],
-          ['3 ABIs', 'Rust userspace'],
+          ['Android 8.0+', 'Min manager version'],
+          ['5.10 - 6.12', 'Official KMI support'],
+          ['7 KMI groups', 'Bundled per release'],
+          ['3 ABIs', 'Rust userspace components'],
         ],
         featureKicker: 'MANAGER CAPABILITIES',
-        featureTitle: 'Direct daily workflows with recoverable failure paths',
+        featureTitle: 'Surgical daily operations with clear failure stories',
         featureLead:
-          'The Manager is organized around real maintenance work: identify the device, select the correct module, manage hiding settings, and retain a recovery path.',
+          'Features are organised around real maintenance workflows: identify the device, select the right module, manage hiding configuration, and keep recovery space for failed flashes.',
         features: [
-          [
-            '01',
-            'KMI-aware matching',
-            'Reads Android KMI markers and avoids selecting an LKM from the major kernel version alone.',
-          ],
-          [
-            '02',
-            'SuSFS management',
-            'Manages hidden paths, maps, Kstat, uname, logging, and auto-start settings in one place.',
-          ],
-          [
-            '03',
-            'Recoverable updates',
-            'Stages and validates new modules, then restores the previous state when activation fails.',
-          ],
-          [
-            '04',
-            'Signing contract',
-            'Keeps the Manager package, APK certificate, and kernel certificate expectations aligned.',
-          ],
-          [
-            '05',
-            'KPM and flashing',
-            'Provides KPM, module management, boot-image patching, and kernel flashing tools.',
-          ],
-          [
-            '06',
-            'Material and Miuix',
-            'Two focused interfaces with theme switching and alternate launcher icon support.',
-          ],
+          ['01', 'Smart KMI matching', 'Reads the Android KMI marker and selects the matching LKM instead of guessing from the kernel major version.'],
+          ['02', 'Unified SuSFS management', 'Configure paths, maps, stat, vname, logging, and auto-start from one surface.'],
+          ['03', 'Recoverable module updates', 'New modules are staged and verified; if activation fails the manager rolls back to the last-known-good module and configuration.'],
+          ['04', 'Signature identity contract', 'Manager package name, APK Release certificate, and kernel-side expected hash are maintained as one release contract.'],
+          ['05', 'KPM & flash tooling', 'KPM, module management, boot-image patching, and kernel flashing from a single entry point.'],
+          ['06', 'Material + Miuix', 'Two UI skins, theme switching, and fallback icons balance information density with operational speed.'],
         ],
         kmiKicker: 'RELEASE KMI SET',
-        kmiTitle: 'Seven release KMIs, selected with explicit compatibility data',
+        kmiTitle: 'Seven official KMI groups, not fuzzy matching',
         kmiLead:
-          'The formal release targets GKI 2.0. Vendor ABI, symbols, configuration, and KMI markers must still match. Kernel 5.4 remains experimental.',
-        kmiAction: 'Review release contract',
+          'This release targets GKI 2.0. OEM ABI, symbols, configuration, and KMI marker must still align; 5.4/GKI 1.0 is not part of the official release set. ',
+        kmiAction: 'See the release contract',
         susfsKicker: 'SUSFS USERSPACE',
-        susfsTitle: 'Configuration reliability before feature count',
+        susfsTitle: 'Configuration safety before feature count',
         susfsLead:
-          'MakoSU makes the SuSFS userspace path transactional to reduce UI stalls, concurrent overwrites, and unrecoverable boot-time states.',
+          'MakoSU wraps SuSFS userspace operations in transactional helpers to reduce jank, concurrent overwrites, and unrecoverable states during boot.',
         susfsItems: [
-          [
-            'Atomic writes',
-            'Temporary files, fsync, and atomic replacement reduce corruption after interrupted writes.',
-          ],
-          [
-            'Strict parsing',
-            'Rejects truncated data, duplicate fields, oversized values, and trailing bytes.',
-          ],
-          [
-            'Single read',
-            'Loads the complete configuration through one root call instead of many sequential commands.',
-          ],
-          [
-            'Rollback',
-            'Auto-start updates and restores attempt to return to the last usable module state.',
-          ],
+          ['Atomic writes', 'Temp files, fsync, and atomic rename reduce corruption risk after unexpected interruption.'],
+          ['Strict parsing', 'Rejects truncated data, duplicate keys, oversized values, and trailing garbage.'],
+          ['Single-shot read', 'The manager reads the full configuration with a single root call, avoiding UI lag from repeated shell invocations.'],
+          ['Failure rollback', 'Auto-start modules and backup restore try to get back to the last usable state when something goes wrong.'],
         ],
         contractKicker: 'RELEASE CONTRACT',
-        contractTitle: 'The Manager and kernel must agree on one identity',
+        contractTitle: 'Manager and kernel must agree on identity',
         contractLead:
-          'Changing the package or certificate is not a cosmetic edit. Every identity change requires rebuilt KMIs and another APK v2 certificate verification.',
+          'Changing the package name or certificate is not a cosmetic edit. Any identity field change requires a proper KMI rebuild and APK v2 certificate verification.',
         contract: [
-          ['Application package', 'com.makosu.manager'],
+          ['Package name', 'com.makosu.manager'],
           ['Certificate DER size', '0x0549'],
           ['Release KMIs', '7'],
           ['Userspace ABIs', 'arm64 / armv7 / x86_64'],

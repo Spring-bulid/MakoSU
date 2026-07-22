@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitepress'
+﻿import { defineConfig } from 'vitepress'
 import { groupIconMdPlugin, groupIconVitePlugin } from 'vitepress-plugin-group-icons'
 import {
   GitChangelog,
@@ -126,11 +126,9 @@ export default defineConfig({
   cleanUrls: true,
   metaChunk: true,
 
-  // Global performance optimizations
   cacheDir: './.vitepress/cache',
   ignoreDeadLinks: false,
 
-  // Enhanced markdown with performance focus
   markdown: {
     math: true,
     config(md) {
@@ -157,121 +155,41 @@ export default defineConfig({
   sitemap: {
     hostname: 'https://spring-bulid.github.io/MakoSU',
     transformItems(items) {
-      return items
-        .filter((item) => !item.url.includes('404'))
-        .map((item) => ({
-          ...item,
-          changefreq:
-            item.url === '/' ? 'daily' : item.url.includes('/guide/') ? 'weekly' : 'monthly',
-          priority: item.url === '/' ? 1.0 : item.url.includes('/guide/') ? 0.9 : 0.7,
-        }))
+      return items.filter((item) => !item.url.includes('/en/'))
     },
   },
 
-  // Critical performance transformations
-  transformPageData(pageData) {
-    const canonicalUrl = `https://spring-bulid.github.io/MakoSU/${pageData.relativePath}`
-      .replace(/index\.md$/, '')
-      .replace(/\.md$/, '')
-
-    pageData.frontmatter.head ??= []
-    pageData.frontmatter.head.push(
-      ['link', { rel: 'canonical', href: canonicalUrl }],
-      ['meta', { property: 'og:url', content: canonicalUrl }],
-      ['link', { rel: 'preload', href: '/MakoSU/makosu-manager.png', as: 'image' }]
-    )
-
-    return pageData
-  },
-
   head: [
-    // Critical resource hints for global performance
-    ['link', { rel: 'dns-prefetch', href: '//github.com' }],
-    ['link', { rel: 'dns-prefetch', href: '//githubusercontent.com' }],
-
-    // Essential favicon setup - synced from /favicon during build/dev
-    ['link', { rel: 'icon', type: 'image/png', sizes: '96x96', href: '/MakoSU/favicon-96x96.png' }],
-    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/MakoSU/apple-touch-icon.png' }],
-
-    // Web App Manifest
-    ['link', { rel: 'manifest', href: '/MakoSU/site.webmanifest' }],
-
-    // Theme and app configuration
+    ['link', { rel: 'icon', href: '/favicon-96x96.png' }],
+    ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
+    ['link', { rel: 'manifest', href: '/site.webmanifest' }],
     ['meta', { name: 'theme-color', content: '#2f7259' }],
-    ['meta', { name: 'application-name', content: 'MakoSU' }],
-    ['meta', { name: 'apple-mobile-web-app-title', content: 'MakoSU' }],
-    ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
-    ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'default' }],
-
-    // Viewport and mobile optimization
-    [
-      'meta',
-      { name: 'viewport', content: 'width=device-width, initial-scale=1.0, viewport-fit=cover' },
-    ],
-    ['meta', { name: 'format-detection', content: 'telephone=no' }],
-    ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:site_name', content: 'MakoSU' }],
-    ['meta', { property: 'og:url', content: 'https://spring-bulid.github.io/MakoSU/' }],
-    ['meta', { property: 'og:locale', content: 'en_US' }],
-    ['meta', { property: 'og:locale:alternate', content: 'zh_CN' }],
-
-    // Twitter optimization for global audience
-    ['meta', { property: 'twitter:card', content: 'summary_large_image' }],
-    // (Removed Twitter image as no PNG social image is provided)
-
-    // Additional SEO optimizations
-    [
-      'meta',
-      {
-        name: 'robots',
-        content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
-      },
-    ],
-    ['meta', { name: 'bingbot', content: 'index, follow' }],
+    ['meta', { name: 'og:type', content: 'website' }],
+    ['meta', { name: 'og:locale', content: 'zh-Hans' }],
+    ['meta', { name: 'og:site_name', content: 'MakoSU' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { name: 'referrer', content: 'strict-origin-when-cross-origin' }],
 
-    // Global SEO optimization
-    [
-      'meta',
-      {
-        name: 'keywords',
-        content:
-          'MakoSU, Android root, KernelSU, SuSFS, KMI, KPM, GKI, Android kernel, root management',
-      },
-    ],
+    ['meta', {
+      name: 'keywords',
+      content: 'MakoSU, Android root, KernelSU, SuSFS, KMI, KPM, GKI, Android kernel, root management',
+    }],
     ['meta', { name: 'author', content: 'MakoSU maintainers' }],
 
-    // Enhanced structured data for global search engines
-    [
-      'script',
-      { type: 'application/ld+json' },
-      JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'SoftwareApplication',
-        name: 'MakoSU',
-        description: 'Reliable kernel-root management for GKI Android devices',
-        applicationCategory: 'SystemApplication',
-        operatingSystem: 'Android',
-        url: 'https://spring-bulid.github.io/MakoSU/',
-        downloadUrl: 'https://github.com/Spring-bulid/MakoSU',
-        supportingData: {
-          '@type': 'DataCatalog',
-          name: 'Compatibility Database',
-        },
-        offers: {
-          '@type': 'Offer',
-          price: '0',
-          priceCurrency: 'USD',
-        },
-        author: {
-          '@type': 'Organization',
-          name: 'MakoSU maintainers',
-          url: 'https://github.com/Spring-bulid',
-        },
-      }),
-    ],
+    ['script', { type: 'application/ld+json' }, JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'MakoSU',
+      description: 'Reliable kernel-root management for GKI Android devices',
+      applicationCategory: 'SystemApplication',
+      operatingSystem: 'Android',
+      url: 'https://spring-bulid.github.io/MakoSU/',
+      downloadUrl: 'https://github.com/Spring-bulid/MakoSU',
+      supportingData: { '@type': 'DataCatalog', name: 'Compatibility Database' },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      author: { '@type': 'Organization', name: 'MakoSU maintainers', url: 'https://github.com/Spring-bulid' },
+    })],
 
-    // PWA optimization for global mobile users (manifest declared above)
     ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
     ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }],
     ['meta', { name: 'apple-mobile-web-app-title', content: 'MakoSU' }],
@@ -279,7 +197,6 @@ export default defineConfig({
 
   themeConfig: {
     logo: { src: '/makosu-manager.png', width: 28, height: 28 },
-
     socialLinks: [{ icon: 'github', link: 'https://github.com/Spring-bulid/MakoSU' }],
     editLink: {
       pattern: 'https://github.com/Spring-bulid/MakoSU/edit/main/website/docs/:path',
@@ -308,11 +225,8 @@ export default defineConfig({
       cssCodeSplit: true,
       sourcemap: false,
     },
-
     server: {
-      fs: {
-        allow: ['..'],
-      },
+      fs: { allow: ['..'] },
     },
   },
 })

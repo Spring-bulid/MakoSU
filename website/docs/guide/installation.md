@@ -1,4 +1,4 @@
----
+﻿---
 title: 安装与更新
 description: 安全安装、更新 MakoSU Manager 与正式 KMI 模块。
 ---
@@ -66,7 +66,7 @@ sha256sum MakoSU_*.apk MakoSU_*.zip
 2. 备份原始镜像、当前可用镜像以及重要的 SuSFS 配置。
 3. 先安装同一 Release 的 Manager，再使用该 Release 提供的 KMI 或内核产物。
 4. 不要把新 Manager 与旧下游的 `kernelsu.ko` 混用。
-5. A/B 设备执行“安装到未使用槽位”时，只能用于 OTA 完成后、首次重启前的明确场景，并核对目标槽位。
+5. A/B 设备执行"安装到未使用槽位"时，只能用于 OTA 完成后、首次重启前的明确场景，并核对目标槽位。
 
 ## 安装后检查
 
@@ -76,4 +76,4 @@ sha256sum MakoSU_*.apk MakoSU_*.zip
 - SuSFS 页面显示的能力与设备内核实际启用项一致。
 - 重启一次后状态仍然存在，没有进入回滚或异常槽位。
 
-若 Manager 显示“未安装”或刷写后无法启动，请立即转到[故障排查与救砖](/guide/troubleshooting)，不要连续尝试不同 LKM。
+若 Manager 显示"未安装"或刷写后无法启动，请立即转到[故障排查与救砖](/guide/troubleshooting)，不要连续尝试不同 LKM。
