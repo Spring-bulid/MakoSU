@@ -32,19 +32,19 @@
              },
     "devDependencies":  {
                             "@types/node":  "^26.1.1",
-                            "@types/serviceworker":  "^0.0.199",
+                            "@types/serviceworker":  "^0.0.200",
                             "markdown-it-footnote":  "^4.0.0",
                             "markdown-it-mark":  "^4.0.0",
                             "markdown-it-mathjax3":  "^5.2.0",
                             "markdown-it-sub":  "^2.0.0",
                             "markdown-it-task-lists":  "^2.1.1",
-                            "prettier":  "^3.9.5",
+                            "prettier":  "^3.9.6",
                             "terser":  "^5.49.0",
                             "ts-node":  "^10.9.2",
                             "tsx":  "^4.23.1",
                             "typescript":  "^7.0.2",
                             "vitepress":  "1.6.4",
-                            "vue":  "^3.5.39"
+                            "vue":  "^3.5.40"
                         },
     "engines":  {
                     "node":  "\u003e=22"
