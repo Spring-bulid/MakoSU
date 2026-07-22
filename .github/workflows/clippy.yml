@@ -22,8 +22,8 @@ jobs:
   clippy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: android-actions/setup-android@v3
+      - uses: actions/checkout@v7
+      - uses: android-actions/setup-android@v4
       - run: sdkmanager "ndk;29.0.14206865"
       - uses: dtolnay/rust-toolchain@stable
         with:
