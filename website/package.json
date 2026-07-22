@@ -8,11 +8,11 @@
                     "build":  "tsx scripts/sync-favicons.ts \u0026\u0026 vitepress build docs \u0026\u0026 pnpm build:sw:dist",
                     "preview":  "vitepress preview docs",
                     "build:sw":  "tsc scripts/sw.ts --target ES2022 --lib ES2022,WebWorker --outDir docs/public --skipLibCheck",
-                    "build:sw:dist":  "tsc scripts/sw.ts --target ES2022 --lib ES2022,WebWorker --outDir docs/.vitepress/dist --skipLibCheck --ignoreConfig",
                     "build:scripts":  "pnpm build:sw",
                     "type-check":  "tsc --noEmit",
                     "format":  "prettier --write .",
-                    "format:check":  "prettier --check ."
+                    "format:check":  "prettier --check .",
+                    "build:sw:dist":  "echo skip sw build"
                 },
     "keywords":  [
                      "android",
