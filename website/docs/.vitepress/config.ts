@@ -1,5 +1,5 @@
 ﻿import { defineConfig } from 'vitepress'
-import { groupIconMdPlugin, groupIconVitePlugin } from 'vitepress-plugin-group-icons'
+// import { groupIconMdPlugin, groupIconVitePlugin } from 'vitepress-plugin-group-icons'
 import {
   GitChangelog,
   GitChangelogMarkdownSection,
@@ -132,7 +132,7 @@ export default defineConfig({
   markdown: {
     math: true,
     config(md) {
-      md.use(groupIconMdPlugin)
+      // md.use(groupIconMdPlugin)
       md.use(footnote)
       md.use(mark)
       md.use(sub)
@@ -230,3 +230,4 @@ export default defineConfig({
     },
   },
 })
+
