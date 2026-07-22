@@ -1,57 +1,57 @@
-{
-  "name": "makosu-site",
-  "version": "2.0.0",
-  "description": "MakoSU Manager - reliable kernel-root management for GKI Android devices",
-  "type": "module",
-  "scripts": {
-    "dev": "tsx scripts/sync-favicons.ts && vitepress dev docs --host",
-    "build": "tsx scripts/sync-favicons.ts && vitepress build docs && pnpm build:sw:dist",
-    "preview": "vitepress preview docs",
-    "build:sw": "tsc scripts/sw.ts --target ES2022 --lib ES2022,WebWorker --outDir docs/public --skipLibCheck",
-    "build:sw:dist": "tsc scripts/sw.ts --target ES2022 --lib ES2022,WebWorker --outDir docs/.vitepress/dist --skipLibCheck",
-    "build:scripts": "pnpm build:sw",
-    "type-check": "tsc --noEmit",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
-  },
-  "keywords": [
-    "android",
-    "root",
-    "kernelsu",
-    "makosu",
-    "documentation",
-    "vitepress"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Spring-bulid/MakoSU.git"
-  },
-  "homepage": "https://spring-bulid.github.io/MakoSU/",
-  "bugs": {
-    "url": "https://github.com/Spring-bulid/MakoSU/issues"
-  },
-  "devDependencies": {
-    "@types/node": "^26.1.1",
-    "@types/serviceworker": "^0.0.199",
-    "markdown-it-footnote": "^4.0.0",
-    "markdown-it-mark": "^4.0.0",
-    "markdown-it-mathjax3": "^5.2.0",
-    "markdown-it-sub": "^2.0.0",
-    "markdown-it-task-lists": "^2.1.1",
-    "prettier": "^3.9.5",
-    "terser": "^5.49.0",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.23.1",
-    "typescript": "^7.0.2",
-    "vitepress": "1.6.4",
-    "vue": "^3.5.39"
-  },
-  "engines": {
-    "node": ">=22"
-  },
-  "packageManager": "pnpm@10.17.1",
-  "dependencies": {
-    "@nolebase/vitepress-plugin-git-changelog": "^2.18.2",
-    "vitepress-plugin-group-icons": "^1.7.5"
-  }
+﻿{
+    "name":  "makosu-site",
+    "version":  "2.0.0",
+    "description":  "MakoSU Manager - reliable kernel-root management for GKI Android devices",
+    "type":  "module",
+    "scripts":  {
+                    "dev":  "tsx scripts/sync-favicons.ts \u0026\u0026 vitepress dev docs --host",
+                    "build":  "tsx scripts/sync-favicons.ts \u0026\u0026 vitepress build docs \u0026\u0026 pnpm build:sw:dist",
+                    "preview":  "vitepress preview docs",
+                    "build:sw":  "tsc scripts/sw.ts --target ES2022 --lib ES2022,WebWorker --outDir docs/public --skipLibCheck",
+                    "build:sw:dist":  "tsc scripts/sw.ts --target ES2022 --lib ES2022,WebWorker --outDir docs/.vitepress/dist --skipLibCheck --ignoreConfig",
+                    "build:scripts":  "pnpm build:sw",
+                    "type-check":  "tsc --noEmit",
+                    "format":  "prettier --write .",
+                    "format:check":  "prettier --check ."
+                },
+    "keywords":  [
+                     "android",
+                     "root",
+                     "kernelsu",
+                     "makosu",
+                     "documentation",
+                     "vitepress"
+                 ],
+    "repository":  {
+                       "type":  "git",
+                       "url":  "https://github.com/Spring-bulid/MakoSU.git"
+                   },
+    "homepage":  "https://spring-bulid.github.io/MakoSU/",
+    "bugs":  {
+                 "url":  "https://github.com/Spring-bulid/MakoSU/issues"
+             },
+    "devDependencies":  {
+                            "@types/node":  "^26.1.1",
+                            "@types/serviceworker":  "^0.0.199",
+                            "markdown-it-footnote":  "^4.0.0",
+                            "markdown-it-mark":  "^4.0.0",
+                            "markdown-it-mathjax3":  "^5.2.0",
+                            "markdown-it-sub":  "^2.0.0",
+                            "markdown-it-task-lists":  "^2.1.1",
+                            "prettier":  "^3.9.5",
+                            "terser":  "^5.49.0",
+                            "ts-node":  "^10.9.2",
+                            "tsx":  "^4.23.1",
+                            "typescript":  "^7.0.2",
+                            "vitepress":  "1.6.4",
+                            "vue":  "^3.5.39"
+                        },
+    "engines":  {
+                    "node":  "\u003e=22"
+                },
+    "packageManager":  "pnpm@10.17.1",
+    "dependencies":  {
+                         "@nolebase/vitepress-plugin-git-changelog":  "^2.18.2",
+                         "vitepress-plugin-group-icons":  "^1.7.5"
+                     }
 }
