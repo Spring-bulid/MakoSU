@@ -175,6 +175,16 @@ internal fun selinuxDisplay(status: String): String = when (status) {
 @Composable
 internal fun ListInfoCard(state: HomeUiState) {
     val info = state.systemInfo
+    val susfs = rememberSusfsInfo(
+        stringResource(R.string.manual_hook),
+        stringResource(R.string.inline_hook),
+    )
+    val hook = rememberHookTypeLabel(
+        stringResource(R.string.manual_hook),
+        stringResource(R.string.inline_hook),
+        stringResource(R.string.tracepoint_hook),
+        stringResource(R.string.selinux_status_unknown),
+    )
     FolkTonalCard {
         Column(
             modifier = Modifier
@@ -202,6 +212,17 @@ internal fun ListInfoCard(state: HomeUiState) {
             if (state.showFullStatus) {
                 Spacer(Modifier.height(16.dp))
                 Item(stringResource(R.string.home_fingerprint), info.fingerprint)
+            }
+            if (state.showFullStatus && susfs.status == SusfsStatus.Supported) {
+                Spacer(Modifier.height(16.dp))
+                Item(stringResource(R.string.home_susfs_version), susfs.detail)
+            } else if (state.showFullStatus && !hook.isNullOrBlank()) {
+                Spacer(Modifier.height(16.dp))
+                Item(stringResource(R.string.hook_type), hook)
+            }
+            if (state.showFullStatus && !info.kernelFullVersion.isNullOrBlank()) {
+                Spacer(Modifier.height(16.dp))
+                Item(stringResource(R.string.home_kernel_full_version), info.kernelFullVersion)
             }
             Spacer(Modifier.height(16.dp))
             Item(stringResource(R.string.home_selinux_status), selinuxDisplay(info.selinuxStatus))

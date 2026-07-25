@@ -56,6 +56,26 @@ bool get_allow_list(struct ksu_new_get_allow_list_cmd *);
 bool get_full_version(char* buff);
 bool get_hook_type(char *buff);
 
+// Dynamic manager list (supercall 'K', 106). The canonical uapi definitions
+// (ksu_get_managers_cmd / KSU_IOCTL_GET_MANAGERS) land in uapi/supercall.h
+// together with the kernel side; these local copies keep the manager
+// buildable independently until then.
+struct ksu_dm_manager_entry {
+    uint32_t uid;
+    uint8_t signature_index;
+} __attribute__((packed));
+
+struct ksu_dm_get_managers_cmd {
+    uint16_t count; // Input / Output: number of managers in array
+    uint16_t total_count; // Output: total number of managers in requested list
+    struct ksu_dm_manager_entry managers[]; // Output: array of active managers
+} __attribute__((packed));
+
+// Get active manager list. Allocates *out_cmd with malloc on success, the
+// caller must free() it. Returns false (and sets *out_cmd to nullptr) when
+// the feature is unavailable.
+bool get_managers_list(struct ksu_dm_get_managers_cmd **out_cmd);
+
 inline std::pair<int, int> legacy_get_info() {
     int32_t version = -1;
     int32_t flags = 0;

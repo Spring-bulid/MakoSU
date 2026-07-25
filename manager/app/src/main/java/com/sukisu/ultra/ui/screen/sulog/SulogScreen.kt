@@ -73,27 +73,28 @@ fun sulogEntryTitle(entry: SulogEntry): String {
         SulogEventType.SuCompat -> stringResource(R.string.sulog_filter_sucompat)
         SulogEventType.IoctlGrantRoot -> stringResource(R.string.sulog_filter_ioctl_grant_root)
         SulogEventType.DaemonEvent -> stringResource(R.string.sulog_filter_daemon_restart)
-        SulogEventType.Dropped -> "Dropped"
-        SulogEventType.Unknown -> entry.fields["type"]?.replace('_', ' ')?.replaceFirstChar(Char::uppercase) ?: "Unknown"
+        SulogEventType.Dropped -> stringResource(R.string.sulog_entry_title_dropped_events)
+        SulogEventType.Unknown -> entry.fields["type"]?.replace('_', ' ')?.replaceFirstChar(Char::uppercase) ?: stringResource(R.string.sulog_entry_unknown_event)
     }
 }
 
 @Composable
 fun sulogEntryDescription(entry: SulogEntry): String? {
     return when (entry.eventType) {
-        SulogEventType.DaemonEvent -> entry.fields["boot_id"]?.let { "Boot ID: $it" }
-        SulogEventType.Dropped -> entry.fields["ts_ns"]?.let { "Timestamp: $it" }
+        SulogEventType.DaemonEvent -> entry.fields["boot_id"]?.let { stringResource(R.string.sulog_entry_boot_id, it) }
+        SulogEventType.Dropped -> entry.fields["ts_ns"]?.let { stringResource(R.string.sulog_entry_timestamp, it) }
         else -> entry.fields["argv"] ?: entry.fields["file"]
     }
 }
 
+@Composable
 fun sulogEntrySummaryTags(entry: SulogEntry): List<String> {
     val comm = entry.fields["comm"]
     val pid = entry.fields["pid"]
     val uid = entry.fields["uid"]
     return when (entry.eventType) {
-        SulogEventType.DaemonEvent -> listOfNotNull(entry.fields["restart"]?.let { "Restart #$it" } ?: "Daemon restarted")
-        SulogEventType.Dropped -> listOfNotNull(entry.fields["dropped"]?.let { "$it lost" })
+        SulogEventType.DaemonEvent -> listOfNotNull(entry.fields["restart"]?.let { stringResource(R.string.sulog_entry_restart_number, it) } ?: stringResource(R.string.sulog_entry_title_daemon_restarted))
+        SulogEventType.Dropped -> listOfNotNull(entry.fields["dropped"]?.let { stringResource(R.string.sulog_entry_dropped_count, it) })
         else -> listOfNotNull(comm?.takeIf { it.isNotBlank() }, pid?.let { "PID $it" }, uid?.let { "UID $it" })
     }
 }
@@ -108,12 +109,14 @@ fun sulogEntryDetailText(entry: SulogEntry) = buildAnnotatedString {
     }
 }
 
+@Composable
 fun sulogEntryStatus(entry: SulogEntry): String? {
-    return entry.fields["retval"]?.toIntOrNull()?.let(::formatSulogStatus)
+    return entry.fields["retval"]?.toIntOrNull()?.let { formatSulogStatus(it) }
 }
 
+@Composable
 private fun formatSulogStatus(retval: Int): String {
-    return if (retval == 0) "Success" else "Exit $retval"
+    return if (retval == 0) stringResource(R.string.sulog_status_success) else stringResource(R.string.sulog_status_exit, retval)
 }
 
 fun buildSulogFileSelector(

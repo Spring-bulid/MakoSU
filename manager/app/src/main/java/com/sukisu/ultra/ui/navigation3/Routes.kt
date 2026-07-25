@@ -72,6 +72,10 @@ sealed interface Route : NavKey, Parcelable {
 
     @Parcelize
     @Serializable
+    data object LanguagePicker : Route
+
+    @Parcelize
+    @Serializable
     data object AppProfileTemplate : Route
 
     @Parcelize
@@ -124,4 +128,8 @@ sealed interface Route : NavKey, Parcelable {
     @Parcelize
     @Serializable
     data object UmountManager: Route
+
+    @Parcelize
+    @Serializable
+    data object DynamicManager : Route
 }

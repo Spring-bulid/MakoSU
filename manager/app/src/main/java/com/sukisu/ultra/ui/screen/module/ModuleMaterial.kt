@@ -181,7 +181,6 @@ fun ModulePagerMaterial(
     val pullToRefreshState = rememberPullToRefreshState()
 
     val listState = rememberLazyListState()
-    val searchListState = rememberLazyListState()
     val refreshTick = remember { mutableIntStateOf(0) }
     val threshold = with(LocalDensity.current) { 100.dp.toPx() }
     val fabExpanded by remember {
@@ -290,7 +289,6 @@ fun ModulePagerMaterial(
                 searchText = uiState.searchStatus.searchText,
                 onSearchTextChange = actions.onSearchTextChange,
                 onClearClick = actions.onClearSearch,
-                snackbarHostState = snackBarHost,
                 navigationIcon = {
                     IconButton(
                         onClick = { actions.onOpenRepo() }
@@ -354,29 +352,6 @@ fun ModulePagerMaterial(
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                searchContent = { bottomPadding, closeSearch ->
-                    val latestSearchResults = rememberUpdatedState(uiState.searchResults)
-                    ScrollToTopOnChange(
-                        searchListState,
-                        uiState.searchStatus.searchText,
-                    ) { latestSearchResults.value }
-                    ModuleList(
-                        bottomInnerPadding = bottomPadding,
-                        modifier = Modifier.fillMaxSize(),
-                        listState = searchListState,
-                        displayModules = uiState.searchResults,
-                        updateInfoMap = uiState.updateInfo,
-                        actions = actions,
-                        onClickModule = { module ->
-                            if (module.hasWebUi) {
-                                actions.onOpenWebUi(module)
-                                closeSearch()
-                            }
-                        },
-                        onModuleAddShortcut = { module, type -> onModuleAddShortcut(module, type) },
-                        closeSearch = closeSearch,
-                    )
-                }
             )
         },
         floatingActionButton = {
@@ -469,13 +444,14 @@ fun ModulePagerMaterial(
                 uiState.sortEnabledFirst,
                 uiState.sortActionFirst,
                 refreshTick.intValue,
+                uiState.searchStatus.searchText,
                 isBusy = { latestRefreshing.value },
             ) { latestModuleList.value }
             ModuleList(
                 bottomInnerPadding = bottomInnerPadding,
                 modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                 listState = listState,
-                displayModules = uiState.moduleList,
+                displayModules = if (uiState.searchStatus.searchText.isBlank()) uiState.moduleList else uiState.searchResults,
                 updateInfoMap = uiState.updateInfo,
                 actions = actions,
                 onClickModule = { module ->
@@ -976,13 +952,20 @@ private fun ModuleItem(
                 modifier = Modifier
                     .run {
                         if (module.hasWebUi) {
-                            toggleable(
-                                value = module.enabled,
+                            combinedClickable(
                                 enabled = !module.remove && module.enabled,
                                 interactionSource = interactionSource,
                                 role = Role.Button,
                                 indication = indication,
-                                onValueChange = { onClick() },
+                                onClick = { onClick() },
+                                onLongClick = if (bannerPrefs.enabled && bannerPrefs.customEnabled) {
+                                    {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onRequestBannerEdit()
+                                    }
+                                } else {
+                                    null
+                                },
                             )
                         } else {
                             this

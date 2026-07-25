@@ -78,7 +78,7 @@ fun TemplateConfigMaterial(
         )
     }
 
-    val selectedTemplateName = template.ifEmpty { "None" }
+    val selectedTemplateName = template.ifEmpty { stringResource(R.string.none) }
 
     SegmentedColumn(
         modifier = Modifier.padding(horizontal = 16.dp),

@@ -4,6 +4,7 @@
 #include <linux/slab.h>
 #include <linux/string.h>
 #include <linux/types.h>
+#include <linux/uaccess.h>
 #include <linux/version.h>
 
 #include "policy/allowlist.h"
@@ -11,8 +12,169 @@
 #include "klog.h" // IWYU pragma: keep
 #include "manager/manager_identity.h"
 #include "manager/throne_tracker.h"
+#include "feature/dynamic_manager.h"
+#include "uapi/supercall.h"
 
-uid_t ksu_manager_appid = KSU_INVALID_APPID;
+// Crowned-manager list: small fixed-capacity table, see manager_identity.h.
+struct ksu_manager_slot {
+    uid_t appid;
+    u8 signature_index;
+    bool valid;
+};
+
+static struct ksu_manager_slot ksu_manager_list[KSU_MAX_MANAGERS];
+static DEFINE_SPINLOCK(ksu_manager_list_lock);
+
+bool ksu_is_manager_appid_valid(void)
+{
+    unsigned long flags;
+    bool valid = false;
+    int i;
+
+    spin_lock_irqsave(&ksu_manager_list_lock, flags);
+    for (i = 0; i < KSU_MAX_MANAGERS; i++) {
+        if (ksu_manager_list[i].valid) {
+            valid = true;
+            break;
+        }
+    }
+    spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+    return valid;
+}
+
+bool is_uid_manager(uid_t uid)
+{
+    unsigned long flags;
+    bool found = false;
+    uid_t appid = uid % KSU_PER_USER_RANGE;
+    int i;
+
+    spin_lock_irqsave(&ksu_manager_list_lock, flags);
+    for (i = 0; i < KSU_MAX_MANAGERS; i++) {
+        if (ksu_manager_list[i].valid && ksu_manager_list[i].appid == appid) {
+            found = true;
+            break;
+        }
+    }
+    spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+    return found;
+}
+
+bool is_manager(void)
+{
+    return is_uid_manager(current_uid().val);
+}
+
+uid_t ksu_get_manager_appid(void)
+{
+    unsigned long flags;
+    uid_t appid = KSU_INVALID_APPID;
+    int i;
+
+    spin_lock_irqsave(&ksu_manager_list_lock, flags);
+    for (i = 0; i < KSU_MAX_MANAGERS; i++) {
+        if (ksu_manager_list[i].valid) {
+            appid = ksu_manager_list[i].appid;
+            break;
+        }
+    }
+    spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+    return appid;
+}
+
+bool ksu_add_manager_appid(uid_t appid, u8 signature_index)
+{
+    unsigned long flags;
+    int i;
+    int free_slot = -1;
+
+    appid %= KSU_PER_USER_RANGE;
+
+    spin_lock_irqsave(&ksu_manager_list_lock, flags);
+    for (i = 0; i < KSU_MAX_MANAGERS; i++) {
+        if (!ksu_manager_list[i].valid) {
+            if (free_slot < 0)
+                free_slot = i;
+            continue;
+        }
+        if (ksu_manager_list[i].appid == appid) {
+            // already crowned; refresh the signature index
+            ksu_manager_list[i].signature_index = signature_index;
+            spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+            return true;
+        }
+    }
+    if (free_slot < 0) {
+        spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+        pr_warn("manager list is full (%d), cannot crown uid=%d\n", KSU_MAX_MANAGERS, appid);
+        return false;
+    }
+    ksu_manager_list[free_slot].appid = appid;
+    ksu_manager_list[free_slot].signature_index = signature_index;
+    ksu_manager_list[free_slot].valid = true;
+    spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+    return true;
+}
+
+bool ksu_remove_manager_appid(uid_t appid)
+{
+    unsigned long flags;
+    bool found = false;
+    int i;
+
+    appid %= KSU_PER_USER_RANGE;
+
+    spin_lock_irqsave(&ksu_manager_list_lock, flags);
+    for (i = 0; i < KSU_MAX_MANAGERS; i++) {
+        if (ksu_manager_list[i].valid && ksu_manager_list[i].appid == appid) {
+            ksu_manager_list[i].valid = false;
+            found = true;
+        }
+    }
+    spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+    return found;
+}
+
+void ksu_remove_manager_by_signature_index(u8 signature_index)
+{
+    unsigned long flags;
+    int i;
+
+    spin_lock_irqsave(&ksu_manager_list_lock, flags);
+    for (i = 0; i < KSU_MAX_MANAGERS; i++) {
+        if (ksu_manager_list[i].valid && ksu_manager_list[i].signature_index == signature_index)
+            ksu_manager_list[i].valid = false;
+    }
+    spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+}
+
+bool ksu_has_manager_signature_index(u8 signature_index)
+{
+    unsigned long flags;
+    bool found = false;
+    int i;
+
+    spin_lock_irqsave(&ksu_manager_list_lock, flags);
+    for (i = 0; i < KSU_MAX_MANAGERS; i++) {
+        if (ksu_manager_list[i].valid && ksu_manager_list[i].signature_index == signature_index) {
+            found = true;
+            break;
+        }
+    }
+    spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+    return found;
+}
+
+void ksu_invalidate_manager_uid(void)
+{
+    unsigned long flags;
+    int i;
+
+    spin_lock_irqsave(&ksu_manager_list_lock, flags);
+    for (i = 0; i < KSU_MAX_MANAGERS; i++)
+        ksu_manager_list[i].valid = false;
+    spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+}
 
 #define SYSTEM_PACKAGES_LIST_PATH "/data/system/packages.list"
 
@@ -22,7 +184,7 @@ struct uid_data {
     char package[KSU_MAX_PACKAGE_NAME];
 };
 
-static void crown_manager(const char *apk, struct list_head *uid_data)
+static void crown_manager(const char *apk, struct list_head *uid_data, u8 signature_index)
 {
     char pkg[KSU_MAX_PACKAGE_NAME];
     if (get_pkg_from_apk_path(pkg, apk) < 0) {
@@ -37,8 +199,8 @@ static void crown_manager(const char *apk, struct list_head *uid_data)
 
     list_for_each_entry (np, list, list) {
         if (strncmp(np->package, pkg, KSU_MAX_PACKAGE_NAME) == 0) {
-            pr_info("Crowning manager: %s(uid=%d)\n", pkg, np->uid);
-            ksu_set_manager_appid(np->uid);
+            pr_info("Crowning manager: %s(uid=%d, signature_index=%d)\n", pkg, np->uid, signature_index);
+            ksu_add_manager_appid(np->uid, signature_index);
             break;
         }
     }
@@ -79,7 +241,6 @@ struct my_dir_context {
 #define FILLDIR_ACTOR_CONTINUE 0
 #define FILLDIR_ACTOR_STOP -EINVAL
 #endif
-extern bool is_manager_apk(char *path);
 FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name, int namelen, loff_t off, u64 ino,
                              unsigned int d_type)
 {
@@ -121,7 +282,7 @@ FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name, int name
         list_add_tail(&data->list, my_ctx->data_path_list);
     } else {
         if ((namelen == 8) && (strncmp(name, "base.apk", namelen) == 0)) {
-            struct apk_path_hash *pos, *n;
+            struct apk_path_hash *pos;
             unsigned int hash = full_name_hash(NULL, dirpath, strlen(dirpath));
             list_for_each_entry (pos, &apk_path_hash_list, list) {
                 if (hash == pos->hash) {
@@ -130,17 +291,13 @@ FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name, int name
                 }
             }
 
-            bool is_manager = is_manager_apk(dirpath);
+            u8 signature_index = 0;
+            bool is_manager = is_manager_apk(dirpath, &signature_index);
             pr_info("Found new base.apk at path: %s, is_manager: %d\n", dirpath, is_manager);
             if (is_manager) {
-                crown_manager(dirpath, my_ctx->private_data);
-                *my_ctx->stop = 1;
-
-                // Manager found, clear APK cache list
-                list_for_each_entry_safe (pos, n, &apk_path_hash_list, list) {
-                    list_del(&pos->list);
-                    kfree(pos);
-                }
+                // Crown every matching package (static and dynamic signed
+                // managers may coexist); do not stop the scan.
+                crown_manager(dirpath, my_ctx->private_data, signature_index);
             } else {
                 struct apk_path_hash *apk_data = kzalloc(sizeof(struct apk_path_hash), GFP_KERNEL);
                 if (!apk_data) {
@@ -308,25 +465,49 @@ void track_throne(bool prune_only)
     // now update uid list
     struct uid_data *np;
     struct uid_data *n;
+    bool removed = false;
 
     if (prune_only)
         goto prune;
 
-    // first, check if manager_uid exist!
-    bool manager_exist = false;
-    list_for_each_entry (np, &uid_list, list) {
-        if (np->uid == ksu_get_manager_appid()) {
-            manager_exist = true;
-            break;
+    // first, drop crowned managers whose package is gone; packages that are
+    // still installed keep their throne.
+    {
+        unsigned long flags;
+        int i;
+
+        spin_lock_irqsave(&ksu_manager_list_lock, flags);
+        for (i = 0; i < KSU_MAX_MANAGERS; i++) {
+            bool exist = false;
+
+            if (!ksu_manager_list[i].valid)
+                continue;
+
+            list_for_each_entry (np, &uid_list, list) {
+                if (np->uid % KSU_PER_USER_RANGE == ksu_manager_list[i].appid) {
+                    exist = true;
+                    break;
+                }
+            }
+            if (!exist) {
+                pr_info("manager(uid=%d) is uninstalled, remove it!\n", ksu_manager_list[i].appid);
+                ksu_manager_list[i].valid = false;
+                removed = true;
+            }
         }
+        spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
     }
 
-    if (!manager_exist) {
-        if (ksu_is_manager_appid_valid()) {
-            pr_info("manager is uninstalled, invalidate it!\n");
-            ksu_invalidate_manager_uid();
-            goto prune;
-        }
+    if (removed) {
+        // A manager was just uninstalled; as before, don't search again in
+        // this round (its /data/app dir may still be around).
+        goto prune;
+    }
+
+    // Search when no manager is crowned at all, or when the dynamic manager
+    // sign is set but no dynamic-signed manager has been crowned yet.
+    if (!ksu_is_manager_appid_valid() ||
+        (ksu_is_dynamic_manager_enabled() && !ksu_has_manager_signature_index(KSU_SIGNATURE_INDEX_DYNAMIC_MANAGER))) {
         pr_info("Searching manager...\n");
         search_manager("/data/app", 2, &uid_list);
         pr_info("Search manager finished\n");
@@ -341,6 +522,42 @@ out:
         list_del(&np->list);
         kfree(np);
     }
+}
+
+int ksu_handle_get_managers_cmd(struct ksu_get_managers_cmd __user *arg, struct ksu_get_managers_cmd *cmd)
+{
+    u16 max_allowed = cmd->count;
+    int count = 0;
+    int total = 0;
+    int i;
+    unsigned long flags;
+    struct ksu_manager_entry snapshot[KSU_MAX_MANAGERS];
+
+    // Snapshot under lock; copy_to_user may sleep.
+    spin_lock_irqsave(&ksu_manager_list_lock, flags);
+    for (i = 0; i < KSU_MAX_MANAGERS; i++) {
+        if (!ksu_manager_list[i].valid)
+            continue;
+        snapshot[total].uid = ksu_manager_list[i].appid;
+        snapshot[total].signature_index = ksu_manager_list[i].signature_index;
+        total++;
+    }
+    spin_unlock_irqrestore(&ksu_manager_list_lock, flags);
+
+    for (i = 0; i < total; i++) {
+        if (count < max_allowed) {
+            void __user *dest = (void __user *)((char *)arg + sizeof(struct ksu_get_managers_cmd) +
+                                                (count * sizeof(struct ksu_manager_entry)));
+
+            if (copy_to_user(dest, &snapshot[i], sizeof(snapshot[i]))) {
+                return -EFAULT;
+            }
+            count++;
+        }
+    }
+
+    cmd->total_count = total;
+    return 0;
 }
 
 void __init ksu_throne_tracker_init()

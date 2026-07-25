@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dynamic_manager_title">Dynamic Manager Configuration</string>
+    <string name="dynamic_manager_settings_summary">Manage the dynamic manager signature</string>
+    <string name="dynamic_manager_current_status">Current configuration</string>
+    <string name="dynamic_manager_enabled_summary">Enabled (Size: %s)</string>
+    <string name="dynamic_manager_disabled">Disabled</string>
+    <string name="dynamic_manager_signature_size">Dynamic Manager Signature Size</string>
+    <string name="dynamic_manager_signature_hash">Dynamic Manager Signature Hash</string>
+    <string name="dynamic_manager_hash_must_be_64_chars">Hash must be 64 hexadecimal characters</string>
+    <string name="dynamic_manager_manual_config">Manual signature configuration</string>
+    <string name="dynamic_manager_manual_config_summary">Set a custom signature size and hash</string>
+    <string name="dynamic_manager_clear_config">Clear dynamic manager</string>
+    <string name="dynamic_manager_clear_config_summary">Disable the dynamic manager configuration</string>
+    <string name="dynamic_manager_fixed_manager_summary">%1$s\nManaged by %2$s</string>
+    <string name="dynamic_manager_manage_managers">Manage managers</string>
+    <string name="dynamic_manager_no_candidates">No candidate manager apps</string>
+    <string name="dynamic_manager_grant_confirm_title">Confirm authorization?</string>
+    <string name="dynamic_manager_grant_confirm_message">The selected app will become the dynamic manager. If a dynamic manager is already configured, it will be invalidated immediately.\n\nThis grants the highest permission level for this device. If you do not know what this means, cancel.</string>
+    <string name="dynamic_manager_clear_confirm_title">Clear dynamic manager</string>
+    <string name="dynamic_manager_clear_confirm_message">Are you sure you want to clear the dynamic manager configuration?</string>
+    <string name="dynamic_manager_set_success">Dynamic Manager configuration set successfully</string>
+    <string name="dynamic_manager_set_failed">Failed to set dynamic Manager configuration</string>
+    <string name="dynamic_manager_disabled_success">Dynamic Manager disabled</string>
+    <string name="dynamic_manager_clear_failed">Failed to clear dynamic Manager</string>
+</resources>

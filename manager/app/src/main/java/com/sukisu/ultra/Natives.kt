@@ -121,6 +121,12 @@ object Natives {
 
     external fun getHookType(): String
 
+    /**
+     * Get active managers list
+     * @return ManagersList object containing active managers, or null if failed or not enabled
+     */
+    external fun getManagersList(): ManagersList?
+
     private const val NON_ROOT_DEFAULT_PROFILE_KEY = "$"
     private const val NOBODY_UID = 9999
 
@@ -155,6 +161,22 @@ object Natives {
         if (version != -1 && version < MINIMAL_SUPPORTED_KERNEL) return true
         return (isVersionLessThan(getFullVersion(), MINIMAL_SUPPORTED_KERNEL_FULL)) || checkUAPIMismatch()
     }
+
+    @Keep
+    @Immutable
+    @Parcelize
+    data class ManagersList(
+        val count: Int = 0,
+        val managers: List<ManagerInfo> = emptyList()
+    ) : Parcelable
+
+    @Keep
+    @Immutable
+    @Parcelize
+    data class ManagerInfo(
+        val uid: Int = 0,
+        val signatureIndex: Int = 0
+    ) : Parcelable
 
     @Keep
     @Immutable

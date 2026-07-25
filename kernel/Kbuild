@@ -36,6 +36,7 @@ endif
 endif
 
 ifneq ($(CONFIG_KSU_DISABLE_MANAGER),y)
+kernelsu-objs += feature/dynamic_manager.o
 kernelsu-objs += manager/apk_sign.o
 kernelsu-objs += manager/pkg_observer.o
 kernelsu-objs += manager/throne_tracker.o
@@ -64,6 +65,8 @@ kernelsu-objs += feature/adb_root.o
 kernelsu-objs += feature/selinux_hide.o
 
 kernelsu-objs += feature/uts_spoof.o
+
+kernelsu-objs += feature/susfs3s.o
 
 ifdef KBUILD_EXTMOD
 ifeq ($(CONFIG_KSU_DISABLE_MANAGER),y)
@@ -109,7 +112,9 @@ git_branch       = $(shell cd $(KSU_SRC) && $(GIT_BIN) rev-parse --abbrev-ref HE
 git_latest_tag   = $(shell cd $(KSU_SRC) && $(GIT_BIN) describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
 
 # This is the Manager/driver protocol contract, not an upstream commit count.
-KSU_VERSION     := 40840
+# Single source of truth: <repo>/version.txt (shared with manager/build.gradle.kts and userspace/ksud/build.rs).
+# Falls back to 40900 when the driver is built standalone (version.txt not present).
+KSU_VERSION     := $(shell cat $(src)/../version.txt 2>/dev/null || cat $(MDIR)/../version.txt 2>/dev/null || echo 40900)
 VERSION_TAG     := $(or $(git_latest_tag),4.1.8)
 KSU_VERSION_FULL := $(if $(call git_short_sha),v$(VERSION_TAG)-$(call git_short_sha)@$(call git_branch),v$(VERSION_TAG)-$(REPO_NAME)-unknown@unknown)
 $(info -- $(REPO_NAME) version: $(KSU_VERSION) [$(KSU_VERSION_FULL)])

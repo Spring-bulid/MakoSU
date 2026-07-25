@@ -97,3 +97,7 @@ val LocalColorMode = staticCompositionLocalOf { 0 }
 val LocalCustomBackgroundEnabled = staticCompositionLocalOf { false }
 
 val LocalCustomBackgroundOpacity = staticCompositionLocalOf { 1f }
+
+val LocalCustomFontEnabled = staticCompositionLocalOf { false }
+
+val LocalCustomFontFilename = staticCompositionLocalOf { null as String? }

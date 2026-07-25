@@ -12,13 +12,13 @@ class HomeLayoutTest {
     }
 
     @Test
-    fun migratesLegacyLayoutsToCircle() {
-        assertEquals(HomeLayout.Circle, HomeLayout.fromValue("compact"))
-        assertEquals(HomeLayout.Circle, HomeLayout.fromValue("legacy_layout"))
+    fun migratesLegacyLayoutsToPure() {
+        assertEquals(HomeLayout.Pure, HomeLayout.fromValue("compact"))
+        assertEquals(HomeLayout.Pure, HomeLayout.fromValue("legacy_layout"))
     }
 
     @Test
-    fun fallsBackToCircleForUnknownLayout() {
-        assertEquals(HomeLayout.Circle, HomeLayout.fromValue("unknown"))
+    fun fallsBackToPureForUnknownLayout() {
+        assertEquals(HomeLayout.Pure, HomeLayout.fromValue("unknown"))
     }
 }

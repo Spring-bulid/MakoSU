@@ -1,16 +1,14 @@
 package com.sukisu.ultra.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.view.WindowInsetsControllerCompat
 import com.sukisu.ultra.ui.webui.MonetColorsProvider
 
 @Composable
@@ -32,20 +30,20 @@ fun MaterialKernelSUTheme(
         colorSpec = appSettings.colorSpec,
     )
 
-    LaunchedEffect(darkTheme) {
-        val window = (context as? Activity)?.window ?: return@LaunchedEffect
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = !darkTheme
-            isAppearanceLightNavigationBars = !darkTheme
-        }
-    }
-
     val animatedColorScheme = colorScheme.animateAsState()
+
+    val fontFamily = remember(
+        FontConfig.isCustomFontEnabled,
+        FontConfig.customFontFilename
+    ) {
+        FontConfig.getFontFamily(context)
+    }
+    val typography = remember(fontFamily) { getTypography(fontFamily) }
 
     MaterialExpressiveTheme(
         colorScheme = animatedColorScheme,
         motionScheme = MotionScheme.expressive(),
-        typography = Typography,
+        typography = typography,
         content = {
             MonetColorsProvider.UpdateCss()
             content()

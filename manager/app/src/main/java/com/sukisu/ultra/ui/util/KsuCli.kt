@@ -28,6 +28,7 @@ import com.sukisu.ultra.Natives
 import com.sukisu.ultra.defaultBootPartitionForSdk
 import com.sukisu.ultra.ksuApp
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 
 /**
@@ -107,6 +108,50 @@ fun execKsud(args: String, newShell: Boolean = false, globalMnt: Boolean = false
     } else {
         ShellUtils.fastCmdResult(getRootShell(globalMnt), "${getKsuDaemonPath()} $args")
     }
+}
+
+data class DynamicManagerCliConfig(
+    val size: Int = 0,
+    val hash: String = ""
+) {
+    fun isValid(): Boolean {
+        return size > 0 && hash.length == 64
+    }
+}
+
+suspend fun getDynamicManagerConfig(): DynamicManagerCliConfig? = withContext(Dispatchers.IO) {
+    val shell = getRootShell()
+    val result = shell.newJob()
+        .add("${getKsuDaemonPath()} kernel dynamic-manager get --internal true")
+        .to(ArrayList<String>(), null)
+        .exec()
+    if (!result.isSuccess) return@withContext null
+
+    runCatching {
+        val obj = JSONObject(result.out.joinToString("\n"))
+        DynamicManagerCliConfig(
+            size = obj.optInt("size", 0),
+            hash = obj.optString("hash", "")
+        )
+    }.getOrNull()
+}
+
+fun setDynamicManager(size: Int, hash: String): Boolean {
+    val result = execKsud("kernel dynamic-manager set $size $hash", true)
+    Log.i(TAG, "set dynamic manager result: $result")
+    return result
+}
+
+fun setDynamicManagerApk(apkPath: String): Boolean {
+    val result = execKsud("kernel dynamic-manager set-apk ${apkPath.shellArg()}", true)
+    Log.i(TAG, "set dynamic manager apk result: $result")
+    return result
+}
+
+fun clearDynamicManager(): Boolean {
+    val result = execKsud("kernel dynamic-manager clear", true)
+    Log.i(TAG, "clear dynamic manager result: $result")
+    return result
 }
 
 suspend fun getFeatureStatus(feature: String): String = withContext(Dispatchers.IO) {

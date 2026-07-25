@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_settings_app_language">App language</string>
+    <string name="language_settings_app_language_summary">Choose the language used by the manager</string>
+    <string name="language_follow_system">Follow system</string>
+</resources>

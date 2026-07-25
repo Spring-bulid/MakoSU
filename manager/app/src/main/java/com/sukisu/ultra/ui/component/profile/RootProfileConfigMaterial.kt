@@ -169,7 +169,7 @@ private fun GroupsPanel(
 
     if (showDialog.value) {
         MultiSelectDialog(
-            title = "Groups",
+            title = stringResource(R.string.profile_groups),
             subtitle = "${selected.size} / 32",
             items = groups,
             selectedItems = selected.toSet(),
@@ -184,7 +184,7 @@ private fun GroupsPanel(
     }
 
     val tag = if (selected.isEmpty()) {
-        "None"
+        stringResource(R.string.none)
     } else {
         selected.joinToString(", ") { it.display }
     }
@@ -293,7 +293,7 @@ private fun RootProfileFlagPanel(
     }
 
     val tag = if (selectedFlags.isEmpty()) {
-        "None"
+        stringResource(R.string.none)
     } else {
         selectedFlags.joinToString(", ") { it.display }
     }
@@ -332,7 +332,7 @@ private fun CapsPanel(
 
     if (showDialog.value) {
         MultiSelectDialog(
-            title = "Capabilities",
+            title = stringResource(R.string.profile_capabilities),
             subtitle = "${selectedCaps.size} / ${Capabilities.entries.size}",
             items = capabilities,
             selectedItems = selectedCaps.toSet(),
@@ -347,7 +347,7 @@ private fun CapsPanel(
     }
 
     val tag = if (selectedCaps.isEmpty()) {
-        "None"
+        stringResource(R.string.none)
     } else {
         selectedCaps.joinToString(", ") { it.display }
     }

@@ -77,6 +77,57 @@ object SuSFSCommands {
         return createMagiskModule()
     }
 
+    /**
+     * Weak BL-lock hiding: apply all bootloader lock-state props to the LIVE
+     * system via resetprop (no reboot needed). Returns true only when a
+     * read-back of ro.boot.verifiedbootstate confirms "green".
+     */
+    suspend fun applyHideBlNow(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val rp = "${getKsuDaemonPath()} resetprop"
+            val props = listOf(
+                "ro.boot.vbmeta.invalidate_on_error" to "yes",
+                "ro.boot.vbmeta.avb_version" to "1.2",
+                "ro.boot.vbmeta.hash_alg" to "sha256",
+                "ro.boot.vbmeta.size" to "19968",
+                "ro.boot.vbmeta.device_state" to "locked",
+                "ro.boot.verifiedbootstate" to "green",
+                "ro.boot.flash.locked" to "1",
+                "ro.boot.veritymode" to "enforcing",
+                "ro.boot.warranty_bit" to "0",
+                "ro.warranty_bit" to "0",
+                "ro.debuggable" to "0",
+                "ro.force.debuggable" to "0",
+                "ro.secure" to "1",
+                "ro.adb.secure" to "1",
+                "ro.build.type" to "user",
+                "ro.build.tags" to "release-keys",
+                "ro.vendor.boot.warranty_bit" to "0",
+                "ro.vendor.warranty_bit" to "0",
+                "vendor.boot.vbmeta.device_state" to "locked",
+                "vendor.boot.verifiedbootstate" to "green",
+                "sys.oem_unlock_allowed" to "0",
+                "ro.secureboot.lockstate" to "locked",
+                "ro.boot.realmebootstate" to "green",
+                "ro.boot.realme.lockstate" to "1",
+                "ro.crypto.state" to "encrypted",
+            )
+            val cmds = buildString {
+                props.forEach { (k, v) -> append("$rp $k $v\n") }
+                // bootmode fragments: recovery -> unknown
+                append("for p in ro.bootmode ro.boot.bootmode vendor.boot.bootmode; do ")
+                append("v=$($rp ${'$'}p); case \"${'$'}v\" in *recovery*) $rp ${'$'}p unknown;; esac; done\n")
+                // read-back verification
+                append("$rp ro.boot.verifiedbootstate\n")
+            }
+            val result = getRootShell().newJob().add(cmds).exec()
+            result.out.lastOrNull()?.trim() == "green"
+        } catch (e: Exception) {
+            Log.e(TAG, "applyHideBlNow failed", e)
+            false
+        }
+    }
+
     private fun runCmdWithResult(cmd: String): CommandResult {
         val result = Shell.getShell().newJob().add(cmd).exec()
         return CommandResult(

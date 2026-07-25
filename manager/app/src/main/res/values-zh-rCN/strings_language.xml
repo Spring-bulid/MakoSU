@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_settings_app_language">应用语言</string>
+    <string name="language_settings_app_language_summary">选择管理器使用的语言</string>
+    <string name="language_follow_system">跟随系统</string>
+</resources>

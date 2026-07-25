@@ -25,6 +25,8 @@
 #include "sulog/fd.h"
 #include "supercall/supercall.h"
 #include "feature/uts_spoof.h"
+#include "feature/dynamic_manager.h"
+#include "feature/susfs3s.h"
 #include "infra/gki1_imports.h"
 
 #ifdef CONFIG_KPM
@@ -856,6 +858,75 @@ static int do_enable_kpm(void __user *arg)
     return 0;
 }
 
+// 105. DYNAMIC_MANAGER - Set/Get/Wipe the dynamic manager signature
+static int do_dynamic_manager(void __user *arg)
+{
+#ifdef CONFIG_KSU_DISABLE_MANAGER
+    return -EOPNOTSUPP;
+#else
+    struct ksu_dynamic_manager_cmd cmd;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd))) {
+        pr_err("dynamic_manager: copy_from_user failed\n");
+        return -EFAULT;
+    }
+
+    int ret = ksu_handle_dynamic_manager(&cmd);
+    if (ret)
+        return ret;
+
+    if (cmd.operation == DYNAMIC_MANAGER_OP_GET && copy_to_user(arg, &cmd, sizeof(cmd))) {
+        pr_err("dynamic_manager: copy_to_user failed\n");
+        return -EFAULT;
+    }
+
+    return 0;
+#endif
+}
+
+#ifndef CONFIG_KSU_DISABLE_MANAGER
+extern int ksu_handle_get_managers_cmd(struct ksu_get_managers_cmd __user *arg, struct ksu_get_managers_cmd *cmd);
+#endif
+
+// 107. SUSFS3S - Manage sus_path / sus_kstat lists (LKM-native SuSFS subset)
+static int do_susfs3s(void __user *arg)
+{
+    struct ksu_susfs3s_cmd cmd;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd))) {
+        pr_err("susfs3s: copy_from_user failed\n");
+        return -EFAULT;
+    }
+
+    return ksu_handle_susfs3s_cmd(&cmd);
+}
+
+// 106. GET_MANAGERS - List the crowned manager(s)
+static int do_get_managers(void __user *arg)
+{
+    struct ksu_get_managers_cmd cmd;
+
+    if (copy_from_user(&cmd, arg, sizeof(struct ksu_get_managers_cmd))) {
+        return -EFAULT;
+    }
+
+#ifndef CONFIG_KSU_DISABLE_MANAGER
+    int ret = ksu_handle_get_managers_cmd(arg, &cmd);
+    if (ret) {
+        return ret;
+    }
+#else
+    cmd.count = 0;
+    cmd.total_count = 0;
+#endif
+
+    if (copy_to_user(arg, &cmd, sizeof(struct ksu_get_managers_cmd))) {
+        return -EFAULT;
+    }
+
+    return 0;
+}
+
 // IOCTL handlers mapping table
 // clang-format off
 static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
@@ -1039,6 +1110,24 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
         .cmd = KSU_IOCTL_LIST_TRY_UMOUNT,
         .name = "LIST_TRY_UMOUNT",
         .handler = list_try_umount,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_DYNAMIC_MANAGER,
+        .name = "SET_DYNAMIC_MANAGER",
+        .handler = do_dynamic_manager,
+        .perm_check = only_root
+    },
+    {
+        .cmd = KSU_IOCTL_GET_MANAGERS,
+        .name = "GET_MANAGERS",
+        .handler = do_get_managers,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_SUSFS3S,
+        .name = "SUSFS3S",
+        .handler = do_susfs3s,
         .perm_check = manager_or_root
     },
     {

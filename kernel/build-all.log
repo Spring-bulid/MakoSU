@@ -1,0 +1,269 @@
+========== Building android12-5.10 ==========
+Building target: android12-5.10
+
+Environment setup:
+  KDIR=/opt/ddk/kdir/android12-5.10
+  CLANG_PATH=/opt/ddk/clang/clang-r416183b/bin
+  ARCH=arm64
+  Custom env vars:
+    CONFIG_KSU=m
+
+Running make...
+-- KDIR: /opt/ddk/kdir/android12-5.10
+-- MDIR: /mnt/d/MakoSU/kernel
+-- OUTPUT DIR: /mnt/d/MakoSU/kernel/out/android12-5.10
+make -C /opt/ddk/kdir/android12-5.10 M=/mnt/d/MakoSU/kernel/out/android12-5.10 src=/mnt/d/MakoSU/kernel modules compile_commands.json -j16
+make[1]: Entering directory '/opt/ddk/kdir/android12-5.10'
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 5.10
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 0
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 5.10
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 0
+make[1]: Leaving directory '/opt/ddk/kdir/android12-5.10'
+./check_symbol /mnt/d/MakoSU/kernel/out/android12-5.10/kernelsu.ko /opt/ddk/kdir/android12-5.10/vmlinux
+
+Build completed successfully
+✓ Built kernelsu-android12-5.10.ko
+
+========== Building android13-5.10 ==========
+Building target: android13-5.10
+
+Environment setup:
+  KDIR=/opt/ddk/kdir/android13-5.10
+  CLANG_PATH=/opt/ddk/clang/clang-r450784e/bin
+  ARCH=arm64
+  Custom env vars:
+    CONFIG_KSU=m
+
+Running make...
+-- KDIR: /opt/ddk/kdir/android13-5.10
+-- MDIR: /mnt/d/MakoSU/kernel
+-- OUTPUT DIR: /mnt/d/MakoSU/kernel/out/android13-5.10
+make -C /opt/ddk/kdir/android13-5.10 M=/mnt/d/MakoSU/kernel/out/android13-5.10 src=/mnt/d/MakoSU/kernel modules compile_commands.json -j16
+make[1]: Entering directory '/opt/ddk/kdir/android13-5.10'
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 5.10
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 5.10
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+make[1]: Leaving directory '/opt/ddk/kdir/android13-5.10'
+./check_symbol /mnt/d/MakoSU/kernel/out/android13-5.10/kernelsu.ko /opt/ddk/kdir/android13-5.10/vmlinux
+
+Build completed successfully
+✓ Built kernelsu-android13-5.10.ko
+
+========== Building android13-5.15 ==========
+Building target: android13-5.15
+
+Environment setup:
+  KDIR=/opt/ddk/kdir/android13-5.15
+  CLANG_PATH=/opt/ddk/clang/clang-r450784e/bin
+  ARCH=arm64
+  Custom env vars:
+    CONFIG_KSU=m
+
+Running make...
+-- KDIR: /opt/ddk/kdir/android13-5.15
+-- MDIR: /mnt/d/MakoSU/kernel
+-- OUTPUT DIR: /mnt/d/MakoSU/kernel/out/android13-5.15
+make -C /opt/ddk/kdir/android13-5.15 M=/mnt/d/MakoSU/kernel/out/android13-5.15 src=/mnt/d/MakoSU/kernel modules compile_commands.json -j16
+make[1]: Entering directory '/opt/ddk/kdir/android13-5.15'
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 5.15
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 5.15
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+make[1]: Leaving directory '/opt/ddk/kdir/android13-5.15'
+./check_symbol /mnt/d/MakoSU/kernel/out/android13-5.15/kernelsu.ko /opt/ddk/kdir/android13-5.15/vmlinux
+
+Build completed successfully
+✓ Built kernelsu-android13-5.15.ko
+
+========== Building android14-5.15 ==========
+Building target: android14-5.15
+
+Environment setup:
+  KDIR=/opt/ddk/kdir/android14-5.15
+  CLANG_PATH=/opt/ddk/clang/clang-r487747c/bin
+  ARCH=arm64
+  Custom env vars:
+    CONFIG_KSU=m
+
+Running make...
+-- KDIR: /opt/ddk/kdir/android14-5.15
+-- MDIR: /mnt/d/MakoSU/kernel
+-- OUTPUT DIR: /mnt/d/MakoSU/kernel/out/android14-5.15
+make -C /opt/ddk/kdir/android14-5.15 M=/mnt/d/MakoSU/kernel/out/android14-5.15 src=/mnt/d/MakoSU/kernel modules compile_commands.json -j16
+make[1]: Entering directory '/opt/ddk/kdir/android14-5.15'
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 5.15
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 5.15
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+make[1]: Leaving directory '/opt/ddk/kdir/android14-5.15'
+./check_symbol /mnt/d/MakoSU/kernel/out/android14-5.15/kernelsu.ko /opt/ddk/kdir/android14-5.15/vmlinux
+
+Build completed successfully
+✓ Built kernelsu-android14-5.15.ko
+
+========== Building android14-6.1 ==========
+Building target: android14-6.1
+
+Environment setup:
+  KDIR=/opt/ddk/kdir/android14-6.1
+  CLANG_PATH=/opt/ddk/clang/clang-r487747c/bin
+  ARCH=arm64
+  Custom env vars:
+    CONFIG_KSU=m
+
+Running make...
+-- KDIR: /opt/ddk/kdir/android14-6.1
+-- MDIR: /mnt/d/MakoSU/kernel
+-- OUTPUT DIR: /mnt/d/MakoSU/kernel/out/android14-6.1
+make -C /opt/ddk/kdir/android14-6.1 M=/mnt/d/MakoSU/kernel/out/android14-6.1 src=/mnt/d/MakoSU/kernel modules compile_commands.json -j16
+make[1]: Entering directory '/opt/ddk/kdir/android14-6.1'
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 6.1
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 6.1
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+make[1]: Leaving directory '/opt/ddk/kdir/android14-6.1'
+./check_symbol /mnt/d/MakoSU/kernel/out/android14-6.1/kernelsu.ko /opt/ddk/kdir/android14-6.1/vmlinux
+
+Build completed successfully
+✓ Built kernelsu-android14-6.1.ko
+
+========== Building android15-6.6 ==========
+Building target: android15-6.6
+
+Environment setup:
+  KDIR=/opt/ddk/kdir/android15-6.6
+  CLANG_PATH=/opt/ddk/clang/clang-r510928/bin
+  ARCH=arm64
+  Custom env vars:
+    CONFIG_KSU=m
+
+Running make...
+-- KDIR: /opt/ddk/kdir/android15-6.6
+-- MDIR: /mnt/d/MakoSU/kernel
+-- OUTPUT DIR: /mnt/d/MakoSU/kernel/out/android15-6.6
+make -C /opt/ddk/kdir/android15-6.6 M=/mnt/d/MakoSU/kernel/out/android15-6.6 src=/mnt/d/MakoSU/kernel modules compile_commands.json -j16
+make[1]: Entering directory '/opt/ddk/kdir/android15-6.6'
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 6.6
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 6.6
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+make[1]: Leaving directory '/opt/ddk/kdir/android15-6.6'
+./check_symbol /mnt/d/MakoSU/kernel/out/android15-6.6/kernelsu.ko /opt/ddk/kdir/android15-6.6/vmlinux
+
+Build completed successfully
+✓ Built kernelsu-android15-6.6.ko
+
+========== Building android16-6.12 ==========
+Building target: android16-6.12
+
+Environment setup:
+  KDIR=/opt/ddk/kdir/android16-6.12
+  CLANG_PATH=/opt/ddk/clang/clang-r536225/bin
+  RUST_PATH=/opt/ddk/rust/rust-1.82.0/bin
+  ARCH=arm64
+  Custom env vars:
+    CONFIG_KSU=m
+
+Running make...
+-- KDIR: /opt/ddk/kdir/android16-6.12
+-- MDIR: /mnt/d/MakoSU/kernel
+-- OUTPUT DIR: /mnt/d/MakoSU/kernel/out/android16-6.12
+make -C /opt/ddk/kdir/android16-6.12 M=/mnt/d/MakoSU/kernel/out/android16-6.12 src=/mnt/d/MakoSU/kernel modules compile_commands.json -j16
+make[1]: Entering directory '/opt/ddk/kdir/android16-6.12'
+-- MakoSU version: 40901 [v4.1.9-04f7c4a8@main]
+-- KernelSU Manager package name: com.makosu.manager
+-- KernelSU Manager signature size: 0x0549
+-- KernelSU Manager signature hash: 7eb729e2d76e05488cc4150825e69be9a8beca33bf606ea9217e163eea3b3943
+-- KERNEL_VERSION: 6.12
+-- KERNEL_TYPE: GKI 2.0
+-- KPM is disabled
+-- KSU_NEW_DCACHE_FLUSH: 1
+make[3]: *** No rule to make target '/mnt/d/MakoSU/kernel/out/android16-6.12/core/init.o', needed by '/mnt/d/MakoSU/kernel/out/android16-6.12/kernelsu.o'.  Stop.
+make[3]: *** Waiting for unfinished jobs....
+make[2]: *** [/opt/ddk/src/android16-6.12/Makefile:2005: /mnt/d/MakoSU/kernel/out/android16-6.12] Error 2
+make[1]: *** [/opt/ddk/src/android16-6.12/Makefile:242: __sub-make] Error 2
+make[1]: Leaving directory '/opt/ddk/kdir/android16-6.12'
+make: *** [Makefile:12: all] Error 2
+✗ Build failed for android16-6.12
+
+========== Final output ==========
+-rwxrwxrwx 1 root root 364848 Jul 25 11:44 kernelsu-android12-5.10.ko
+-rwxrwxrwx 1 root root 358904 Jul 25 11:44 kernelsu-android13-5.10.ko
+-rwxrwxrwx 1 root root 387360 Jul 25 11:45 kernelsu-android13-5.15.ko
+-rwxrwxrwx 1 root root 507312 Jul 25 11:45 kernelsu-android14-5.15.ko
+-rwxrwxrwx 1 root root 419688 Jul 25 11:45 kernelsu-android14-6.1.ko
+-rwxrwxrwx 1 root root 325656 Jul 25 11:45 kernelsu-android15-6.6.ko
+-rwxrwxrwx 1 root root 363080 Jul 25 11:43 kernelsu-android16-6.12.ko

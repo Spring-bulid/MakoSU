@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import com.sukisu.ultra.Natives
 import com.sukisu.ultra.data.repository.SettingsRepository
 import com.sukisu.ultra.data.repository.SettingsRepositoryImpl
@@ -341,7 +342,20 @@ class SuperUserViewModel(
         refreshMutex.withLock {
             _uiState.update { it.copy(isRefreshing = true, error = null) }
 
-            repo.getAppList().onSuccess { (newApps, ids) ->
+            // A hung root shell must not leave the page spinning forever
+            val result = withTimeoutOrNull(30_000) { repo.getAppList() }
+            if (result == null) {
+                _uiState.update {
+                    it.copy(
+                        isRefreshing = false,
+                        hasLoaded = true,
+                        error = IllegalStateException("load app list timeout"),
+                    )
+                }
+                return@withLock
+            }
+
+            result.onSuccess { (newApps, ids) ->
                 val (cachedGroups, grouped) = withContext(Dispatchers.IO) {
                     val cached = buildCachedGroups(newApps)
                     val umountByUid = cached.associate { it.uid to it.shouldUmount }

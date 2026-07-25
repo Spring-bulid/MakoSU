@@ -3,10 +3,12 @@ package com.sukisu.ultra.ui.screen.susfs.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sukisu.ultra.R
 import com.sukisu.ultra.ui.screen.susfs.SuSFSTab
 import com.sukisu.ultra.ui.screen.susfs.SuSFSUiState
 import com.sukisu.ultra.ui.screen.susfs.repository.SuSFSRepositoryInterface
 import com.sukisu.ultra.ui.screen.susfs.repository.SuSFSRepositoryImpl
+import com.sukisu.ultra.ui.screen.susfs.util.SuSFSCommands
 import com.sukisu.ultra.ui.screen.susfs.util.SuSFSManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -256,6 +258,18 @@ class SuSFSViewModel(
             SuSFSManager.saveEnableHideBl(enabled)
             if (SuSFSManager.isAutoStartEnabled()) {
                 SuSFSManager.configureAutoStart(context, true)
+            }
+            if (enabled) {
+                // Apply to the live system immediately so the feature works
+                // without a reboot; module script covers persistence.
+                val applied = SuSFSCommands.applyHideBlNow()
+                withContext(Dispatchers.Main) {
+                    android.widget.Toast.makeText(
+                        context,
+                        if (applied) R.string.hide_bl_applied else R.string.hide_bl_apply_failed,
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
+                }
             }
         }
     }

@@ -8,6 +8,7 @@
 
 #include <android/log.h>
 #include <cstring>
+#include <cstdlib>
 
 #include "ksu.h"
 #include "logging.h"
@@ -435,4 +436,51 @@ Java_com_sukisu_ultra_Natives_getHookType(JNIEnv *env, jobject) {
         return env->NewStringUTF(hook_type);
     }
     return nullptr;
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_sukisu_ultra_Natives_getManagersList(JNIEnv *env, jobject) {
+    struct ksu_dm_get_managers_cmd *cmd = nullptr;
+
+    if (!get_managers_list(&cmd)) {
+        LOGD("getManagersList: failed to get active managers list");
+        return nullptr;
+    }
+
+    int count = cmd != nullptr ? static_cast<int>(cmd->count) : 0;
+
+    auto managerListCls = env->FindClass("com/sukisu/ultra/Natives$ManagersList");
+    auto managerListCtor = env->GetMethodID(managerListCls, "<init>", "()V");
+    auto obj = env->NewObject(managerListCls, managerListCtor);
+    auto countField = env->GetFieldID(managerListCls, "count", "I");
+    auto managersField = env->GetFieldID(managerListCls, "managers", "Ljava/util/List;");
+    env->SetIntField(obj, countField, count);
+
+    auto arrayListCls = env->FindClass("java/util/ArrayList");
+    auto arrayListCtor = env->GetMethodID(arrayListCls, "<init>", "()V");
+    auto addMethod = env->GetMethodID(arrayListCls, "add", "(Ljava/lang/Object;)Z");
+    auto managersList = env->NewObject(arrayListCls, arrayListCtor);
+
+    if (cmd != nullptr && count > 0) {
+        auto managerInfoCls = env->FindClass("com/sukisu/ultra/Natives$ManagerInfo");
+        auto managerInfoCtor = env->GetMethodID(managerInfoCls, "<init>", "(II)V");
+        for (int i = 0; i < count; i++) {
+            auto managerInfo = env->NewObject(managerInfoCls, managerInfoCtor,
+                                              static_cast<jint>(cmd->managers[i].uid),
+                                              static_cast<jint>(cmd->managers[i].signature_index));
+            env->CallBooleanMethod(managersList, addMethod, managerInfo);
+            env->DeleteLocalRef(managerInfo);
+        }
+    }
+
+    env->SetObjectField(obj, managersField, managersList);
+
+    LOGD("getManagersList: count=%d", count);
+
+    if (cmd != nullptr) {
+        free(cmd);
+    }
+
+    return obj;
 }

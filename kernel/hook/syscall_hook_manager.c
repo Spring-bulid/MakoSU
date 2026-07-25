@@ -137,6 +137,9 @@ void __init ksu_syscall_hook_manager_init(void)
     ksu_register_syscall_hook(__NR_execve, ksu_hook_execve);
     ksu_register_syscall_hook(__NR_newfstatat, ksu_hook_newfstatat);
     ksu_register_syscall_hook(__NR_faccessat, ksu_hook_faccessat);
+    // SUSFS3S: openat/statx hooks (sus_path filtering)
+    ksu_register_syscall_hook(__NR_openat, ksu_hook_openat);
+    ksu_register_syscall_hook(__NR_statx, ksu_hook_statx);
 
 #ifdef CONFIG_HAVE_SYSCALL_TRACEPOINTS
 #ifdef KSU_GKI1_LKM_IMPORTS
@@ -183,6 +186,8 @@ void __exit ksu_syscall_hook_manager_exit(void)
     ksu_unregister_syscall_hook(__NR_execve);
     ksu_unregister_syscall_hook(__NR_newfstatat);
     ksu_unregister_syscall_hook(__NR_faccessat);
+    ksu_unregister_syscall_hook(__NR_openat);
+    ksu_unregister_syscall_hook(__NR_statx);
 
     ksu_syscall_hook_exit();
 

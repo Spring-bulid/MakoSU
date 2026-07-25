@@ -86,7 +86,6 @@ fun SulogScreenMaterial(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val pullToRefreshState = rememberPullToRefreshState()
     val listState = rememberLazyListState()
-    val searchListState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
     val fileSelector = buildSulogFileSelector(state.files, state.selectedFilePath)
     var selectedEntry by remember { mutableStateOf<SulogEntry?>(null) }
@@ -104,12 +103,9 @@ fun SulogScreenMaterial(
         )
     }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-
     ExpressiveScaffold(
         topBar = {
             SearchAppBar(
-                snackbarHostState = snackbarHostState,
                 title = { Text(stringResource(R.string.settings_sulog)) },
                 searchText = localSearchText,
                 onSearchTextChange = {
@@ -164,30 +160,6 @@ fun SulogScreenMaterial(
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                searchContent = { bottomPadding, _ ->
-                    val latestVisibleEntries = rememberUpdatedState(state.visibleEntries)
-                    ScrollToTopOnChange(
-                        searchListState,
-                        state.searchText,
-                    ) { latestVisibleEntries.value }
-                    LazyColumn(
-                        state = searchListState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .nestedScroll(scrollBehavior.nestedScrollConnection),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 16.dp + bottomPadding,
-                        ),
-                    ) {
-                        sulogEntriesSection(
-                            entries = state.visibleEntries,
-                            errorMessage = state.errorMessage,
-                            onEntryClick = { selectedEntry = it },
-                        )
-                    }
-                },
             )
         },
         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
@@ -215,6 +187,7 @@ fun SulogScreenMaterial(
                 listState,
                 state.selectedFilters,
                 state.selectedFilePath,
+                state.searchText,
             ) { latestEntries.value }
             LazyColumn(
                 state = listState,

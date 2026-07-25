@@ -10,8 +10,8 @@ use crate::module::regenerate_preinit_rc;
 #[cfg(target_arch = "aarch64")]
 use crate::susfs;
 use crate::{
-    apk_sign, assets, debug, defs, init_event, ksu_uapi, ksucalls, module, module_config, sulog,
-    umount, utils,
+    apk_sign, assets, debug, defs, dynamic_manager, init_event, ksu_uapi, ksucalls, module,
+    module_config, sulog, umount, utils,
 };
 
 /// KernelSU userspace cli
@@ -179,6 +179,13 @@ enum Commands {
     Susfs {
         #[command(subcommand)]
         command: Susfs,
+    },
+
+    #[cfg(target_arch = "aarch64")]
+    /// SUSFS3S (LKM-native SuSFS subset)
+    Susfs3s {
+        #[command(subcommand)]
+        command: Susfs3s,
     },
 }
 
@@ -501,6 +508,11 @@ enum Kernel {
     },
     /// Notify that module is mounted
     NotifyModuleMounted,
+    /// Manage dynamic manager
+    DynamicManager {
+        #[command(subcommand)]
+        command: DynamicManagerOp,
+    },
     /// Spoof kernel release and version strings
     SpoofUname {
         /// kernel release string (e.g. 5.10.117-android12-9)
@@ -510,6 +522,30 @@ enum Kernel {
         #[arg(short, long)]
         version: Option<String>,
     },
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum DynamicManagerOp {
+    /// Get the signature of the current dynamic manager (size+hash)
+    Get {
+        #[arg(long)]
+        internal: Option<bool>,
+    },
+    /// Set the signature of the dynamic manager
+    Set {
+        /// the signature size
+        size: u32,
+        /// the signature hash
+        #[arg(value_parser = dynamic_manager::parse_hash)]
+        hash: [u8; 64],
+    },
+    /// Set the signature of the dynamic manager for apk
+    SetApk {
+        /// the apk path
+        apk: String,
+    },
+    /// Clear the dynamic manager
+    Clear,
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -701,11 +737,66 @@ enum Susfs {
     },
 }
 
+/// susfs3s subcommands (kernel SUSFS3S supercall, 'K' 107)
+#[cfg(target_arch = "aarch64")]
+#[derive(clap::Subcommand, Debug)]
+enum Susfs3s {
+    /// Add a path to the sus_path list (hidden with -ENOENT for non-root)
+    AddSusPath {
+        /// absolute path to hide
+        path: String,
+    },
+    /// Remove a path from the sus_path list
+    DelSusPath {
+        /// absolute path to unhide
+        path: String,
+    },
+    /// Add or update a sus_kstat spoof template for a path. The template is
+    /// applied verbatim, so all fields must be given (e.g. a real stat of
+    /// the target with the fields to spoof edited).
+    AddSusKstat {
+        /// path
+        path: String,
+        /// ino
+        ino: u64,
+        /// dev
+        dev: u32,
+        /// nlink
+        nlink: u32,
+        /// mode
+        mode: u32,
+        /// uid
+        uid: u32,
+        /// gid
+        gid: u32,
+        /// rdev
+        rdev: u32,
+        /// size
+        size: u64,
+        /// blksize
+        blksize: u64,
+        /// blocks
+        blocks: u64,
+        /// atime sec
+        atime: i64,
+        /// mtime sec
+        mtime: i64,
+        /// ctime sec
+        ctime: i64,
+    },
+    /// Remove the sus_kstat spoof template for a path
+    DelSusKstat {
+        /// path
+        path: String,
+    },
+    /// Wipe both the sus_path and sus_kstat lists
+    Wipe,
+}
+
 /// susfs module subcommands
 #[cfg(target_arch = "aarch64")]
 #[derive(clap::Subcommand, Debug)]
-pub enum SusfsModuleCmd {
-    /// Install (or reinstall) the SuSFS auto-start module from saved config
+pub enum SusfsModuleCmd {    /// Install (or reinstall) the SuSFS auto-start module from saved config
     Install,
     /// Remove the SuSFS auto-start module
     Remove,
@@ -1079,6 +1170,34 @@ pub fn run() -> Result<()> {
                 ksucalls::report_module_mounted();
                 Ok(())
             }
+            Kernel::DynamicManager { command } => match command {
+                DynamicManagerOp::Set { size, hash } => dynamic_manager::set(size, hash),
+                DynamicManagerOp::Get { internal } => {
+                    let (size, hash) = ksucalls::dynamic_manager_get()?;
+                    if internal.is_some_and(|s| s) {
+                        println!(
+                            "{}",
+                            serde_json::to_string_pretty(
+                                &serde_json::json!({"size":size,"hash":String::from_utf8_lossy(&hash)})
+                            )?
+                        );
+                    } else {
+                        println!("size: {}, hash: {}", size, String::from_utf8_lossy(&hash));
+                    }
+                    Ok(())
+                }
+                DynamicManagerOp::SetApk { apk } => {
+                    let sign = apk_sign::get_apk_signature(&apk)?;
+
+                    let bytes = sign.1.as_bytes();
+
+                    let mut hash = [0u8; 64];
+                    hash.copy_from_slice(bytes);
+
+                    dynamic_manager::set(sign.0, hash)
+                }
+                DynamicManagerOp::Clear => dynamic_manager::clear(),
+            },
             Kernel::SpoofUname { release, version } => {
                 let r = release.unwrap_or_default();
                 let v = version.unwrap_or_default();
@@ -1243,6 +1362,46 @@ pub fn run() -> Result<()> {
             };
             Ok(())
         }
+        #[cfg(target_arch = "aarch64")]
+        Commands::Susfs3s { command } => match command {
+            Susfs3s::AddSusPath { path } => ksucalls::susfs3s_add_sus_path(&path),
+            Susfs3s::DelSusPath { path } => ksucalls::susfs3s_del_sus_path(&path),
+            Susfs3s::AddSusKstat {
+                path,
+                ino,
+                dev,
+                nlink,
+                mode,
+                uid,
+                gid,
+                rdev,
+                size,
+                blksize,
+                blocks,
+                atime,
+                mtime,
+                ctime,
+            } => ksucalls::susfs3s_add_sus_kstat(
+                &path,
+                &ksucalls::Susfs3sKstat {
+                    st_ino: ino,
+                    st_size: size,
+                    st_blksize: blksize,
+                    st_blocks: blocks,
+                    st_atime: atime,
+                    st_mtime: mtime,
+                    st_ctime: ctime,
+                    st_mode: mode,
+                    st_uid: uid,
+                    st_gid: gid,
+                    st_dev: dev,
+                    st_nlink: nlink,
+                    st_rdev: rdev,
+                },
+            ),
+            Susfs3s::DelSusKstat { path } => ksucalls::susfs3s_del_sus_kstat(&path),
+            Susfs3s::Wipe => ksucalls::susfs3s_wipe(),
+        },
     };
 
     if let Err(e) = &result {

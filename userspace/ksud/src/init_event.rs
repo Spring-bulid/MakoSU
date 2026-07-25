@@ -51,6 +51,9 @@ pub fn on_post_data_fs() -> Result<()> {
         if let Err(e) = crate::module::exec_common_scripts("post-fs-data.d", true) {
             warn!("exec common post-fs-data scripts failed: {e}");
         }
+        if let Err(e) = crate::dynamic_manager::booted_load() {
+            warn!("set dynamic manager failed: {e}");
+        }
     }
 
     let module_dir = defs::MODULE_DIR;

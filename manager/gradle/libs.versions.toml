@@ -84,3 +84,4 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit4 = { module = "junit:junit", version.ref = "junit4" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }

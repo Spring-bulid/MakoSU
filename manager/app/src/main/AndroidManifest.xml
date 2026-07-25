@@ -30,6 +30,7 @@
             android:exported="true"
             android:enabled="true"
             android:theme="@style/Theme.KernelSU"
+            android:configChanges="uiMode|density|orientation|screenSize|screenLayout|smallestScreenSize|locale|layoutDirection|fontScale|keyboard|keyboardHidden|navigation"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

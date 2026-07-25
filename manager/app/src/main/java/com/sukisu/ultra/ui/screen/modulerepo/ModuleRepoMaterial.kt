@@ -119,17 +119,14 @@ fun ModuleRepoScreenMaterial(
 ) {
     val haptic = LocalHapticFeedback.current
     val listState = rememberLazyListState()
-    val searchListState = rememberLazyListState()
     val refreshTick = remember { mutableIntStateOf(0) }
     val pullToRefreshState = rememberPullToRefreshState()
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-    val snackbarHostState = remember { SnackbarHostState() }
 
     ExpressiveScaffold(
         topBar = {
             SearchAppBar(
-                snackbarHostState = snackbarHostState,
                 title = { Text(text = stringResource(R.string.module_repos)) },
                 searchText = state.searchStatus.searchText,
                 onSearchTextChange = actions.onSearchTextChange,
@@ -184,22 +181,6 @@ fun ModuleRepoScreenMaterial(
                         }
                     }
                 },
-                searchContent = { _, closeSearch ->
-                    val latestSearchResults = rememberUpdatedState(state.searchResults)
-                    ScrollToTopOnChange(
-                        searchListState,
-                        state.searchStatus.searchText,
-                    ) { latestSearchResults.value }
-                    RepoModuleList(
-                        modules = state.searchResults,
-                        listState = searchListState,
-                        modifier = Modifier.fillMaxSize(),
-                        onModuleClick = {
-                            closeSearch()
-                            actions.onOpenRepoDetail(it)
-                        }
-                    )
-                }
             )
         },
         contentWindowInsets = WindowInsets.systemBars.add(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal)
@@ -237,6 +218,7 @@ fun ModuleRepoScreenMaterial(
                 listState,
                 state.sortOrder,
                 refreshTick.intValue,
+                state.searchStatus.searchText,
                 isBusy = { latestRefreshing.value },
             ) { latestModules.value }
             PullToRefreshBox(
@@ -259,7 +241,7 @@ fun ModuleRepoScreenMaterial(
                 },
             ) {
                 RepoModuleList(
-                    modules = state.modules,
+                    modules = if (state.searchStatus.searchText.isBlank()) state.modules else state.searchResults,
                     listState = listState,
                     modifier = Modifier
                         .fillMaxSize()

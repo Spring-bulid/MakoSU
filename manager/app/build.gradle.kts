@@ -236,6 +236,7 @@ dependencies {
 
     implementation(libs.appiconloader)
     implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
 }
 
 kotlin {

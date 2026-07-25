@@ -45,21 +45,16 @@ class HomeViewModel(
 
     fun refresh() {
         viewModelScope.launch {
+            // Prefer the in-memory layout already shown; never let a late async
+            // refresh overwrite it with a stale prefs read and flash another skin.
             val previousLayout = _uiState.value.homeLayout
             val baseState = withContext(Dispatchers.IO) { buildState() }
-            // Prefer in-memory layout already shown; only fall back to prefs.
-            // Prevents async refresh finishing late and flashing a different skin.
-            val layoutFromPrefs = HomeLayout.fromValue(settingsRepo.homeLayout)
             _uiState.update {
                 baseState.copy(
-                    homeLayout = layoutFromPrefs,
+                    homeLayout = previousLayout,
                     showFullStatus = preferences.getBoolean("show_fingerprint", true),
                     checkUpdateEnabled = settingsRepo.checkUpdate,
                 )
-            }
-            // If prefs still match what UI was showing, keep identity (no-op for equals)
-            if (layoutFromPrefs != previousLayout) {
-                // prefs already applied above
             }
             if (settingsRepo.checkUpdate) {
                 val latestVersionInfo = withContext(Dispatchers.IO) { checkNewVersion() }

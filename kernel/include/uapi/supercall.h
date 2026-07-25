@@ -188,6 +188,55 @@ struct ksu_kpm_cmd {
     __aligned_u64 __user result_code;
 };
 
+static const __u8 DYNAMIC_MANAGER_OP_SET = 0;
+static const __u8 DYNAMIC_MANAGER_OP_GET = 1;
+static const __u8 DYNAMIC_MANAGER_OP_WIPE = 2;
+static const __u8 DYNAMIC_MANAGER_OP_SET_SYNCHRONOUS = 3;
+
+struct ksu_dynamic_manager_cmd {
+    __u8 operation;
+    unsigned int size;
+    __u8 hash[64];
+};
+
+struct ksu_manager_entry {
+    __u32 uid;
+    __u8 signature_index;
+} __attribute__((packed));
+
+struct ksu_get_managers_cmd {
+    __u16 count; // Input / Output: number of managers in array
+    __u16 total_count; // Output: total number of managers in requested list
+    struct ksu_manager_entry managers[]; // Output: Array of active manager
+} __attribute__((packed));
+
+/* SUSFS3S: LKM-native SuSFS subset (sus_path + sus_kstat) */
+static const __u8 KSU_SUSFS3S_OP_ADD_SUS_PATH = 0;
+static const __u8 KSU_SUSFS3S_OP_DEL_SUS_PATH = 1;
+static const __u8 KSU_SUSFS3S_OP_ADD_SUS_KSTAT = 2;
+static const __u8 KSU_SUSFS3S_OP_DEL_SUS_KSTAT = 3;
+static const __u8 KSU_SUSFS3S_OP_WIPE = 4; /* wipe both lists */
+
+struct ksu_susfs3s_cmd {
+    __u8 op; /* Input: KSU_SUSFS3S_OP_* */
+    __u8 pad[3];
+    char path[256]; /* Input: absolute target path */
+    /* kstat template for ADD_SUS_KSTAT; applied verbatim, must be complete */
+    __u64 st_ino;
+    __u64 st_size;
+    __u64 st_blksize;
+    __u64 st_blocks;
+    __s64 st_atime;
+    __s64 st_mtime;
+    __s64 st_ctime;
+    __u32 st_mode;
+    __u32 st_uid;
+    __u32 st_gid;
+    __u32 st_dev;
+    __u32 st_nlink;
+    __u32 st_rdev;
+};
+
 /* IOCTL command definitions */
 static const __u32 KSU_IOCTL_GRANT_ROOT = _IOC(_IOC_NONE, 'K', 1, 0);
 static const __u32 KSU_IOCTL_GET_INFO = _IOR('K', 2, struct ksu_get_info_cmd);
@@ -222,6 +271,9 @@ static const __u32 KSU_IOCTL_HOOK_TYPE = _IOC(_IOC_READ, 'K', 101, 0);
 static const __u32 KSU_IOCTL_ENABLE_KPM = _IOC(_IOC_READ, 'K', 102, 0);
 static const __u32 KSU_IOCTL_LIST_TRY_UMOUNT = _IOC(_IOC_READ | _IOC_WRITE, 'K', 103, 0);
 static const __u32 KSU_IOCTL_SET_SPOOF_VERSION = _IOC(_IOC_WRITE, 'K', 104, 0);
+static const __u32 KSU_IOCTL_DYNAMIC_MANAGER = _IOC(_IOC_READ | _IOC_WRITE, 'K', 105, 0);
+static const __u32 KSU_IOCTL_GET_MANAGERS = _IOC(_IOC_READ | _IOC_WRITE, 'K', 106, 0);
+static const __u32 KSU_IOCTL_SUSFS3S = _IOC(_IOC_READ | _IOC_WRITE, 'K', 107, 0);
 static const __u32 KSU_IOCTL_KPM = _IOC(_IOC_READ | _IOC_WRITE, 'K', 200, 0);
 
 #endif

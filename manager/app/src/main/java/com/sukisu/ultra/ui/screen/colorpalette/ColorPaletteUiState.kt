@@ -23,6 +23,8 @@ data class ColorPaletteUiState(
     val moduleBannerCustomEnabled: Boolean,
     val moduleBannerCustomOpacityEnabled: Boolean,
     val moduleBannerOpacity: Float,
+    val customFontEnabled: Boolean,
+    val customFontFilename: String?,
 )
 
 @Immutable
@@ -49,4 +51,10 @@ data class ColorPaletteScreenActions(
     val onSetModuleBannerCustomEnabled: (Boolean) -> Unit,
     val onSetModuleBannerCustomOpacityEnabled: (Boolean) -> Unit,
     val onSetModuleBannerOpacity: (Float) -> Unit,
+    val onSetCustomFontEnabled: (Boolean) -> Unit,
+    val onSelectCustomFont: () -> Unit,
+    val onClearCustomFont: () -> Unit,
+    val onExportTheme: () -> Unit,
+    val onImportTheme: () -> Unit,
+    val onPageBackgroundClick: (Int) -> Unit,
 )

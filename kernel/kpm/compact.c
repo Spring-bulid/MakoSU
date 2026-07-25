@@ -28,6 +28,7 @@
 #include "kpm.h"
 #include "compact.h"
 #include "policy/allowlist.h"
+#include "manager/apk_sign.h"
 #include "manager/manager_identity.h"
 
 static int sukisu_is_su_allow_uid(uid_t uid)
@@ -52,13 +53,17 @@ static int sukisu_is_current_uid_manager(void)
 
 static uid_t sukisu_get_manager_uid(void)
 {
-    return ksu_manager_appid;
+    return ksu_get_manager_appid();
 }
 
 static void sukisu_set_manager_uid(uid_t uid, int force)
 {
-    if (force || ksu_manager_appid == -1)
-        ksu_manager_appid = uid;
+    if (force) {
+        ksu_invalidate_manager_uid();
+        ksu_add_manager_appid(uid, KSU_SIGNATURE_INDEX_KSU_DEBUG);
+    } else if (!ksu_is_manager_appid_valid()) {
+        ksu_add_manager_appid(uid, KSU_SIGNATURE_INDEX_KSU_DEBUG);
+    }
 }
 
 struct CompactAddressSymbol {

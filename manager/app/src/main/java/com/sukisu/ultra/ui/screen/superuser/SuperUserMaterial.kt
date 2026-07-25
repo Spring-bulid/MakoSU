@@ -1,49 +1,52 @@
 package com.sukisu.ultra.ui.screen.superuser
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenuPopup
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,10 +57,14 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -66,13 +73,32 @@ import com.sukisu.ultra.data.model.AppInfo
 import com.sukisu.ultra.ui.component.AppIconImage
 import com.sukisu.ultra.ui.component.ScrollToTopOnChange
 import com.sukisu.ultra.ui.component.material.ExpressiveScaffold
+import com.sukisu.ultra.ui.component.material.ExpressiveSwitch
 import com.sukisu.ultra.ui.component.material.SearchAppBar
 import com.sukisu.ultra.ui.component.material.SegmentedColumn
 import com.sukisu.ultra.ui.component.material.SegmentedItem
 import com.sukisu.ultra.ui.component.material.SegmentedListItem
 import com.sukisu.ultra.ui.component.statustag.StatusTag
-import com.sukisu.ultra.ui.util.ownerNameForUid
+import com.sukisu.ultra.ui.theme.LocalCustomBackgroundEnabled
+import com.sukisu.ultra.ui.viewmodel.AppSortConfig
 import com.sukisu.ultra.ui.viewmodel.AppSortType
+
+/** One row of the flat (FolkPatch-style) app list: a single app of a uid group. */
+private data class FlatApp(
+    val group: GroupedApps,
+    val app: AppInfo,
+    val matched: Boolean = false,
+)
+
+private fun List<GroupedApps>.flatten(): List<FlatApp> = flatMap { group ->
+    group.apps.map { app ->
+        FlatApp(
+            group = group,
+            app = app,
+            matched = group.matchedPackageNames.contains(app.packageName),
+        )
+    }
+}
 
 @Composable
 fun SuperUserPagerMaterial(
@@ -82,7 +108,6 @@ fun SuperUserPagerMaterial(
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val listState = rememberLazyListState()
-    val searchListState = rememberLazyListState()
     val refreshTick = remember { mutableIntStateOf(0) }
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -92,12 +117,29 @@ fun SuperUserPagerMaterial(
     }
 
     val haptic = LocalHapticFeedback.current
-    val snackbarHostState = remember { SnackbarHostState() }
+    var showOptionsSheet by remember { mutableStateOf(false) }
+
+    val flatApps = remember(uiState.groupedApps) { uiState.groupedApps.flatten() }
+    val flatSearchResults = remember(uiState.searchResults) { uiState.searchResults.flatten() }
+
+    if (showOptionsSheet) {
+        SuperUserOptionsSheet(
+            uiState = uiState,
+            onDismiss = { showOptionsSheet = false },
+            onRefresh = {
+                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                actions.onRefresh()
+                refreshTick.intValue++
+            },
+            onUpdateSortConfig = actions.onUpdateSortConfig,
+            onToggleShowSystemApps = actions.onToggleShowSystemApps,
+            onToggleShowOnlyPrimaryUserApps = actions.onToggleShowOnlyPrimaryUserApps,
+        )
+    }
 
     ExpressiveScaffold(
         topBar = {
             SearchAppBar(
-                snackbarHostState = snackbarHostState,
                 title = { Text(stringResource(R.string.superuser)) },
                 searchText = localSearchText,
                 onSearchTextChange = {
@@ -117,195 +159,14 @@ fun SuperUserPagerMaterial(
                     }
                 },
                 actions = {
-                    var showSortMenu by remember { mutableStateOf(false) }
-
-                    IconButton(onClick = { showSortMenu = true }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Sort,
-                            contentDescription = stringResource(R.string.menu_sort)
-                        )
-
-                        DropdownMenuPopup(
-                            expanded = showSortMenu,
-                            onDismissRequest = { showSortMenu = false }
-                        ) {
-                            val sortEntries = listOf(
-                                AppSortType.NAME to R.string.sort_by_name,
-                                AppSortType.PACKAGE_NAME to R.string.sort_by_package_name,
-                                AppSortType.INSTALL_TIME to R.string.sort_by_install_time,
-                                AppSortType.UPDATE_TIME to R.string.sort_by_update_time,
-                            )
-                            val sortConfig = uiState.sortConfig
-
-                            DropdownMenuGroup(shapes = MenuDefaults.groupShape(index = 0, count = 2)) {
-                                sortEntries.onEachIndexed { index, (type, resId) ->
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(resId)) },
-                                        selected = sortConfig.sortType == type,
-                                        selectedLeadingIcon = {
-                                            Icon(
-                                                Icons.Filled.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(MenuDefaults.LeadingIconSize),
-                                            )
-                                        },
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                                            actions.onUpdateSortConfig(sortConfig.withType(type))
-                                            showSortMenu = false
-                                        },
-                                        shapes = MenuDefaults.itemShape(
-                                            index = index,
-                                            count = sortEntries.size
-                                        ),
-                                    )
-                                }
-                            }
-
-                            Spacer(Modifier.height(MenuDefaults.GroupSpacing))
-
-                            DropdownMenuGroup(shapes = MenuDefaults.groupShape(index = 1, count = 2)) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.sort_reverse)) },
-                                    checked = sortConfig.reversed,
-                                    checkedLeadingIcon = {
-                                        Icon(
-                                            Icons.Filled.Check,
-                                            modifier = Modifier.size(MenuDefaults.LeadingIconSize),
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    onCheckedChange = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                                        actions.onUpdateSortConfig(sortConfig.toggleReversed())
-                                        showSortMenu = false
-                                    },
-                                    shapes = MenuDefaults.itemShape(
-                                        index = 0,
-                                        count = 1
-                                    ),
-                                )
-                            }
-                        }
-                    }
-
-                    var showDropdown by remember { mutableStateOf(false) }
-
-                    IconButton(onClick = { showDropdown = true }) {
+                    IconButton(onClick = { showOptionsSheet = true }) {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
                             contentDescription = stringResource(id = R.string.settings)
                         )
-
-                        DropdownMenuPopup(
-                            expanded = showDropdown,
-                            onDismissRequest = { showDropdown = false }
-                        ) {
-                            val filterCount = if (uiState.userIds.size > 1) 2 else 1
-                            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.show_system_apps)) },
-                                    checked = uiState.showSystemApps,
-                                    checkedLeadingIcon = {
-                                        Icon(
-                                            Icons.Filled.Check,
-                                            modifier = Modifier.size(MenuDefaults.LeadingIconSize),
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    onCheckedChange = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                                        actions.onToggleShowSystemApps()
-                                        showDropdown = false
-                                    },
-                                    shapes = MenuDefaults.itemShape(index = 0, count = filterCount),
-                                )
-                                if (uiState.userIds.size > 1) {
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.show_only_primary_user_apps)) },
-                                        checked = uiState.showOnlyPrimaryUserApps,
-                                        checkedLeadingIcon = {
-                                            Icon(
-                                                Icons.Filled.Check,
-                                                modifier = Modifier.size(MenuDefaults.LeadingIconSize),
-                                                contentDescription = null,
-                                            )
-                                        },
-                                        onCheckedChange = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                                            actions.onToggleShowOnlyPrimaryUserApps()
-                                            showDropdown = false
-                                        },
-                                        shapes = MenuDefaults.itemShape(index = 1, count = filterCount),
-                                    )
-                                }
-                            }
-                        }
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                defaultContent = { bottomPadding, closeSearch ->
-                    LaunchedEffect(localSearchText) {
-                        searchListState.scrollToItem(0)
-                    }
-                    LazyColumn(
-                        state = searchListState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .nestedScroll(scrollBehavior.nestedScrollConnection),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 16.dp + bottomPadding
-                        ),
-                    ) {
-                        if (uiState.recentlyInstalledResults.isNotEmpty()) {
-                            item {
-                                SegmentedColumn(
-                                    title = stringResource(R.string.recently_installed),
-                                    content = uiState.recentlyInstalledResults.map { group ->
-                                        @Composable {
-                                            SearchGroupItem(
-                                                group = group,
-                                                closeSearch = closeSearch,
-                                                onOpenProfile = actions.onOpenProfile,
-                                            )
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                },
-                searchContent = { bottomPadding, closeSearch ->
-                    LaunchedEffect(localSearchText) {
-                        searchListState.scrollToItem(0)
-                    }
-                    LazyColumn(
-                        state = searchListState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .nestedScroll(scrollBehavior.nestedScrollConnection),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 0.dp,
-                            bottom = 16.dp + bottomPadding
-                        ),
-                    ) {
-                        itemsIndexed(uiState.searchResults, key = { _, item -> item.uid }) { index, group ->
-                            SegmentedItem(index = index, count = uiState.searchResults.size) {
-                                SearchGroupItem(
-                                    group = group,
-                                    closeSearch = closeSearch,
-                                    onOpenProfile = actions.onOpenProfile,
-                                )
-                            }
-                        }
-                    }
-                }
             )
         },
         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
@@ -329,8 +190,6 @@ fun SuperUserPagerMaterial(
                 )
             },
         ) {
-            val expandedSearchUids = remember { mutableStateOf(setOf<Int>()) }
-
             val latestGroupedApps = rememberUpdatedState(uiState.groupedApps)
             val latestRefreshing = rememberUpdatedState(uiState.isRefreshing)
             ScrollToTopOnChange(
@@ -339,9 +198,11 @@ fun SuperUserPagerMaterial(
                 uiState.showSystemApps,
                 uiState.showOnlyPrimaryUserApps,
                 refreshTick.intValue,
+                localSearchText,
                 isBusy = { latestRefreshing.value },
             ) { latestGroupedApps.value }
 
+            val displayedApps = if (localSearchText.isBlank()) flatApps else flatSearchResults
             LazyColumn(
                 state = listState,
                 modifier = Modifier
@@ -355,40 +216,15 @@ fun SuperUserPagerMaterial(
                     bottom = 16.dp + bottomInnerPadding
                 ),
             ) {
-                itemsIndexed(uiState.groupedApps, key = { _, item -> item.uid }) { index, group ->
-                    val expanded = expandedSearchUids.value.contains(group.uid)
-                    val onToggleExpand = {
-                        if (group.apps.size > 1) {
-                            expandedSearchUids.value = if (expandedSearchUids.value.contains(group.uid)) {
-                                expandedSearchUids.value - group.uid
-                            } else {
-                                expandedSearchUids.value + group.uid
-                            }
-                        }
-                    }
-                    SegmentedItem(index = index, count = uiState.groupedApps.size) {
-                        Column {
-                            GroupItem(
-                                group = group,
-                                selected = expanded,
-                                onToggleExpand = onToggleExpand,
-                            ) {
-                                actions.onOpenProfile(group)
-                            }
-                            AnimatedVisibility(
-                                visible = expanded && group.apps.size > 1,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Column {
-                                    group.apps.forEach { app ->
-                                        SimpleAppItem(app = app) {
-                                            actions.onOpenProfile(group)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                itemsIndexed(
+                    displayedApps,
+                    key = { _, item -> "${item.group.uid}:${item.app.packageName}" }
+                ) { index, item ->
+                    SegmentedItem(index = index, count = displayedApps.size) {
+                        AppItem(
+                            item = item,
+                            onClick = { actions.onOpenProfile(item.group) },
+                        )
                     }
                 }
             }
@@ -396,86 +232,20 @@ fun SuperUserPagerMaterial(
     }
 }
 
+/**
+ * FolkPatch-style flat app card (AppItemM3E analog): round app icon, label,
+ * package name, status tags below, trailing chevron. Tap opens the profile
+ * for the app's uid (same navigation as before).
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SearchGroupItem(
-    group: GroupedApps,
-    closeSearch: () -> Unit,
-    onOpenProfile: (GroupedApps) -> Unit,
+private fun AppItem(
+    item: FlatApp,
+    onClick: () -> Unit,
 ) {
-    Column {
-        GroupItem(
-            group = group,
-            selected = false,
-            onToggleExpand = {},
-        ) {
-            closeSearch()
-            onOpenProfile(group)
-        }
-        AnimatedVisibility(
-            visible = group.apps.size > 1,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            Column {
-                group.apps.forEach { app ->
-                    SimpleAppItem(
-                        app = app,
-                        matched = group.matchedPackageNames.contains(app.packageName),
-                    ) {
-                        closeSearch()
-                        onOpenProfile(group)
-                    }
-                }
-            }
-        }
-    }
-}
+    val group = item.group
+    val app = item.app
 
-@Composable
-private fun SimpleAppItem(
-    app: AppInfo,
-    matched: Boolean = false,
-    onNavigate: () -> Unit,
-) {
-    ListItem(
-        onClick = onNavigate,
-        modifier = Modifier.padding(horizontal = 4.dp),
-        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
-        colors = ListItemDefaults.colors(
-            containerColor = if (matched) {
-                colorScheme.secondaryContainer
-            } else {
-                colorScheme.surfaceColorAtElevation(3.dp)
-            }
-        ),
-        content = { Text(app.label, overflow = TextOverflow.Ellipsis, maxLines = 1) },
-        supportingContent = { Text(app.packageName, overflow = TextOverflow.Ellipsis, maxLines = 1) },
-        leadingContent = {
-            AppIconImage(
-                packageInfo = app.packageInfo,
-                label = app.label,
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(start = 4.dp)
-            )
-        },
-        trailingContent = {
-            Icon(
-                Icons.Filled.Remove,
-                contentDescription = null,
-                modifier = Modifier.padding(end = 4.dp)
-            )
-        }
-    )
-}
-
-@Composable
-private fun GroupItem(
-    group: GroupedApps,
-    selected: Boolean,
-    onToggleExpand: () -> Unit,
-    onClickPrimary: () -> Unit,
-) {
     val bg = colorScheme.primary
     val fg = colorScheme.onPrimary
     val umountBg = colorScheme.tertiaryContainer
@@ -486,60 +256,265 @@ private fun GroupItem(
     val otherFg = colorScheme.onTertiary
 
     val userId = group.uid / 100000
-    val tags = remember(group.anyAllowSu, group.shouldUmount, group.anyCustom, userId) {
+    val tags = remember(app.allowSu, app.hasCustomProfile, group.shouldUmount, userId) {
         buildList {
-            if (group.anyAllowSu) add(StatusMeta("ROOT", bg, fg))
+            if (app.allowSu) add(StatusMeta("ROOT", bg, fg))
             if (group.shouldUmount) add(StatusMeta("UMOUNT", umountBg, umountFg))
-            if (group.anyCustom) add(StatusMeta("CUSTOM", customBg, customFg))
+            if (app.hasCustomProfile) add(StatusMeta("CUSTOM", customBg, customFg))
             if (userId != 0) add(StatusMeta("USER $userId", otherBg, otherFg))
         }
     }
-    val summaryText = if (group.apps.size > 1) {
-        stringResource(R.string.group_contains_apps, group.apps.size)
-    } else {
-        group.primary.packageName
+
+    val containerColor = when {
+        item.matched -> colorScheme.secondaryContainer
+        LocalCustomBackgroundEnabled.current -> colorScheme.surfaceContainer.copy(alpha = 0.72f)
+        else -> colorScheme.surfaceContainer
     }
+
     SegmentedListItem(
-        selected = selected,
-        onClick = onClickPrimary,
-        onLongClick = if (group.apps.size > 1) onToggleExpand else null,
+        onClick = onClick,
+        colors = ListItemDefaults.segmentedColors(
+            containerColor = containerColor,
+            supportingContentColor = colorScheme.onSurfaceVariant,
+        ),
         headlineContent = {
             Text(
-                text = if (group.apps.size > 1) ownerNameForUid(group.uid) else group.primary.label,
+                text = app.label,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )
         },
         supportingContent = {
-            Text(
-                text = summaryText,
-                color = colorScheme.onSurfaceVariant,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
-            )
-        },
-        trailingContent = {
-            if (tags.isNotEmpty()) {
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    tags.forEach { tag ->
-                        StatusTag(
-                            label = tag.label,
-                            backgroundColor = tag.bg,
-                            contentColor = tag.fg
-                        )
+            Column {
+                Text(
+                    text = app.packageName,
+                    color = colorScheme.onSurfaceVariant,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+                if (tags.isNotEmpty()) {
+                    FlowRow(
+                        modifier = Modifier.padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        tags.forEach { tag ->
+                            StatusTag(
+                                label = tag.label,
+                                backgroundColor = tag.bg,
+                                contentColor = tag.fg
+                            )
+                        }
                     }
                 }
             }
         },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+        },
         leadingContent = {
             AppIconImage(
-                packageInfo = group.primary.packageInfo,
-                label = group.primary.label,
+                packageInfo = app.packageInfo,
+                label = app.label,
                 modifier = Modifier.size(48.dp)
             )
         },
     )
+}
+
+/**
+ * FolkPatch-style options sheet: refresh, filters and sort options in a
+ * ModalBottomSheet instead of toolbar dropdown menus.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SuperUserOptionsSheet(
+    uiState: SuperUserUiState,
+    onDismiss: () -> Unit,
+    onRefresh: () -> Unit,
+    onUpdateSortConfig: (AppSortConfig) -> Unit,
+    onToggleShowSystemApps: () -> Unit,
+    onToggleShowOnlyPrimaryUserApps: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sortConfig = uiState.sortConfig
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = colorScheme.surfaceContainerLow,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 32.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.superuser),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 16.dp),
+            )
+
+            SheetItem(
+                icon = Icons.Filled.Refresh,
+                title = stringResource(R.string.refresh),
+                onClick = {
+                    onRefresh()
+                    onDismiss()
+                },
+            )
+
+            SheetSectionTitle(stringResource(R.string.superuser_filter))
+            SheetSwitchItem(
+                icon = Icons.Filled.Visibility,
+                title = stringResource(R.string.show_system_apps),
+                checked = uiState.showSystemApps,
+                onToggle = onToggleShowSystemApps,
+            )
+            if (uiState.userIds.size > 1) {
+                SheetSwitchItem(
+                    icon = Icons.Filled.Person,
+                    title = stringResource(R.string.show_only_primary_user_apps),
+                    checked = uiState.showOnlyPrimaryUserApps,
+                    onToggle = onToggleShowOnlyPrimaryUserApps,
+                )
+            }
+
+            SheetSectionTitle(stringResource(R.string.menu_sort))
+            val sortEntries = listOf(
+                AppSortType.NAME to R.string.sort_by_name,
+                AppSortType.PACKAGE_NAME to R.string.sort_by_package_name,
+                AppSortType.INSTALL_TIME to R.string.sort_by_install_time,
+                AppSortType.UPDATE_TIME to R.string.sort_by_update_time,
+            )
+            sortEntries.forEach { (type, resId) ->
+                SheetItem(
+                    title = stringResource(resId),
+                    onClick = { onUpdateSortConfig(sortConfig.withType(type)) },
+                    trailing = {
+                        if (sortConfig.sortType == type) {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                tint = colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    },
+                )
+            }
+            SheetSwitchItem(
+                title = stringResource(R.string.sort_reverse),
+                checked = sortConfig.reversed,
+                onToggle = { onUpdateSortConfig(sortConfig.toggleReversed()) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun SheetSectionTitle(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        color = colorScheme.secondary,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(start = 8.dp, top = 12.dp, bottom = 4.dp),
+    )
+}
+
+@Composable
+private fun SheetItem(
+    title: String,
+    onClick: () -> Unit,
+    icon: ImageVector? = null,
+    trailing: (@Composable () -> Unit)? = null,
+) {
+    val haptic = LocalHapticFeedback.current
+    Surface(
+        onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+            onClick()
+        },
+        shape = RoundedCornerShape(12.dp),
+        color = Color.Transparent,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(Modifier.width(16.dp))
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            trailing?.invoke()
+        }
+    }
+}
+
+@Composable
+private fun SheetSwitchItem(
+    title: String,
+    checked: Boolean,
+    onToggle: () -> Unit,
+    icon: ImageVector? = null,
+) {
+    val haptic = LocalHapticFeedback.current
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = Color.Transparent,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .toggleable(
+                    value = checked,
+                    role = Role.Switch,
+                    onValueChange = {
+                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                        onToggle()
+                    },
+                )
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(Modifier.width(16.dp))
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            ExpressiveSwitch(
+                checked = checked,
+                onCheckedChange = null,
+            )
+        }
+    }
 }

@@ -63,13 +63,9 @@ fun HomePager(
     val refreshToken by UiRefresh.token.collectAsStateWithLifecycle()
 
     LaunchedEffect(refreshToken) {
-        // token 0 is initial; still sync once so cold start matches disk
+        // token 0 is initial; still sync once so cold start matches disk.
+        // This is the ONLY re-read path — tab switches must not swap the skin.
         homeLayout = readLayout()
-    }
-    LaunchedEffect(isCurrentPage) {
-        if (isCurrentPage) {
-            homeLayout = readLayout()
-        }
     }
 
     var hasActivated by remember { mutableStateOf(false) }

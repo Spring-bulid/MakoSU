@@ -9,6 +9,16 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -24,31 +34,33 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -75,6 +87,7 @@ import com.sukisu.ultra.ui.navigation3.rememberNavigator
 import com.sukisu.ultra.ui.screen.about.AboutScreen
 import com.sukisu.ultra.ui.screen.appprofile.AppProfileScreen
 import com.sukisu.ultra.ui.screen.colorpalette.ColorPaletteScreen
+import com.sukisu.ultra.ui.screen.dynamicmanager.DynamicManagerScreen
 import com.sukisu.ultra.ui.screen.executemoduleaction.ExecuteModuleActionScreen
 import com.sukisu.ultra.ui.screen.flash.FlashScreen
 import com.sukisu.ultra.ui.screen.home.HomePager
@@ -83,6 +96,7 @@ import com.sukisu.ultra.ui.screen.kpm.KpmScreen
 import com.sukisu.ultra.ui.screen.module.ModulePager
 import com.sukisu.ultra.ui.screen.modulerepo.ModuleRepoDetailScreen
 import com.sukisu.ultra.ui.screen.modulerepo.ModuleRepoScreen
+import com.sukisu.ultra.ui.screen.settings.LanguagePickerScreen
 import com.sukisu.ultra.ui.screen.settings.SettingPager
 import com.sukisu.ultra.ui.screen.settings.SettingsBehaviorScreen
 import com.sukisu.ultra.ui.screen.settings.SettingsFeaturesScreen
@@ -100,14 +114,18 @@ import com.sukisu.ultra.ui.theme.KernelSUTheme
 import com.sukisu.ultra.ui.theme.LocalColorMode
 import com.sukisu.ultra.ui.theme.LocalCustomBackgroundEnabled
 import com.sukisu.ultra.ui.theme.LocalCustomBackgroundOpacity
+import com.sukisu.ultra.ui.theme.FontConfig
 import com.sukisu.ultra.ui.util.install
-import com.sukisu.ultra.ui.util.rememberContentReady
 import com.sukisu.ultra.ui.util.rootAvailable
 import com.sukisu.ultra.ui.viewmodel.MainActivityViewModel
 import com.sukisu.ultra.ui.viewmodel.MainPagerConfig
 
 class MainActivity : ComponentActivity() {
     private val intentChannel = Channel<Intent>(capacity = Channel.BUFFERED)
+
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(com.sukisu.ultra.ui.theme.AppLanguage.wrap(newBase))
+    }
 
     @RequiresApi(Build.VERSION_CODES.Q)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -147,6 +165,9 @@ class MainActivity : ComponentActivity() {
                 Density(systemDensity.density * uiState.pageScale, systemDensity.fontScale)
             }
 
+            // Load custom font config
+            FontConfig.load(context = this@MainActivity)
+            com.sukisu.ultra.ui.theme.PageBackgrounds.load(context = this@MainActivity)
             CompositionLocalProvider(
                 LocalNavigator provides navigator,
                 LocalDensity provides density,
@@ -184,6 +205,18 @@ class MainActivity : ComponentActivity() {
                                         else -> navigator.pop()
                                     }
                                 },
+                                transitionSpec = {
+                                    ContentTransform(
+                                        targetContentEnter = slideInHorizontally(initialOffsetX = { it }),
+                                        initialContentExit = slideOutHorizontally(targetOffsetX = { -it / 4 }) + fadeOut(),
+                                    )
+                                },
+                                popTransitionSpec = {
+                                    ContentTransform(
+                                        targetContentEnter = slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn(),
+                                        initialContentExit = scaleOut(targetScale = 0.9f) + fadeOut(),
+                                    )
+                                },
                                 entryProvider = entryProvider {
                                     entry<Route.Main> { mainScreenEntry() }
                                     entry<Route.About> { AboutScreen() }
@@ -194,6 +227,8 @@ class MainActivity : ComponentActivity() {
                                     entry<Route.SettingsBehavior> { SettingsBehaviorScreen() }
                                     entry<Route.SettingsModule> { SettingsModuleScreen() }
                                     entry<Route.SettingsMore> { SettingsMoreScreen() }
+                                    entry<Route.LanguagePicker> { LanguagePickerScreen() }
+                                    entry<Route.DynamicManager> { DynamicManagerScreen() }
                                     entry<Route.AppProfileTemplate> { AppProfileTemplateScreen() }
                                     entry<Route.TemplateEditor> { key -> TemplateEditorScreen(key.template, key.readOnly) }
                                     entry<Route.AppProfile> { key -> AppProfileScreen(key.uid) }
@@ -281,11 +316,9 @@ fun MainScreen(
 ) {
     val navController = LocalNavigator.current
     val customBackgroundEnabled = LocalCustomBackgroundEnabled.current
-    val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { MainPagerConfig.PAGE_COUNT })
-    val mainPagerState = rememberMainPagerState(pagerState)
+    val mainPagerState = rememberMainPagerState(initialPage)
     val isManager = Natives.isManager
     val isFullFeatured = isManager && !Natives.requireNewKernel() && rootAvailable()
-    var userScrollEnabled by remember(isFullFeatured) { mutableStateOf(isFullFeatured) }
     val surfaceColor = MaterialTheme.colorScheme.surface
     val pageContainerColor = if (customBackgroundEnabled) Color.Transparent else surfaceColor
 
@@ -298,8 +331,7 @@ fun MainScreen(
     }
     var floatingAutoHide by remember { mutableStateOf(prefs.getBoolean("floating_auto_hide", true)) }
     var floatingSwipeHide by remember { mutableStateOf(prefs.getBoolean("floating_swipe_hide", true)) }
-    // Prefs listener + UiRefresh (same idea as FolkPatch refreshTheme for nav)
-    val mainHandler = remember { android.os.Handler(android.os.Looper.getMainLooper()) }
+    // UiRefresh is the single sync path (settings setters write prefs then bump)
     val uiRefreshToken by com.sukisu.ultra.ui.theme.UiRefresh.token.collectAsStateWithLifecycle()
     LaunchedEffect(uiRefreshToken) {
         if (uiRefreshToken > 0L) {
@@ -308,37 +340,9 @@ fun MainScreen(
             floatingSwipeHide = prefs.getBoolean("floating_swipe_hide", true)
         }
     }
-    DisposableEffect(Unit) {
-        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { p, key ->
-            val apply = Runnable {
-                when (key) {
-                    "nav_mode", null -> {
-                        navMode = com.sukisu.ultra.ui.navigation.NavMode.fromValue(
-                            p.getString("nav_mode", "floating"),
-                        )
-                    }
-                    "floating_auto_hide" -> floatingAutoHide = p.getBoolean("floating_auto_hide", true)
-                    "floating_swipe_hide" -> floatingSwipeHide = p.getBoolean("floating_swipe_hide", true)
-                }
-            }
-            if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) apply.run()
-            else mainHandler.post(apply)
-        }
-        prefs.registerOnSharedPreferenceChangeListener(listener)
-        onDispose {
-            prefs.unregisterOnSharedPreferenceChangeListener(listener)
-            mainHandler.removeCallbacksAndMessages(null)
-        }
-    }
-
-    val settledPage = mainPagerState.pagerState.settledPage
-    LaunchedEffect(settledPage) {
-        onPageChanged(settledPage)
-    }
-
-    val currentPage = mainPagerState.pagerState.currentPage
+    val currentPage = mainPagerState.selectedPage
     LaunchedEffect(currentPage) {
-        mainPagerState.syncPage()
+        onPageChanged(currentPage)
     }
 
     MainScreenBackHandler(mainPagerState, navController)
@@ -363,14 +367,23 @@ fun MainScreen(
     val isScrollingDown = remember { mutableStateOf(false) }
     val scrollOffset = remember { mutableStateOf(0f) }
     val previousScrollOffset = remember { mutableStateOf(0f) }
-    var isBottomBarVisible by rememberSaveable { mutableStateOf(true) }
+    // Plain remember (NOT saveable): every entry starts visible. A saveable
+    // hidden value restores for one frame on return and the bar visibly jumps.
+    var isBottomBarVisible by remember { mutableStateOf(true) }
     var autoHideKey by remember { mutableStateOf(0) }
     fun resetBottomBarAutoHide() {
         isBottomBarVisible = true
         autoHideKey++
     }
+    // MainScreen re-enters composition when returning from a pushed route
+    // (e.g. theme settings): always show the bar first, never restore hidden.
+    LaunchedEffect(isFloatingMode) {
+        isBottomBarVisible = true
+    }
+    // Only start the auto-hide countdown after user interaction (autoHideKey > 0),
+    // so the bar never slides away unexpectedly right after a route switch.
     LaunchedEffect(isFloatingMode, autoHideKey, floatingAutoHide) {
-        if (isFloatingMode && floatingAutoHide && isBottomBarVisible) {
+        if (autoHideKey > 0 && isFloatingMode && floatingAutoHide && isBottomBarVisible) {
             kotlinx.coroutines.delay(3000L)
             isBottomBarVisible = false
         }
@@ -386,7 +399,10 @@ fun MainScreen(
         true
     }
     val bottomBarVisibleState = remember { mutableStateOf(showBottomBar) }
-    bottomBarVisibleState.value = showBottomBar
+    // Side-effect writes do not belong in composition; update after it.
+    SideEffect {
+        bottomBarVisibleState.value = showBottomBar
+    }
 
     val scrollConnection = com.sukisu.ultra.ui.navigation.rememberNavScrollConnection(
         isScrollingDown = isScrollingDown,
@@ -407,20 +423,76 @@ fun MainScreen(
             )
         } else null,
     ) {
-        val contentReady = rememberContentReady()
         val pagerContent = @Composable { bottomInnerPadding: Dp ->
             Box {
-                HorizontalPager(
-                    state = mainPagerState.pagerState,
-                    beyondViewportPageCount = if (contentReady) 3 else 0,
-                    userScrollEnabled = userScrollEnabled,
-                ) { page ->
-                    val isCurrentPage = page == settledPage
-                    when (page) {
-                        0 -> if (isCurrentPage || contentReady) HomePager(navController, bottomInnerPadding, isCurrentPage)
-                        1 -> if (isCurrentPage || contentReady) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
-                        2 -> if (isCurrentPage || contentReady) ModulePager(bottomInnerPadding, isCurrentPage)
-                        3 -> if (isCurrentPage || contentReady) SettingPager(navController, bottomInnerPadding)
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val currentPage = mainPagerState.selectedPage
+                // subscribe to per-page background changes
+                com.sukisu.ultra.ui.theme.PageBackgrounds.revision
+                // Defer offscreen pages by one frame so the entry stays smooth;
+                // afterwards ALL pages stay composed (no rebuild jank on tab switch).
+                var allPagesReady by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    withFrameNanos { }
+                    allPagesReady = true
+                }
+                for (page in 0 until MainPagerConfig.PAGE_COUNT) {
+                    if (page != currentPage && !allPagesReady) continue
+                    // key() isolates per-page animation/content state so pages
+                    // inserted later never inherit another page's state.
+                    androidx.compose.runtime.key(page) {
+                        val alpha by animateFloatAsState(
+                            targetValue = if (page == currentPage) 1f else 0f,
+                            animationSpec = tween(340),
+                            label = "mainPageFade$page",
+                        )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { this.alpha = alpha }
+                            .zIndex(if (page == currentPage) 1f else 0f),
+                    ) {
+                        val pageContent = @Composable {
+                            when (page) {
+                                0 -> HomePager(navController, bottomInnerPadding, page == currentPage)
+                                1 -> SuperUserPager(navController, bottomInnerPadding, page == currentPage)
+                                2 -> ModulePager(bottomInnerPadding, page == currentPage)
+                                3 -> SettingPager(navController, bottomInnerPadding)
+                            }
+                        }
+                        val pageBgUri = com.sukisu.ultra.ui.theme.PageBackgrounds.uriFor(context, page)
+                        if (pageBgUri != null) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CustomBackground(
+                                    uriString = pageBgUri,
+                                    opacity = prefs.getFloat("custom_background_opacity", 1f),
+                                    blurRadius = prefs.getFloat("custom_background_blur", 6f),
+                                    dimAmount = prefs.getFloat("custom_background_dim", 0.05f),
+                                )
+                                CompositionLocalProvider(
+                                    LocalCustomBackgroundEnabled provides true,
+                                ) {
+                                    pageContent()
+                                }
+                            }
+                        } else {
+                            pageContent()
+                        }
+                        // Hidden/fading pages must not receive touches
+                        if (alpha < 1f) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .pointerInput(Unit) {
+                                        awaitEachGesture {
+                                            while (true) {
+                                                awaitPointerEvent().changes.forEach { it.consume() }
+                                            }
+                                        }
+                                    },
+                            )
+                        }
+                    }
                     }
                 }
             }
@@ -453,8 +525,8 @@ fun MainScreen(
                         .nestedScroll(scrollConnection)
                 ) {
                     val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                    // FolkPatch HomeBottomSpacer uses 80.dp; match for list pages
-                    val floatingPad = if (showBottomBar) 80.dp + navBarBottom else navBarBottom
+                    // FolkPatch HomeBottomSpacer uses 80.dp; MakoSU bar is 68.dp, so use a bit less
+                    val floatingPad = if (showBottomBar) 72.dp + navBarBottom else navBarBottom
                     pagerContent(floatingPad)
                 }
                 androidx.compose.animation.AnimatedVisibility(
@@ -476,7 +548,7 @@ fun MainScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = 80.dp)
+                        .padding(bottom = 72.dp)
                 ) {
                     pagerContent(0.dp)
                 }

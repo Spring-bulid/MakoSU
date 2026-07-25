@@ -1,6 +1,9 @@
 #![allow(clippy::unreadable_literal)]
 use libc::SYS_reboot;
 
+use crate::ksucalls;
+use std::sync::OnceLock;
+
 const SUSFS_MAX_VERSION_BUFSIZE: usize = 16;
 const SUSFS_ENABLED_FEATURES_SIZE: usize = 8192;
 const SUSFS_MAX_VARIANT_BUFSIZE: usize = 16;
@@ -97,6 +100,20 @@ struct SusfsMap {
 }
 
 pub fn get_susfs_version() -> String {
+    if let Some(ver) = real_susfs_version() {
+        return ver;
+    }
+    if susfs3s_supported() {
+        // No real SuSFS kernel: report the LKM-native SUSFS3S subset so the
+        // manager UI shows a meaningful version instead of "unsupport".
+        return "SUSFS3S-1.0".to_string();
+    }
+    "unsupport".to_string()
+}
+
+/// Raw real-SuSFS version query. `Some(ver)` when a real SuSFS kernel
+/// answers, `None` when the query fails or returns garbage/empty.
+fn query_real_susfs_version() -> Option<String> {
     let mut cmd = SusfsVersion {
         susfs_version: [0; SUSFS_MAX_VERSION_BUFSIZE],
         err: ERR_CMD_NOT_SUPPORTED,
@@ -113,14 +130,58 @@ pub fn get_susfs_version() -> String {
     };
 
     let ver = cmd.susfs_version.iter().position(|&b| b == 0).unwrap_or(16);
-    let ver = String::from_utf8(cmd.susfs_version[..ver].to_vec())
-        .unwrap_or_else(|_| "<invalid>".to_string());
+    let ver =
+        String::from_utf8(cmd.susfs_version[..ver].to_vec()).unwrap_or_else(|_| String::new());
 
-    if ver.starts_with('v') {
-        ver
-    } else {
-        "unsupport".to_string()
-    }
+    if ver.starts_with('v') { Some(ver) } else { None }
+}
+
+/// Cached real-SuSFS version; `None` means there is no real SuSFS kernel.
+fn real_susfs_version() -> Option<String> {
+    static REAL_VERSION: OnceLock<Option<String>> = OnceLock::new();
+    REAL_VERSION.get_or_init(query_real_susfs_version).clone()
+}
+
+/// Probe whether the kernel answers the SUSFS3S supercall. Deleting a bogus
+/// sus_path yields -ENOENT from the SUSFS3S handler, while a kernel without
+/// SUSFS3S rejects the ioctl itself (EINVAL/ENOTTY).
+fn susfs3s_supported() -> bool {
+    static SUPPORTED: OnceLock<bool> = OnceLock::new();
+    *SUPPORTED.get_or_init(|| {
+        match ksucalls::susfs3s_del_sus_path("/susfs3s_probe_nonexistent") {
+            Ok(()) => true,
+            Err(e) => e
+                .downcast_ref::<std::io::Error>()
+                .is_some_and(|io| io.raw_os_error() == Some(libc::ENOENT)),
+        }
+    })
+}
+
+/// Transparent fallback: no real SuSFS, but the kernel SUSFS3S subset works.
+pub fn use_susfs3s_fallback() -> bool {
+    real_susfs_version().is_none() && susfs3s_supported()
+}
+
+/// Build a complete SUSFS3S kstat template from the path's current real
+/// stat (mirrors real SuSFS, which clones the live stat on add_sus_kstat).
+fn susfs3s_kstat_from_path(path: &str) -> anyhow::Result<ksucalls::Susfs3sKstat> {
+    use std::os::unix::fs::MetadataExt;
+    let md = std::fs::metadata(path)?;
+    Ok(ksucalls::Susfs3sKstat {
+        st_ino: md.ino(),
+        st_size: md.size(),
+        st_blksize: md.blksize(),
+        st_blocks: md.blocks(),
+        st_atime: md.atime(),
+        st_mtime: md.mtime(),
+        st_ctime: md.ctime(),
+        st_mode: md.mode(),
+        st_uid: md.uid(),
+        st_gid: md.gid(),
+        st_dev: md.dev() as u32,
+        st_nlink: md.nlink() as u32,
+        st_rdev: md.rdev() as u32,
+    })
 }
 
 pub fn get_susfs_status() -> bool {
@@ -128,6 +189,15 @@ pub fn get_susfs_status() -> bool {
 }
 
 pub fn get_susfs_features() -> String {
+    if use_susfs3s_fallback() {
+        // Report the features the SUSFS3S kernel subset actually provides
+        // (SPOOF_UNAME is covered by the kernel uts_spoof supercall).
+        return "CONFIG_KSU_SUSFS_SUS_PATH\n\
+                CONFIG_KSU_SUSFS_SUS_KSTAT\n\
+                CONFIG_KSU_SUSFS_SPOOF_UNAME"
+            .to_string();
+    }
+
     let mut cmd = SusfsFeatures {
         enabled_features: [0; SUSFS_ENABLED_FEATURES_SIZE],
         err: ERR_CMD_NOT_SUPPORTED,
@@ -153,6 +223,10 @@ pub fn get_susfs_features() -> String {
 }
 
 pub fn get_susfs_variant() -> String {
+    if use_susfs3s_fallback() {
+        return "SUSFS3S".to_string();
+    }
+
     let mut cmd = SusfsVariant {
         susfs_variant: [0; SUSFS_MAX_VARIANT_BUFSIZE],
         err: ERR_CMD_NOT_SUPPORTED,
@@ -178,6 +252,11 @@ pub fn get_susfs_variant() -> String {
 }
 
 pub fn set_uname(release: &str, version: &str) -> anyhow::Result<()> {
+    if use_susfs3s_fallback() {
+        // uname spoofing is provided by the kernel uts_spoof supercall.
+        return ksucalls::set_spoof_version(release, version);
+    }
+
     let mut cmd = SusfsUname {
         release: [0; 65],
         version: [0; 65],
@@ -281,6 +360,9 @@ pub fn hide_sus_mnts_for_non_su_procs(enabled: bool) -> anyhow::Result<()> {
 
 #[allow(clippy::unnecessary_wraps, clippy::missing_const_for_fn)]
 pub fn add_sus_path(path: &str) -> anyhow::Result<()> {
+    if use_susfs3s_fallback() {
+        return ksucalls::susfs3s_add_sus_path(path);
+    }
     // SusFS SUS path is managed via Magisk module scripts on the manager side.
     // The kernel path list is populated by the generated post-fs-data script,
     // so we return success here to keep the CLI contract consistent.
@@ -361,6 +443,10 @@ pub fn add_sus_map(path: &str) -> anyhow::Result<()> {
 
 #[allow(clippy::unnecessary_wraps, clippy::missing_const_for_fn)]
 pub fn add_sus_kstat(path: &str) -> anyhow::Result<()> {
+    if use_susfs3s_fallback() {
+        let kstat = susfs3s_kstat_from_path(path)?;
+        return ksucalls::susfs3s_add_sus_kstat(path, &kstat);
+    }
     // The kstat spoof list is replayed from the manager's persisted config
     // by the generated SusFS scripts, so we treat this as accepted here.
     let _ = path;
@@ -369,12 +455,20 @@ pub fn add_sus_kstat(path: &str) -> anyhow::Result<()> {
 
 #[allow(clippy::unnecessary_wraps, clippy::missing_const_for_fn)]
 pub fn update_sus_kstat(path: &str) -> anyhow::Result<()> {
+    if use_susfs3s_fallback() {
+        let kstat = susfs3s_kstat_from_path(path)?;
+        return ksucalls::susfs3s_add_sus_kstat(path, &kstat);
+    }
     let _ = path;
     Ok(())
 }
 
 #[allow(clippy::unnecessary_wraps, clippy::missing_const_for_fn)]
 pub fn update_sus_kstat_full_clone(path: &str) -> anyhow::Result<()> {
+    if use_susfs3s_fallback() {
+        let kstat = susfs3s_kstat_from_path(path)?;
+        return ksucalls::susfs3s_add_sus_kstat(path, &kstat);
+    }
     let _ = path;
     Ok(())
 }
@@ -395,6 +489,23 @@ pub fn add_sus_kstat_statically(
     blocks: u64,
     blksize: i64,
 ) -> anyhow::Result<()> {
+    if use_susfs3s_fallback() {
+        // The SUSFS3S template is applied verbatim, so fill the fields the
+        // statically protocol does not carry (mode/uid/gid/rdev) from the
+        // path's current real stat.
+        let mut kstat = susfs3s_kstat_from_path(path)?;
+        kstat.st_ino = ino;
+        kstat.st_dev = dev as u32;
+        kstat.st_nlink = nlink;
+        kstat.st_size = size;
+        kstat.st_atime = atime_sec;
+        kstat.st_mtime = mtime_sec;
+        kstat.st_ctime = ctime_sec;
+        kstat.st_blocks = blocks;
+        kstat.st_blksize = blksize as u64;
+        return ksucalls::susfs3s_add_sus_kstat(path, &kstat);
+    }
+
     let mut cmd = SusfsKstat {
         is_statically: 1,
         target_ino: 0,

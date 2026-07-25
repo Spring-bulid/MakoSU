@@ -26,7 +26,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.FontDownload
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Wallpaper
@@ -154,6 +159,8 @@ fun ColorPaletteScreenMaterial(
                         val icon = when (layout) {
                             HomeLayout.Stats -> Icons.Filled.Dashboard
                             HomeLayout.Pure -> Icons.Filled.Home
+                            HomeLayout.Grid -> Icons.Filled.GridView
+                            HomeLayout.List -> Icons.AutoMirrored.Filled.ViewList
                         }
                         RadioRow(
                             icon = icon,
@@ -204,6 +211,52 @@ fun ColorPaletteScreenMaterial(
                 checked = uiState.customBackgroundEnabled,
                 onCheckedChange = actions.onSetCustomBackgroundEnabled,
             )
+            // Per-page backgrounds (FolkPatch home/superuser/module/settings URIs)
+            TonalCard {
+                Column(Modifier.padding(vertical = 8.dp)) {
+                    Text(
+                        text = stringResource(R.string.settings_page_background),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                    // subscribe to per-page background changes
+                    com.sukisu.ultra.ui.theme.PageBackgrounds.revision
+                    com.sukisu.ultra.ui.theme.PageBackgrounds.PAGES.forEach { page ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { actions.onPageBackgroundClick(page) }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    when (page) {
+                                        0 -> R.string.home
+                                        1 -> R.string.superuser
+                                        2 -> R.string.module
+                                        else -> R.string.settings
+                                    }
+                                ),
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Text(
+                                text = stringResource(
+                                    if (com.sukisu.ultra.ui.theme.PageBackgrounds.isSet(page)) {
+                                        R.string.settings_bg_set
+                                    } else {
+                                        R.string.settings_bg_not_set
+                                    }
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
             if (uiState.customBackgroundEnabled) {
                 TonalCard(onClick = actions.onSelectCustomBackground) {
                     Row(
@@ -290,6 +343,108 @@ fun ColorPaletteScreenMaterial(
                 pageScale = uiState.pageScale,
                 onSetPageScale = actions.onSetPageScale,
             )
+
+            // 6) Font
+            SectionTitle(stringResource(R.string.settings_appearance_font))
+            SwitchCard(
+                icon = Icons.Filled.FormatSize,
+                title = stringResource(R.string.settings_custom_font),
+                summary = when {
+                    !state.customFontEnabled ->
+                        stringResource(R.string.settings_custom_font_summary)
+                    state.customFontFilename != null ->
+                        stringResource(R.string.settings_font_selected)
+                    else ->
+                        stringResource(R.string.settings_custom_font_enabled)
+                },
+                checked = state.customFontEnabled,
+                onCheckedChange = actions.onSetCustomFontEnabled,
+            )
+            if (state.customFontEnabled) {
+                TonalCard(onClick = actions.onSelectCustomFont) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Filled.FontDownload, null, Modifier.size(24.dp), MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.width(16.dp))
+                        Text(
+                            stringResource(R.string.settings_select_font_file),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
+                if (state.customFontFilename != null) {
+                    TonalCard(onClick = actions.onClearCustomFont) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(Icons.Filled.Delete, null, Modifier.size(24.dp), MaterialTheme.colorScheme.onSurfaceVariant)
+                            Spacer(Modifier.width(16.dp))
+                            Text(
+                                stringResource(R.string.settings_clear_font),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 7) Theme backup
+            SectionTitle(stringResource(R.string.settings_appearance_theme))
+            TonalCard(onClick = actions.onExportTheme) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(Icons.Filled.Upload, null, Modifier.size(24.dp), MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            stringResource(R.string.settings_theme_export),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            stringResource(R.string.settings_theme_export_summary),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+            TonalCard(onClick = actions.onImportTheme) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(Icons.Filled.Download, null, Modifier.size(24.dp), MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            stringResource(R.string.settings_theme_import),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            stringResource(R.string.settings_theme_import_summary),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
 
             Spacer(Modifier.height(16.dp + bottomPad))
         }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home layout picker: GridUI / ListUI -->
+    <string name="settings_home_layout_grid">GridUI</string>
+    <string name="settings_home_layout_grid_summary">Large status card with side-by-side superuser and module stats</string>
+    <string name="settings_home_layout_list">ListUI</string>
+    <string name="settings_home_layout_list_summary">Classic list style — status banner followed by system info</string>
+    <!-- Grid working card image -->
+    <string name="grid_card_image_title">Status card image</string>
+    <string name="grid_card_image_change">Change image</string>
+    <string name="grid_card_image_clear">Clear image</string>
+</resources>

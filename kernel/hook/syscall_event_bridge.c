@@ -18,6 +18,7 @@
 #include "hook/syscall_hook.h"
 #include "hook/syscall_event_bridge.h"
 #include "feature/adb_root.h"
+#include "feature/susfs3s.h"
 
 static int ksu_handle_init_mark_tracker(const char __user **filename_user)
 {
@@ -49,18 +50,60 @@ static int ksu_handle_init_mark_tracker(const char __user **filename_user)
 
 long __nocfi ksu_hook_newfstatat(int orig_nr, const struct pt_regs *regs)
 {
-    if (!ksu_su_compat_enabled)
-        return ksu_syscall_table[orig_nr](regs);
+    // newfstatat(dfd, pathname, statbuf, flag)
+    int dfd = (int)PT_REGS_PARM1(regs);
+    const char __user *pathname = (const char __user *)PT_REGS_PARM2(regs);
+    long ret;
 
-    return ksu_handle_stat_sucompat(orig_nr, (struct pt_regs *)regs);
+    // SUSFS3S sus_path filter runs before sucompat: a hidden path must fail
+    // with -ENOENT outright, not even reach the su->ksud redirect logic.
+    if (ksu_susfs3s_path_hidden(dfd, pathname))
+        return -ENOENT;
+
+    if (!ksu_su_compat_enabled)
+        ret = ksu_syscall_table[orig_nr](regs);
+    else
+        ret = ksu_handle_stat_sucompat(orig_nr, (struct pt_regs *)regs);
+
+    // sus_kstat overlay runs last, on the original requested path (sucompat
+    // restores regs after its redirect, so PT_REGS_PARM2 is unmodified).
+    if (ret == 0)
+        ksu_susfs3s_try_spoof_kstat(dfd, pathname, (void __user *)PT_REGS_PARM3(regs));
+
+    return ret;
 }
 
 long __nocfi ksu_hook_faccessat(int orig_nr, const struct pt_regs *regs)
 {
+    // faccessat(dfd, pathname, mode, flags)
+    // sus_path filter first (same ordering as newfstatat), sucompat untouched.
+    if (ksu_susfs3s_path_hidden((int)PT_REGS_PARM1(regs), (const char __user *)PT_REGS_PARM2(regs)))
+        return -ENOENT;
+
     if (!ksu_su_compat_enabled)
         return ksu_syscall_table[orig_nr](regs);
 
     return ksu_handle_faccessat_sucompat(orig_nr, (struct pt_regs *)regs);
+}
+
+// SUSFS3S-only hooks: openat and statx carry no sucompat logic today.
+long __nocfi ksu_hook_openat(int orig_nr, const struct pt_regs *regs)
+{
+    // openat(dfd, pathname, flags, mode)
+    if (ksu_susfs3s_path_hidden((int)PT_REGS_PARM1(regs), (const char __user *)PT_REGS_PARM2(regs)))
+        return -ENOENT;
+
+    return ksu_syscall_table[orig_nr](regs);
+}
+
+long __nocfi ksu_hook_statx(int orig_nr, const struct pt_regs *regs)
+{
+    // statx(dfd, pathname, flags, mask, statxbuf). sus_path only; sus_kstat
+    // spoofing is not implemented for the statx buffer layout (v1 scope).
+    if (ksu_susfs3s_path_hidden((int)PT_REGS_PARM1(regs), (const char __user *)PT_REGS_PARM2(regs)))
+        return -ENOENT;
+
+    return ksu_syscall_table[orig_nr](regs);
 }
 
 DEFINE_STATIC_KEY_TRUE(ksud_execve_key);

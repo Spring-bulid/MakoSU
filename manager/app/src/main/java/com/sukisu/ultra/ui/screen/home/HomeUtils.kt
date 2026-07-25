@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.system.Os
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.pm.PackageInfoCompat
@@ -11,6 +12,8 @@ import com.sukisu.ultra.Natives
 import com.sukisu.ultra.Natives.isManager
 import com.sukisu.ultra.ui.util.getSuSFSStatus
 import com.sukisu.ultra.ui.util.getSuSFSVersion
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 data class ManagerVersion(
     val versionName: String,
@@ -51,32 +54,35 @@ fun rememberSusfsInfo(
     manualHookLabel: String,
     inlineHookLabel: String,
 ): SusfsInfoState {
-    return remember(manualHookLabel, inlineHookLabel) {
-        runCatching {
-            val supported = getSuSFSStatus().equals("true", ignoreCase = true)
-            if (supported) {
-                val version = getSuSFSVersion().trim()
-                val hookLabel = when (val type = Natives.getHookType()) {
-                    "Manual" -> manualHookLabel
-                    "Inline" -> inlineHookLabel
-                    else -> type
-                }.takeIf { it.isNotBlank() }?.let { "($it)" }.orEmpty()
-                SusfsInfoState(
-                    status = SusfsStatus.Supported,
-                    detail = listOf(version, hookLabel)
-                        .filter { it.isNotBlank() }
-                        .joinToString(" ")
-                )
-            } else {
-                SusfsInfoState(
-                    status = SusfsStatus.Unsupported,
-                    detail = ""
-                )
+    // Root-shell + natives calls must not run on the composition/main thread.
+    return produceState(initialValue = SusfsInfoState(), manualHookLabel, inlineHookLabel) {
+        value = withContext(Dispatchers.IO) {
+            runCatching {
+                val supported = getSuSFSStatus().equals("true", ignoreCase = true)
+                if (supported) {
+                    val version = getSuSFSVersion().trim()
+                    val hookLabel = when (val type = Natives.getHookType()) {
+                        "Manual" -> manualHookLabel
+                        "Inline" -> inlineHookLabel
+                        else -> type
+                    }.takeIf { it.isNotBlank() }?.let { "($it)" }.orEmpty()
+                    SusfsInfoState(
+                        status = SusfsStatus.Supported,
+                        detail = listOf(version, hookLabel)
+                            .filter { it.isNotBlank() }
+                            .joinToString(" ")
+                    )
+                } else {
+                    SusfsInfoState(
+                        status = SusfsStatus.Unsupported,
+                        detail = ""
+                    )
+                }
+            }.getOrElse {
+                SusfsInfoState(status = SusfsStatus.Error)
             }
-        }.getOrElse {
-            SusfsInfoState(status = SusfsStatus.Error)
         }
-    }
+    }.value
 }
 
 @Composable

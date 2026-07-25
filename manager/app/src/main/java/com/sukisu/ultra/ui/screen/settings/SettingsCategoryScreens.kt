@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.Adb
+import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.ContactPage
 import androidx.compose.material.icons.filled.Delete
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.filled.FolderDelete
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.icons.filled.RemoveModerator
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.UploadFile
@@ -21,6 +23,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -44,6 +47,8 @@ import com.sukisu.ultra.ui.navigation3.LocalNavigator
 import com.sukisu.ultra.ui.navigation3.Route
 import com.sukisu.ultra.ui.util.getSuSFSStatus
 import com.sukisu.ultra.ui.util.rememberKpmAvailable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.sukisu.ultra.ui.viewmodel.SettingsViewModel
 
 @Composable
@@ -102,6 +107,19 @@ fun SettingsGeneralScreen() {
                     summary = stringResource(R.string.icon_switch_summary),
                     checked = uiState.alternativeIcon,
                     onCheckedChange = { viewModel.setAlternativeIcon(context, it) },
+                )
+            }
+        }
+
+        SegmentedColumn(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            item(key = "app-language") {
+                SplicedSettingsItem(
+                    icon = Icons.Filled.Translate,
+                    title = stringResource(R.string.language_settings_app_language),
+                    summary = stringResource(R.string.language_settings_app_language_summary),
+                    onClick = { navigator.push(Route.LanguagePicker) },
                 )
             }
         }
@@ -218,6 +236,19 @@ fun SettingsFeaturesScreen() {
                     )
                 }
             }
+
+            SegmentedColumn(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                item(key = "dynamic-manager") {
+                    SplicedSettingsItem(
+                        icon = Icons.Filled.Android,
+                        title = stringResource(R.string.dynamic_manager_title),
+                        summary = stringResource(R.string.dynamic_manager_settings_summary),
+                        onClick = { navigator.push(Route.DynamicManager) },
+                    )
+                }
+            }
         }
     }
 }
@@ -272,7 +303,13 @@ fun SettingsBehaviorScreen() {
 fun SettingsModuleScreen() {
     val navigator = LocalNavigator.current
     val isKpmAvailable = rememberKpmAvailable()
-    val isSusfsSupported = getSuSFSStatus().equals("true", ignoreCase = true)
+    // Root-shell call must not run on the composition/main thread — a slow
+    // shell would freeze the whole settings page.
+    val isSusfsSupported by produceState(initialValue = false) {
+        value = withContext(Dispatchers.IO) {
+            runCatching { getSuSFSStatus().equals("true", ignoreCase = true) }.getOrDefault(false)
+        }
+    }
 
     SettingsCategoryScaffold(
         title = stringResource(R.string.settings_category_module),
@@ -298,11 +335,11 @@ fun SettingsModuleScreen() {
                         onClick = { navigator.push(Route.Kpm) },
                     )
                 }
-                item(key = "susfs", visible = isSusfsSupported && isKpmAvailable) {
+                item(key = "susfs", visible = isSusfsSupported) {
                     SplicedSettingsItem(
                         icon = Icons.Filled.Fence,
                         title = stringResource(R.string.susfs_config_title),
-                        summary = stringResource(R.string.settings_kpm_summary),
+                        summary = stringResource(R.string.susfs_config_summary),
                         onClick = { navigator.push(Route.SuSFS) },
                     )
                 }

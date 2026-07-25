@@ -238,3 +238,42 @@ bool is_selinux_hide_enabled() {
 // Custom
 DEFINE_CACHED_GETTER(full_version, KSU_IOCTL_GET_FULL_VERSION, ksu_get_full_version_cmd, version_full, 255)
 DEFINE_CACHED_GETTER(hook_type, KSU_IOCTL_HOOK_TYPE, ksu_hook_type_cmd, hook_type, 32)
+
+// KSU_IOCTL_GET_MANAGERS: 'K', 106; kept local until uapi/supercall.h provides it.
+static const unsigned long KSU_IOCTL_GET_MANAGERS_LOCAL =
+    _IOC(_IOC_READ | _IOC_WRITE, 'K', 106, 0);
+
+bool get_managers_list(struct ksu_dm_get_managers_cmd **out_cmd) {
+    if (!out_cmd) {
+        return false;
+    }
+    *out_cmd = nullptr;
+
+    struct ksu_dm_get_managers_cmd probe = {
+        .count = 0
+    };
+    if (ksuctl(KSU_IOCTL_GET_MANAGERS_LOCAL, &probe) != 0) {
+        return false;
+    }
+
+    if (probe.total_count == 0) { // it shouldn't happen, but just in case...
+        return false;
+    }
+
+    size_t payload_size = sizeof((*out_cmd)->managers[0]) * probe.total_count;
+    size_t total_size = sizeof(struct ksu_dm_get_managers_cmd) + payload_size;
+
+    auto *cmd = static_cast<struct ksu_dm_get_managers_cmd *>(malloc(total_size));
+    if (!cmd) {
+        return false;
+    }
+
+    cmd->count = probe.total_count;
+    if (ksuctl(KSU_IOCTL_GET_MANAGERS_LOCAL, cmd) != 0) {
+        free(cmd);
+        return false;
+    }
+
+    *out_cmd = cmd;
+    return true;
+}
