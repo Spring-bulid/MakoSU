@@ -24,7 +24,34 @@
 @rem ##########################################################################
 
 @rem Set local scope for the variables, and ensure extensions are enabled
-setlocal EnableExtensions EnableDelayedExpansion
+setlocal EnableExtensions
+
+@rem Catch executions from older scripts and ensure they exit cleanly.
+@rem This can be removed once we can be reasonably confident that few people
+@rem will be migrating directly to this new wrapper.
+goto afterSafetyNet
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+goto exitWithErrorLevel
+:afterSafetyNet
 
 set DIRNAME=%~dp0
 if "%DIRNAME%"=="" set DIRNAME=.
@@ -34,21 +61,6 @@ set APP_HOME=%DIRNAME%
 
 @rem Resolve any "." and ".." in APP_HOME to make it shorter.
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
-
-@rem Keep MakoSU build caches and temporary files on the project drive.
-set "MAKOSU_CACHE_ROOT=%APP_HOME%\..\.cache"
-if not defined GRADLE_USER_HOME set "GRADLE_USER_HOME=%MAKOSU_CACHE_ROOT%\gradle"
-set "TEMP=%MAKOSU_CACHE_ROOT%\tmp"
-set "TMP=%TEMP%"
-if not exist "%GRADLE_USER_HOME%" mkdir "%GRADLE_USER_HOME%"
-if not exist "%TEMP%" mkdir "%TEMP%"
-
-@rem Load release-signing values from the gitignored local properties file.
-set "MAKOSU_SIGNING_PROPERTIES=%APP_HOME%\makosu-signing.properties"
-set "MAKOSU_GRADLE_PROPERTIES="
-if exist "%MAKOSU_SIGNING_PROPERTIES%" (
-    for /F "usebackq tokens=1,* delims==" %%A in ("%MAKOSU_SIGNING_PROPERTIES%") do if not "%%A"=="" set "MAKOSU_GRADLE_PROPERTIES=!MAKOSU_GRADLE_PROPERTIES! -P%%A=%%B"
-)
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
@@ -60,13 +72,14 @@ set JAVA_EXE=java.exe
 %JAVA_EXE% -version >NUL 2>&1
 if %ERRORLEVEL% equ 0 goto execute
 
-echo. 1>&2
-echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
-echo. 1>&2
-echo Please set the JAVA_HOME variable in your environment to match the 1>&2
-echo location of your Java installation. 1>&2
+1>&2 echo.
+1>&2 echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+1>&2 echo.
+1>&2 echo Please set the JAVA_HOME variable in your environment to match the
+1>&2 echo location of your Java installation.
 
 "%COMSPEC%" /c exit 1
+goto exitWithErrorLevel
 
 :findJavaFromJavaHome
 set JAVA_HOME=%JAVA_HOME:"=%
@@ -74,13 +87,14 @@ set JAVA_EXE=%JAVA_HOME%/bin/java.exe
 
 if exist "%JAVA_EXE%" goto execute
 
-echo. 1>&2
-echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
-echo. 1>&2
-echo Please set the JAVA_HOME variable in your environment to match the 1>&2
-echo location of your Java installation. 1>&2
+1>&2 echo.
+1>&2 echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
+1>&2 echo.
+1>&2 echo Please set the JAVA_HOME variable in your environment to match the
+1>&2 echo location of your Java installation.
 
 "%COMSPEC%" /c exit 1
+goto exitWithErrorLevel
 
 :execute
 @rem Setup the command line
@@ -90,8 +104,9 @@ echo location of your Java installation. 1>&2
 @rem Execute gradlew
 @rem endlocal doesn't take effect until after the line is parsed and variables are expanded
 @rem which allows us to clear the local environment before executing the java command
-endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %MAKOSU_GRADLE_PROPERTIES% %* & call :exitWithErrorLevel
+endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %* & call :exitWithErrorLevel & goto exitWithErrorLevel
 
+@rem This label must not be changed. We rely on old scripts being able to jump to this point.
 :exitWithErrorLevel
 @rem Use "%COMSPEC%" /c exit to allow operators to work properly in scripts
 "%COMSPEC%" /c exit %ERRORLEVEL%
